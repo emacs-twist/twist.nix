@@ -1,5 +1,5 @@
 let
-  inherit (builtins) pathExists fetchTree replaceStrings map readDir
+  inherit (builtins) pathExists fetchTree replaceStrings map readDir hasAttr
     readFile attrNames filter all match isString isList typeOf length head;
   globToRegex = replaceStrings [ "?" "*" "." ] [ "." ".*" "\\." ];
 in
@@ -97,6 +97,7 @@ filesInfo
 meta
   //
 {
+  inherit ename;
   inherit mainFile headers;
   packageRequires =
     if self.headers ? Package-Requires

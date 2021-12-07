@@ -5,6 +5,7 @@
 , collectiveDir
 , explicitPackages
 , stdenv
+, packageOverrides
 }:
 let
   inherit (builtins) length head tail hasAttr filter elem mapAttrs readFile
@@ -42,20 +43,24 @@ let
       let
         ename = head enames;
         prescription = findPrescription ename;
-        data = lib.fix (import ./readPackageSource.nix
+        data = lib.makeExtensible (import ./readPackageSource.nix
           {
             inherit lib emacs collectiveDir;
           }
           ename
           prescription);
+        data' =
+          if hasAttr ename packageOverrides
+          then data.extend(packageOverrides.${ename})
+          else data;
       in
       accumPackage
-        (acc // { ${ename} = data; })
+        (acc // { ${ename} = data'; })
         (enames
           ++
           (filter
             (ename: !elem ename builtinLibraries)
-            data.packageRequires));
+            data'.packageRequires));
 
   enabledPackages = accumPackage { } explicitPackages;
 

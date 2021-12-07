@@ -7,6 +7,7 @@
 , initFiles
 , extraPackages ? [ "use-package" ]
 , addSystemPackages ? true
+, packageOverrides ? { }
 }:
 let
   inherit (builtins) readFile attrNames attrValues concatLists;
@@ -43,6 +44,7 @@ lib.makeScope pkgs.newScope (self:
 
     inherit initFiles;
     inherit extraPackages;
+    inherit packageOverrides;
 
     builtinLibraries = getBuiltinLibraries emacs;
 
