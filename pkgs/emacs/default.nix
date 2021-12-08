@@ -76,4 +76,13 @@ lib.makeScope pkgs.newScope (self:
     packageProfiles = lib.pipe self.elispPackages [
       (lib.mapAttrs (_: profileElisp))
     ];
+
+    flakeNix = {
+      description = "This is an auto-generated file. Please don't edit it manually.";
+      inputs =
+        lib.mapAttrs
+          (_: { sourceAttrs, ... }: sourceAttrs // { flake = false; })
+          self.packageProfiles;
+      outputs = { ... }: {};
+    };
   })
