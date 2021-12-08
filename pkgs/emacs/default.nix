@@ -81,7 +81,7 @@ lib.makeScope pkgs.newScope (self:
       description = "This is an auto-generated file. Please don't edit it manually.";
       inputs =
         lib.mapAttrs
-          (_: { sourceAttrs, ... }: sourceAttrs // { flake = false; })
+          (_: { origin, ... }: origin // { flake = false; })
           self.packageProfiles;
       outputs = { ... }: {};
     };

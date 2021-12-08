@@ -67,14 +67,14 @@ let
       src =
         if self.pure
         then fetchTree lockData.${ename}
-        else fetchTree self.sourceAttrs;
+        else fetchTree self.origin;
       files =
         if type == "elpa"
         then elpaFiles entry self.src
         else if type == "melpa"
         then lib.expandMelpaRecipeFiles self.src (entry.files or null)
         else throw "FIXME";
-      sourceAttrs =
+      origin =
         if type == "elpa"
         then lib.flakeRefAttrsFromElpaAttrs { preferReleaseBranch = false; } entry
         else if type == "melpa"
