@@ -85,4 +85,8 @@ lib.makeScope pkgs.newScope (self:
           self.packageProfiles;
       outputs = { ... }: {};
     };
+
+    flakeLock = import ./packages/lock.nix {
+      inherit (self) lib lockFile elispPackages;
+    };
   })
