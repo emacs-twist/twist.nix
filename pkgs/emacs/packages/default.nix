@@ -2,14 +2,14 @@
 , emacs
 , builtinLibraries
 , inventories
-, collectiveDir
+, lockFile
 , explicitPackages
 , stdenv
 , packageOverrides
 }:
 let
   inherit (builtins) length head tail hasAttr filter elem mapAttrs readFile
-    pathExists concatLists;
+    pathExists concatLists isFunction;
 
   readMelpaRecipeMaybe = file:
     if pathExists file
@@ -45,7 +45,7 @@ let
         prescription = findPrescription ename;
         data = lib.makeExtensible (import ./readPackageSource.nix
           {
-            inherit lib emacs collectiveDir;
+            inherit lib emacs lockFile;
           }
           ename
           prescription);
@@ -106,7 +106,9 @@ mapAttrs
       {
         inherit meta;
         # Remove attributes that can't be serialized into JSON.
-        passthru = removeAttrs data' [ "src" ];
+        passthru = lib.pipe (removeAttrs data' [ "src" ]) [
+          (lib.filterAttrs (_: v: ! isFunction v))
+        ];
       }
       derivation
   )

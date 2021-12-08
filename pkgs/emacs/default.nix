@@ -2,7 +2,7 @@
 , pkgs
 }:
 { emacs ? pkgs.emacs
-, collectiveDir
+, lockFile
 , inventorySpecs
 , initFiles
 , extraPackages ? [ "use-package" ]
@@ -25,7 +25,7 @@ lib.makeScope pkgs.newScope (self:
     ];
   in
   {
-    inherit lib emacs collectiveDir;
+    inherit lib emacs lockFile;
 
     makeInventory = { type, path }:
       { inherit type; }

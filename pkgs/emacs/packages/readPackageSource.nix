@@ -5,7 +5,7 @@ let
 in
 { lib
 , emacs
-, collectiveDir
+, lockFile
 }:
 let
   inherit (lib) gitignoreSource;
@@ -33,6 +33,16 @@ let
         else file))
       (filter (file: all (pattern: match pattern file == null) ignorePatterns))
     ];
+
+  toLockData = { nodes, version, ... }:
+    if version == 7
+    then lib.mapAttrs (_: { locked, ... }: locked) nodes
+    else throw "Unsupported flake.lock version ${version}";
+
+  lockData =
+    if pathExists lockFile
+    then toLockData (lib.importJSON lockFile)
+    else { };
 in
 ename:
 { type
@@ -40,8 +50,6 @@ ename:
 }:
 self:
 let
-  localSrc = collectiveDir + "/${ename}";
-
   filesInfo =
     if type == "elpa" && entry ? core
     then {
@@ -55,10 +63,10 @@ let
         else throw "Invalid :core value type: ${typeOf entry.core}";
     }
     else {
-      pure = collectiveDir != null && pathExists localSrc;
+      pure = hasAttr ename lockData;
       src =
         if self.pure
-        then gitignoreSource localSrc
+        then fetchTree lockData.${ename}
         else fetchTree self.sourceAttrs;
       files =
         if type == "elpa"
