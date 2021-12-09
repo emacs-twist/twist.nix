@@ -47,5 +47,7 @@ lib
   parseUsePackages = import ./elisp/parseUsePackages.nix { inherit lib fromElisp; };
 
   # Just a shorthand for overriding a nested attribute.
-  overrideAttrsByPath = import ./overrideAttrsByPath.nix { inherit lib; };
+  # I am looking for a better syntax for overriding multiple packages.
+  # I would want a kind of recursive updating with recursion limit.
+  # overrideAttrsByPath = import ./overrideAttrsByPath.nix { inherit lib; };
 }

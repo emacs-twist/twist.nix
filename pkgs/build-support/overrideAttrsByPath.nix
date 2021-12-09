@@ -1,3 +1,6 @@
+# This function was intended for use inside overrideScope' call but is
+# currently deprecated. This function would slightly reduce a boilerplate,
+# but I am not sure if it is useful.
 { lib }:
 super: path:
 let

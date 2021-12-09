@@ -11,7 +11,7 @@ let
   newNodeAttrs = ename: value:
     let
       package = elispPackages.${ename};
-      original = package.passthru.origin;
+      original = package.passthru.elispAttrs.origin;
     in
     {
       inherit original;

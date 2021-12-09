@@ -10,11 +10,13 @@
 , packageOverrides ? { }
 }:
 let
-  inherit (builtins) readFile attrNames attrValues concatLists;
+  inherit (builtins) readFile attrNames attrValues concatLists isFunction;
 
   getBuiltinLibraries = pkgs.callPackage ./packages/builtins.nix { };
 
-  profileElisp = drv @ { passthru, ... }: passthru // { inherit (drv) src; };
+  profileElisp = { passthru, ... }: lib.pipe passthru.elispAttrs [
+    (lib.filterAttrs (_: v: ! isFunction v))
+  ];
 in
 lib.makeScope pkgs.newScope (self:
   let

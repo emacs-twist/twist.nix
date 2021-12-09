@@ -65,51 +65,27 @@ let
   enabledPackages = accumPackage { } explicitPackages;
 
   visibleBuiltinLibraries = lib.subtractLists explicitPackages builtinLibraries;
-
-  # Collect implicit dependencies.
-  requiredPackageSet = lib.fix (depsFrom: mapAttrs
-    (_ename: { packageRequires, ... }:
-      let
-        explicitDeps = lib.subtractLists visibleBuiltinLibraries packageRequires;
-      in
-      lib.unique
-        (explicitDeps
-          ++
-          concatLists
-            (lib.attrVals explicitDeps depsFrom)))
-    enabledPackages);
 in
 self:
 # Annotate a concrete set of elisp dependencies (including implicit ones) to each package.
 mapAttrs
   (ename:
     { meta
+    , packageRequires
     , ...
-    } @ data:
+    } @ attrs:
     let
-      requiredPackages = requiredPackageSet.${ename};
-
-      derivation = lib.callPackageWith data ./buildElispPackage.nix
-        {
-          inherit ename;
-          elispDerivations = lib.attrVals requiredPackages self.elispPackages;
-        }
-        {
-          inherit lib stdenv emacs;
-        };
-
-      data' = data // {
-        inherit requiredPackages;
-      };
+      explicitDeps = lib.subtractLists visibleBuiltinLibraries packageRequires;
     in
-    lib.extendDerivation true
-      {
-        inherit meta;
-        # Remove attributes that can't be serialized into JSON.
-        passthru = lib.pipe (removeAttrs data' [ "src" ]) [
-          (lib.filterAttrs (_: v: ! isFunction v))
-        ];
-      }
-      derivation
-  )
+      self.callPackage ./buildElispPackage.nix { }
+        (attrs // {
+          # Collect implicit dependencies.
+          requiredPackages =
+            lib.unique
+              (explicitDeps
+               ++
+               concatLists
+                 (map (dep: self.elispPackages.${dep}.passthru.elispAttrs.requiredPackages)
+                   explicitDeps));
+        }))
   enabledPackages
