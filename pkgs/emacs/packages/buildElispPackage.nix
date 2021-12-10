@@ -1,4 +1,4 @@
-{ lib, stdenv, emacs, elispPackages }:
+{ lib, stdenv, emacs, texinfo, elispPackages }:
 { ename
 , src
 , version
@@ -9,7 +9,7 @@
 , ...
 } @ elispAttrs:
 let
-  inherit (builtins) concatStringsSep replaceStrings;
+  inherit (builtins) concatStringsSep replaceStrings match elem;
 
   elispBuildInputs = lib.attrVals requiredPackages elispPackages;
 
@@ -43,8 +43,35 @@ let
     (map (pkg: "${pkg.outPath}/share/emacs/site-lisp/elpa/${pkg.ename}-${pkg.version}:")
         elispBuildInputs);
 
+  hasInfoOutput =
+    # (elem "info" (meta.outputsToInstall or []))
+    # &&
+    (lib.findFirst (f: match ".+\\.(info|texi(nfo)?)" f != null) null files
+    != null);
+
+  buildInfo = ''
+    cwd="$PWD"
+    cd $src
+    for doc in $(find -name '*.texi' -o -name '*.texinfo')
+    do
+      local basename=$(basename $doc)
+      cd $src/$(dirname $doc)
+      makeinfo --no-split "$basename" -o $cwd/''${basename%%.*}.info
+    done
+    cd $cwd
+  '';
+
+  installInfo = ''
+    mkdir -p $info/share
+    install -d $info/share/info
+    for i in *.info
+    do
+      install -t $info/share/info $i
+    done
+  '';
+
 in
-stdenv.mkDerivation {
+stdenv.mkDerivation rec {
   inherit src ename meta version;
 
   pname = concatStringsSep "-" [
@@ -55,7 +82,9 @@ stdenv.mkDerivation {
   preferLocalBuild = true;
   allowSubstitutes = false;
 
-  buildInputs = [ emacs ];
+  outputs = [ "out" ] ++ lib.optional hasInfoOutput "info";
+
+  buildInputs = [ emacs texinfo ];
 
   unpackPhase = ''
     for file in ${lib.escapeShellArgs files}
@@ -71,6 +100,8 @@ stdenv.mkDerivation {
 
     ${buildCmd}
 
+    ${lib.optionalString hasInfoOutput buildInfo}
+
     runHook postBuild
   '';
 
@@ -79,7 +110,9 @@ stdenv.mkDerivation {
 
     lispDir=$out/share/emacs/site-lisp/elpa/$ename-$version
     install -d $lispDir
-    tar cf - . | (cd $lispDir && tar xf -)
+    tar cf - --exclude='*.info' . | (cd $lispDir && tar xf -)
+
+    ${lib.optionalString hasInfoOutput installInfo}
 
     runHook postInstall
   '';
