@@ -38,6 +38,11 @@ let
     PKG
     fi
   '';
+
+  emacsLoadPath = lib.concatStrings
+    (map (pkg: "${pkg.outPath}/share/emacs/site-lisp/elpa/${pkg.ename}-${pkg.version}:")
+        elispBuildInputs);
+
 in
 stdenv.mkDerivation {
   inherit src ename meta version;
@@ -60,7 +65,7 @@ stdenv.mkDerivation {
   '';
 
   buildPhase = ''
-    export EMACSLOADPATH="${lib.makeSearchPath "share/emacs/site-lisp" elispBuildInputs}:"
+    export EMACSLOADPATH="${emacsLoadPath}"
 
     runHook preBuild
 
@@ -72,7 +77,7 @@ stdenv.mkDerivation {
   installPhase = ''
     runHook preInstall
 
-    lispDir=$out/share/emacs/site-lisp
+    lispDir=$out/share/emacs/site-lisp/elpa/$ename-$version
     install -d $lispDir
     tar cf - . | (cd $lispDir && tar xf -)
 

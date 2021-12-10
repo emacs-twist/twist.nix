@@ -1,7 +1,7 @@
 { lib
 , runCommandLocal
 , makeWrapper
-, linkFarm
+, buildEnv
 , emacs
 , lndir
 , elispPackages
@@ -11,20 +11,18 @@ let
   inherit (builtins) length;
 
   # Use a symlink farm for specifying subdirectory names inside site-lisp.
-  packagesAsFarm = linkFarm "emacs-dependencies-${emacs.version}"
-    (map
-      ({ ename, src, version, outPath, ... }:
-        {
-          # Construct a directory name prefixed with the ename.
-          name = "${ename}-${lib.makeSourceVersion version src}";
-          path = outPath;
-        })
-      elispPackages);
+  packageEnv = buildEnv {
+    name = "elisp-packages";
+    paths = elispPackages;
+    pathsToLink = [
+      "/share/emacs/site-lisp/elpa"
+    ];
+  };
 in
 runCommandLocal "emacs"
 {
   buildInputs = [ lndir ];
-  propagatedBuildInputs = [ emacs packagesAsFarm ] ++ executablePackages;
+  propagatedBuildInputs = [ emacs packageEnv ] ++ executablePackages;
   nativeBuildInputs = [ makeWrapper ];
 }
   ''
@@ -35,11 +33,8 @@ runCommandLocal "emacs"
     done
 
     siteLisp=$out/share/emacs/site-lisp
-    mkdir -p $siteLisp/elpa
-    for dep in ${packagesAsFarm}/*
-    do
-      ln -s $dep/share/emacs/site-lisp $siteLisp/elpa/$(basename $dep)
-    done
+    mkdir -p $siteLisp
+    ln -t $siteLisp -s ${packageEnv}/share/emacs/site-lisp/elpa
     ln -t $siteLisp -s ${emacs}/share/emacs/site-lisp/subdirs.el
 
     for bin in $out/bin/*
