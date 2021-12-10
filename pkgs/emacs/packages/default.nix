@@ -65,27 +65,23 @@ let
   enabledPackages = accumPackage { } explicitPackages;
 
   visibleBuiltinLibraries = lib.subtractLists explicitPackages builtinLibraries;
+
+  # Collect implicit dependencies.
+  allDependencies = lib.fix
+    (deps:
+      mapAttrs
+        (ename: { packageRequires, ... }:
+          let
+            explicitDeps = lib.subtractLists visibleBuiltinLibraries packageRequires;
+          in
+            lib.unique (explicitDeps ++ concatLists (lib.attrVals explicitDeps deps)))
+        enabledPackages);
 in
 self:
-# Annotate a concrete set of elisp dependencies (including implicit ones) to each package.
 mapAttrs
-  (ename:
-    { meta
-    , packageRequires
-    , ...
-    } @ attrs:
-    let
-      explicitDeps = lib.subtractLists visibleBuiltinLibraries packageRequires;
-    in
-      self.callPackage ./buildElispPackage.nix { }
-        (attrs // {
-          # Collect implicit dependencies.
-          requiredPackages =
-            lib.unique
-              (explicitDeps
-               ++
-               concatLists
-                 (map (dep: self.elispPackages.${dep}.passthru.elispAttrs.requiredPackages)
-                   explicitDeps));
-        }))
+  (ename: attrs:
+    self.callPackage ./buildElispPackage.nix { }
+      (attrs // {
+        requiredPackages = allDependencies.${ename};
+      }))
   enabledPackages
