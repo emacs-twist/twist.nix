@@ -27,6 +27,10 @@ lib.makeScope pkgs.newScope (self:
     ];
   in
   {
+    # This scope has too many attributes. It would be better if it had been
+    # reduced to a simpler, elegant API while allowing for customization using
+    # overrideScope'.
+
     inherit lib emacs lockFile;
 
     makeInventory = { type, path }:
