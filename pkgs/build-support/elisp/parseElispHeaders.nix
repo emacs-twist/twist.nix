@@ -25,7 +25,7 @@ let
       then line
       else head m;
 
-  description =
+  summary =
     let
       m = match descriptionRegex headLine;
     in
@@ -71,6 +71,6 @@ let
 
   headers = go { } lines';
 in
-(lib.optionalAttrs (description != null) { inherit description; })
+(lib.optionalAttrs (summary != null) { inherit summary; })
   //
 headers

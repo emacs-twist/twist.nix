@@ -96,19 +96,46 @@ let
 
   headers = lib.parseElispHeaders (readFile (self.src + "/${self.mainFile}"));
 
-  meta = import ./meta.nix {
+  metaFromHeaders = import ./meta.nix {
     inherit lib headers;
   };
+
+  pkgFiles = filter (file: baseNameOf file == ename + "-pkg.el") elispFiles;
+  pkgFile = head pkgFiles;
+  hasPkgFile = length pkgFiles != 0;
+  packageDesc =
+    if hasPkgFile
+    then lib.parsePkg (readFile (self.src + "/${pkgFile}"))
+    else {};
+
+  metaFromPackageDesc =
+    if hasPkgFile
+    then {
+      description = packageDesc.summary;
+    }
+    else {};
 in
 filesInfo
 //
-meta
-  //
 {
   inherit ename;
+  author = headers.Author or null;
+  version =
+    packageDesc.version
+      or headers.Version
+      or headers.Package-Version
+      # There are packages that lack a version header, so fallback to zero.
+      or "0.0.0";
+  meta = metaFromHeaders // metaFromPackageDesc;
   inherit mainFile headers;
   packageRequires =
-    if self.headers ? Package-Requires
+    if packageDesc ? packageRequires
+    then
+      lib.pipe packageDesc.packageRequires [
+        attrNames
+        (filter (name: name != "emacs"))
+      ]
+    else if self.headers ? Package-Requires
     then
       lib.pipe self.headers.Package-Requires [
         lib.parsePackageRequireLines

@@ -20,6 +20,7 @@ lib
   inherit (inputs.gitignore.lib) gitignoreSource;
 
   inherit (elispHelpers)
+    parsePkg
     parseElpaPackages
     flakeRefAttrsFromElpaAttrs
     parseMelpaRecipe
