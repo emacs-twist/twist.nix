@@ -7,7 +7,7 @@ let
   };
 in
 {
-  emacsTwist = import ./emacs {
+  emacsTwist = lib.makeOverridable (import ./emacs {
     inherit pkgs lib;
-  };
+  });
 }

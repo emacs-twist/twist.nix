@@ -25,41 +25,36 @@ lib.makeScope pkgs.newScope (self:
       lib.zipAttrs
       (lib.mapAttrs (_: concatLists))
     ];
-  in
-  {
-    # This scope has too many attributes. It would be better if it had been
-    # reduced to a simpler, elegant API while allowing for customization using
-    # overrideScope'.
-
-    inherit lib emacs lockFile;
 
     makeInventory = { type, path }:
       { inherit type; }
       //
       (if type == "melpa"
-      then { inherit path; }
-      else if type == "elpa"
-      then {
-        data = lib.filterAttrs
-          (_: args: args ? core || args.url != null)
-          (lib.parseElpaPackages (readFile path));
-      }
-      else throw "Unsupported inventory type: ${type}");
+       then { inherit path; }
+       else if type == "elpa"
+       then {
+         data = lib.filterAttrs
+           (_: args: args ? core || args.url != null)
+           (lib.parseElpaPackages (readFile path));
+       }
+       else throw "Unsupported inventory type: ${type}");
+  in
+  {
+    inherit lib emacs;
 
-    inventories = map self.makeInventory inventorySpecs;
-
+    # Expose only for convenience.
     inherit initFiles;
-    inherit extraPackages;
-    inherit packageOverrides;
-
-    builtinLibraries = getBuiltinLibraries emacs;
 
     # You cannot use callPackageWith because it will apply makeOverridable
     # which will add extra attributes, e.g. overrideDerivation, to the result.
     # It will make builtins.attrNames unusable to this attribute.
-    elispPackages = self.callPackage ./packages
+    elispPackages = import ./packages
       {
-        explicitPackages = userConfig.elispPackages ++ self.extraPackages;
+        inherit (pkgs) stdenv;
+        inherit lib emacs lockFile packageOverrides;
+        explicitPackages = userConfig.elispPackages ++ extraPackages;
+        inventories = map makeInventory inventorySpecs;
+        builtinLibraries = getBuiltinLibraries emacs;
       }
       self;
 
@@ -93,6 +88,7 @@ lib.makeScope pkgs.newScope (self:
     };
 
     flakeLock = import ./packages/lock.nix {
-      inherit (self) lib lockFile elispPackages;
+      inherit lib lockFile;
+      inherit (self) elispPackages;
     };
   })
