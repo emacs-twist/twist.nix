@@ -8,6 +8,7 @@
 , extraPackages ? [ "use-package" ]
 , addSystemPackages ? true
 , packageOverrides ? { }
+, nativeCompileAheadDefault ? true
 }:
 let
   inherit (builtins) readFile attrNames attrValues concatLists isFunction;
@@ -51,7 +52,7 @@ lib.makeScope pkgs.newScope (self:
     elispPackages = import ./packages
       {
         inherit (pkgs) stdenv;
-        inherit lib emacs lockFile packageOverrides;
+        inherit lib emacs lockFile packageOverrides nativeCompileAheadDefault;
         explicitPackages = userConfig.elispPackages ++ extraPackages;
         inventories = map makeInventory inventorySpecs;
         builtinLibraries = getBuiltinLibraries emacs;

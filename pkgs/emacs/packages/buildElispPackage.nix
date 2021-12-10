@@ -1,4 +1,4 @@
-{ lib, stdenv, emacs, texinfo, elispPackages }:
+{ lib, stdenv, emacs, texinfo, gcc, elispPackages }:
 { ename
 , src
 , version
@@ -6,12 +6,15 @@
 , requiredPackages
 , meta
 , allowSkipCompiling ? false
+, nativeCompileAhead
 , ...
 } @ elispAttrs:
 let
   inherit (builtins) concatStringsSep replaceStrings match elem;
 
   elispBuildInputs = lib.attrVals requiredPackages elispPackages;
+
+  nativeComp = emacs.nativeComp or false;
 
   buildCmd = ''
     if ! emacs --batch -L . -f batch-byte-compile *.el
@@ -20,7 +23,7 @@ let
       then
         echo "warn: Byte-compile is skipped."
       else
-        echo "To allow this error, set allowErrors.byteCompile to true."
+        echo "To allow this error, set allowErrors.allowSkipCompiling to true."
         exit 1
       fi
     fi
@@ -38,10 +41,6 @@ let
     PKG
     fi
   '';
-
-  emacsLoadPath = lib.concatStrings
-    (map (pkg: "${pkg.outPath}/share/emacs/site-lisp/elpa/${pkg.ename}-${pkg.version}:")
-        elispBuildInputs);
 
   hasInfoOutput =
     # (elem "info" (meta.outputsToInstall or []))
@@ -69,7 +68,6 @@ let
       install -t $info/share/info $i
     done
   '';
-
 in
 stdenv.mkDerivation rec {
   inherit src ename meta version;
@@ -85,6 +83,7 @@ stdenv.mkDerivation rec {
   outputs = [ "out" ] ++ lib.optional hasInfoOutput "info";
 
   buildInputs = [ emacs texinfo ];
+  # nativeBuildInputs = lib.optional nativeComp gcc;
 
   unpackPhase = ''
     for file in ${lib.escapeShellArgs files}
@@ -93,16 +92,35 @@ stdenv.mkDerivation rec {
     done
   '';
 
+  EMACSLOADPATH = lib.concatStrings
+    (map (pkg: "${pkg.outPath}/share/emacs/site-lisp/elpa/${pkg.ename}-${pkg.version}:")
+        elispBuildInputs);
+
   buildPhase = ''
-    export EMACSLOADPATH="${emacsLoadPath}"
+    export EMACSLOADPATH
 
     runHook preBuild
 
     ${buildCmd}
 
+    ${lib.optionalString nativeComp buildNativeLisp}
+
     ${lib.optionalString hasInfoOutput buildInfo}
 
     runHook postBuild
+  '';
+
+  EMACSNATIVELOADPATH = "${
+    lib.makeSearchPath "share/emacs/native-lisp/" elispBuildInputs
+  }:";
+
+  buildNativeLisp = ''
+    if [[ ${lib.boolToString nativeCompileAhead} = true ]]
+    then
+      EMACSNATIVELOADPATH="$EMACSNATIVELOADPATH" \
+        emacs --batch -L . -l ${./comp-native.el} \
+          -f native-compile-sync-default-directory
+    fi
   '';
 
   installPhase = ''
@@ -110,7 +128,18 @@ stdenv.mkDerivation rec {
 
     lispDir=$out/share/emacs/site-lisp/elpa/$ename-$version
     install -d $lispDir
-    tar cf - --exclude='*.info' . | (cd $lispDir && tar xf -)
+    tar cf - --exclude='*.info' --exclude='eln-cache' . \
+      | (cd $lispDir && tar xf -)
+
+    ${lib.optionalString nativeComp ''
+      if [[ -d eln-cache ]]
+      then
+        nativeLispDir=$out/share/emacs/native-lisp
+        install -d $nativeLispDir
+        tar cf - -C eln-cache --exclude='.*.eln' . \
+          | (cd $nativeLispDir && tar xf -)
+      fi
+    ''}
 
     ${lib.optionalString hasInfoOutput installInfo}
 

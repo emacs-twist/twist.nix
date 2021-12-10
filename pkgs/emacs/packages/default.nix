@@ -6,6 +6,7 @@
 , explicitPackages
 , stdenv
 , packageOverrides
+, nativeCompileAheadDefault
 }:
 let
   inherit (builtins) length head tail hasAttr filter elem mapAttrs readFile
@@ -81,7 +82,8 @@ self:
 mapAttrs
   (ename: attrs:
     self.callPackage ./buildElispPackage.nix { }
-      (attrs // {
+      ({
+        nativeCompileAhead = nativeCompileAheadDefault;
         requiredPackages = allDependencies.${ename};
-      }))
+      } // attrs))
   enabledPackages

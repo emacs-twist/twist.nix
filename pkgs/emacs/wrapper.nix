@@ -11,6 +11,8 @@
 let
   inherit (builtins) length;
 
+  nativeComp = emacs.nativeComp or false;
+
   # Use a symlink farm for specifying subdirectory names inside site-lisp.
   packageEnv = buildEnv {
     name = "elisp-packages";
@@ -18,7 +20,7 @@ let
     pathsToLink = [
       "/share/emacs/site-lisp/elpa"
       "/share/info"
-    ];
+    ] ++ lib.optional nativeComp "/share/emacs/native-lisp";
     extraOutputsToInstall = [ "info" ];
     buildInputs = [
       texinfo
@@ -61,6 +63,9 @@ runCommandLocal "emacs"
           "--prefix PATH : ${lib.escapeShellArg (lib.makeBinPath executablePackages)}"
         )} \
         --prefix INFOPATH : ${emacs}/share/info:${packageEnv}/share/info \
+        ${lib.optionalString nativeComp
+          "--set EMACSNATIVELOADPATH ${packageEnv}/share/emacs/native-lisp/:"
+        } \
         --set EMACSLOADPATH "$siteLisp:"
       fi
     done
