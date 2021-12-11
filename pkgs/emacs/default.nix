@@ -61,6 +61,12 @@ in
     # Expose only for convenience.
     inherit initFiles;
 
+    # Expose for inspecting the configuration. Don't override this attribute
+    # using overrideScope', it doesn't affect anything.
+    packageInputs = lib.pipe packageInputs [
+      (mapAttrs (_: lib.filterAttrs (_: v: ! isFunction v)))
+    ];
+
     # You cannot use callPackageWith because it will apply makeOverridable
     # which will add extra attributes, e.g. overrideDerivation, to the result.
     # It will make builtins.attrNames unusable to this attribute.
