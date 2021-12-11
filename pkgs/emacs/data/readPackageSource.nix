@@ -47,7 +47,8 @@ in
 ename:
 { type
 , entry
-}:
+, ...
+} @ prescription:
 self:
 let
   filesInfo =
@@ -143,4 +144,5 @@ filesInfo
         (filter (name: name != "emacs"))
       ]
     else [ ];
+  inventory = lib.getAttrs [ "type" "entry" "path" ] prescription;
 }

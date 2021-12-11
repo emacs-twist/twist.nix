@@ -10,11 +10,11 @@ in
 , inputOverrides
 }:
 let
-  makeInventory = { type, path }:
-    { inherit type; }
+  makeInventory = { type, path } @ spec:
+    spec
     //
     (if type == "melpa"
-     then { inherit path; }
+     then { }
      else if type == "elpa"
      then {
        data = lib.filterAttrs
@@ -32,15 +32,14 @@ let
 
   findPrescription = ename: lib.pipe inventories [
     (map (i @ { type, ... }:
-      {
-        inherit type;
+      (i // {
         entry =
           if type == "melpa"
           then readMelpaRecipeMaybe (i.path + "/${ename}")
           else if type == "elpa"
           then i.data.${ename} or null
           else throw "FIXME";
-      }))
+      })))
     (filter ({ entry, ... }: entry != null))
     (results:
       if length results == 0
