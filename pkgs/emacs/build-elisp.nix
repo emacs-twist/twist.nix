@@ -1,18 +1,16 @@
-{ lib, stdenv, emacs, texinfo, gcc, elispPackages }:
+{ lib, stdenv, emacs, texinfo, gcc }:
 { ename
 , src
 , version
 , files
-, requiredPackages
 , meta
 , allowSkipCompiling ? false
 , nativeCompileAhead
+, elispInputs
 , ...
-} @ elispAttrs:
+}:
 let
   inherit (builtins) concatStringsSep replaceStrings match elem;
-
-  elispBuildInputs = lib.attrVals requiredPackages elispPackages;
 
   nativeComp = emacs.nativeComp or false;
 
@@ -94,7 +92,7 @@ stdenv.mkDerivation rec {
 
   EMACSLOADPATH = lib.concatStrings
     (map (pkg: "${pkg.outPath}/share/emacs/site-lisp/elpa/${pkg.ename}-${pkg.version}:")
-        elispBuildInputs);
+      elispInputs);
 
   buildPhase = ''
     export EMACSLOADPATH
@@ -111,7 +109,7 @@ stdenv.mkDerivation rec {
   '';
 
   EMACSNATIVELOADPATH = "${
-    lib.makeSearchPath "share/emacs/native-lisp/" elispBuildInputs
+    lib.makeSearchPath "share/emacs/native-lisp/" elispInputs
   }:";
 
   buildNativeLisp = ''
@@ -136,7 +134,7 @@ stdenv.mkDerivation rec {
       then
         nativeLispDir=$out/share/emacs/native-lisp
         install -d $nativeLispDir
-        tar cf - -C eln-cache --exclude='.*.eln' . \
+        tar cf - -C eln-cache . \
           | (cd $nativeLispDir && tar xf -)
       fi
     ''}
@@ -145,8 +143,4 @@ stdenv.mkDerivation rec {
 
     runHook postInstall
   '';
-
-  passthru = {
-    inherit elispAttrs;
-  };
 }

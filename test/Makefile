@@ -3,7 +3,7 @@ NIX := nix
 NIX_OPTIONS := --override-input twist path:$(PWD)/..
 
 build:
-	$(NIX) build .#emacs $(NIX_OPTIONS) --update-input twist
+	$(NIX) build .#emacs $(NIX_OPTIONS) --update-input twist $(ARGS)
 .PHONY: build
 
 lock:

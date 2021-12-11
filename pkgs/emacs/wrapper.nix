@@ -5,7 +5,7 @@
 , emacs
 , lndir
 , texinfo
-, elispPackages
+, elispInputs
 , executablePackages
 }:
 let
@@ -16,7 +16,7 @@ let
   # Use a symlink farm for specifying subdirectory names inside site-lisp.
   packageEnv = buildEnv {
     name = "elisp-packages";
-    paths = elispPackages;
+    paths = elispInputs;
     pathsToLink = [
       "/share/emacs/site-lisp/elpa"
       "/share/info"

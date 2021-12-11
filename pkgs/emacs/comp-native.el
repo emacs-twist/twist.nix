@@ -12,9 +12,10 @@
     (make-directory target-directory)
     (push target-directory native-comp-eln-load-path)
     (setq native-compile-target-directory target-directory))
-  (condition-case err
-      (native-compile-async default-directory 'recursively)
-    (error (message "%s" err)))
+  (native-compile-async default-directory nil nil
+                        (lambda (name)
+                          ;; Exclude .dir-locals.el and other config files.
+                          (string-match-p "^[^.]" name)))
   (while (or comp-files-queue
              (> (comp-async-runnings) 0))
     ;; Calibration may be needed

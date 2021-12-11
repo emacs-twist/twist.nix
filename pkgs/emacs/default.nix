@@ -7,13 +7,12 @@
 , initFiles
 , extraPackages ? [ "use-package" ]
 , addSystemPackages ? true
-, packageOverrides ? { }
+, inputOverrides ? { }
 , nativeCompileAheadDefault ? true
 }:
 let
-  inherit (builtins) readFile attrNames attrValues concatLists isFunction;
-
-  getBuiltinLibraries = pkgs.callPackage ./packages/builtins.nix { };
+  inherit (builtins) readFile attrNames attrValues concatLists isFunction
+    split filter isString mapAttrs;
 
   profileElisp = { passthru, ... }: lib.pipe passthru.elispAttrs [
     (lib.filterAttrs (_: v: ! isFunction v))
@@ -27,19 +26,35 @@ lib.makeScope pkgs.newScope (self:
       (lib.mapAttrs (_: concatLists))
     ];
 
-    makeInventory = { type, path }:
-      { inherit type; }
-      //
-      (if type == "melpa"
-       then { inherit path; }
-       else if type == "elpa"
-       then {
-         data = lib.filterAttrs
-           (_: args: args ? core || args.url != null)
-           (lib.parseElpaPackages (readFile path));
-       }
-       else throw "Unsupported inventory type: ${type}");
-  in
+    explicitPackages = userConfig.elispPackages ++ extraPackages;
+
+    builtinLibraryList = self.callPackage ./builtins.nix { };
+
+    builtinLibraries = lib.pipe (readFile builtinLibraryList) [
+      (split "\n")
+      (filter (s: isString s && s != ""))
+    ];
+
+    enumerateConcretePackageSet = import ./data {
+      inherit lib emacs lockFile
+        builtinLibraries inventorySpecs inputOverrides;
+    };
+
+    packageInputs = enumerateConcretePackageSet explicitPackages;
+
+    visibleBuiltinLibraries = lib.subtractLists explicitPackages builtinLibraries;
+
+    allDependencies = lib.fix (self:
+      mapAttrs
+        (ename: { packageRequires, ... } @ attrs:
+          let
+            explicitDeps = lib.subtractLists visibleBuiltinLibraries packageRequires;
+          in
+            lib.unique
+              (explicitDeps
+               ++ concatLists (lib.attrVals explicitDeps self)))
+        packageInputs);
+in
   {
     inherit lib emacs;
 
@@ -49,19 +64,19 @@ lib.makeScope pkgs.newScope (self:
     # You cannot use callPackageWith because it will apply makeOverridable
     # which will add extra attributes, e.g. overrideDerivation, to the result.
     # It will make builtins.attrNames unusable to this attribute.
-    elispPackages = import ./packages
-      {
-        inherit (pkgs) stdenv;
-        inherit lib emacs lockFile packageOverrides nativeCompileAheadDefault;
-        explicitPackages = userConfig.elispPackages ++ extraPackages;
-        inventories = map makeInventory inventorySpecs;
-        builtinLibraries = getBuiltinLibraries emacs;
-      }
-      self;
+    elispPackages = lib.makeScope self.newScope (eself:
+      mapAttrs
+        (ename: attrs:
+          self.callPackage ./build-elisp.nix { }
+            ({
+              nativeCompileAhead = nativeCompileAheadDefault;
+              elispInputs = lib.attrVals allDependencies.${ename} eself;
+            } // attrs))
+        packageInputs);
 
-    emacsWithPackages = self.callPackage ./wrapper.nix
+    emacsWrapper = self.callPackage ./wrapper.nix
       {
-        elispPackages = attrValues self.elispPackages;
+        elispInputs = lib.attrVals (attrNames packageInputs) self.elispPackages;
         # It may be better to use lib.attrByPath to access packages like
         # gitAndTools.git-lfs, but I am not sure if a path can be safely
         # split by ".".
@@ -72,23 +87,18 @@ lib.makeScope pkgs.newScope (self:
       };
 
     # This makes the attrset a derivation for a shorthand.
-    inherit (self.emacsWithPackages) name type outputName outPath drvPath;
-
-    # Expose the package information to the user via `nix eval`.
-    packageProfiles = lib.pipe self.elispPackages [
-      (lib.mapAttrs (_: profileElisp))
-    ];
+    inherit (self.emacsWrapper) name type outputName outPath drvPath;
 
     flakeNix = {
       description = "This is an auto-generated file. Please don't edit it manually.";
       inputs =
         lib.mapAttrs
           (_: { origin, ... }: origin // { flake = false; })
-          self.packageProfiles;
+          packageInputs;
       outputs = { ... }: {};
     };
 
-    flakeLock = import ./packages/lock.nix {
+    flakeLock = import ./lock.nix {
       inherit lib lockFile;
       inherit (self) elispPackages;
     };
