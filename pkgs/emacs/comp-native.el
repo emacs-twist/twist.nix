@@ -12,8 +12,8 @@
                             (error "Specify a source directory as the argument"))
                         nil nil
                         (lambda (name)
-                          (string-match-p "^[^.]\\|-pkg\\.el$"
-                                          (file-name-nondirectory name))))
+                          (and (string-match-p "^[^.]" (file-name-nondirectory name))
+                               (not (string-suffix-p "-pkg.el" name)))))
   (while (or comp-files-queue
              (> (comp-async-runnings) 0))
     ;; Calibration may be needed

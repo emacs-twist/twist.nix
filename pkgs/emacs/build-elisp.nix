@@ -32,7 +32,12 @@ let
       cat > ${ename}-pkg.el <<PKG
       (define-package "${ename}" "${version}"
         "${meta.description or ""}"
-        '())
+        '(${
+          # It may be necessary to include the version actually specified in the
+          # header, but it won't matter anyway.
+          lib.concatMapStrings (name: "(" + name + " \"0\")")
+            (lib.catAttrs "ename" elispInputs)
+        }))
       ;; Local Variables:
       ;; no-byte-compile: t
       ;; End:
