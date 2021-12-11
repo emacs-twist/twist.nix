@@ -101,8 +101,6 @@ stdenv.mkDerivation rec {
 
     ${buildCmd}
 
-    ${lib.optionalString nativeComp buildNativeLisp}
-
     ${lib.optionalString hasInfoOutput buildInfo}
 
     runHook postBuild
@@ -112,13 +110,18 @@ stdenv.mkDerivation rec {
     lib.makeSearchPath "share/emacs/native-lisp/" elispInputs
   }:";
 
-  buildNativeLisp = ''
-    if [[ ${lib.boolToString nativeCompileAhead} = true ]]
-    then
-      EMACSNATIVELOADPATH="$EMACSNATIVELOADPATH" \
-        emacs --batch -L . -l ${./comp-native.el} \
-          -f native-compile-sync-default-directory
-    fi
+  # Because eln depends on the file name hash of the source file, native
+  # compilation must be done after the elisp files are installed. For details,
+  # see the documentation of comp-el-to-eln-rel-filename.
+  buildAndInstallNativeLisp = ''
+    nativeLispDir=$out/share/emacs/native-lisp
+    mkdir -p $nativeLispDir
+
+    EMACSLOADPATH="$EMACSLOADPATH" EMACSNATIVELOADPATH="$EMACSNATIVELOADPATH" \
+      emacs --batch -L $lispDir -l ${./comp-native.el} \
+        --eval "(push \"$nativeLispDir/\" native-comp-eln-load-path)" \
+        --eval "(setq native-compile-target-directory \"$nativeLispDir/\")" \
+        -f run-native-compile-sync $lispDir
   '';
 
   installPhase = ''
@@ -129,15 +132,7 @@ stdenv.mkDerivation rec {
     tar cf - --exclude='*.info' --exclude='eln-cache' . \
       | (cd $lispDir && tar xf -)
 
-    ${lib.optionalString nativeComp ''
-      if [[ -d eln-cache ]]
-      then
-        nativeLispDir=$out/share/emacs/native-lisp
-        install -d $nativeLispDir
-        tar cf - -C eln-cache . \
-          | (cd $nativeLispDir && tar xf -)
-      fi
-    ''}
+    ${lib.optionalString (nativeComp && nativeCompileAhead) buildAndInstallNativeLisp}
 
     ${lib.optionalString hasInfoOutput installInfo}
 
