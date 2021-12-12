@@ -32,6 +32,8 @@
     } @ inputs:
     flake-utils.lib.eachDefaultSystem (system:
     let
+      inherit (builtins) filter match elem;
+
       pkgs = import nixpkgs {
         inherit system;
         overlays = [
@@ -39,6 +41,8 @@
           inputs.twist.overlay
         ];
       };
+
+      inherit (pkgs) lib;
 
       emacs = (pkgs.emacsTwist {
         emacs = pkgs.emacsPgtkGcc.overrideAttrs (_: { version = "29.0.50"; });
@@ -56,6 +60,19 @@
             path = inputs.melpa.outPath + "/recipes";
           }
         ];
+        inputOverrides = {
+          ivy = _: ivy: {
+            # You can filter package files.
+            files = lib.pipe ivy.files [
+              (filter (name: match "ivy.+" name != null || name == "colir.el"))
+              (filter (name: ! elem name [
+                "ivy-test.el"
+                "ivy-avy.el"
+                "ivy-hydra.el"
+              ]))
+            ];
+          };
+        };
       });
 
       inherit (flake-utils.lib) mkApp;

@@ -181,7 +181,7 @@
         "pre-commit-hooks": "pre-commit-hooks"
       },
       "locked": {
-        "narHash": "sha256-wt5RD9QBOLrIxVdP4RJsPRNTbERLORG1pWpmh0IEJ08=",
+        "narHash": "sha256-a5eVku9LNiKEOhdNyL59XYMA9oWrCoWzmWg8miXNlYM=",
         "path": "/home/akirakomamura/work/github.com/nix-libraries/emacs-twist",
         "type": "path"
       },

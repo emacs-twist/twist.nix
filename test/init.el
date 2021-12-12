@@ -5,3 +5,6 @@
 
 (use-package magit
   :ensure t)
+
+(use-package ivy
+  :ensure t)
