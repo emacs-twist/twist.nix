@@ -1,0 +1,5 @@
+#+TITLE: Emacs Twist User Documentation
+#+TEXINFO_DIR_CATEGORY: Emacs
+#+TEXINFO_DIR_TITLE: Twist: (emacs-twist)
+#+TEXINFO_DIR_DESC: Source-based build machinery for Nix.
+* Introduction

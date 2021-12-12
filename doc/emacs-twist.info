@@ -1,0 +1,36 @@
+This is emacs-twist.info, produced by makeinfo version 6.8 from
+emacs-twist.texi.
+
+INFO-DIR-SECTION Emacs
+START-INFO-DIR-ENTRY
+* Twist: (emacs-twist). Source-based build machinery for Nix.
+END-INFO-DIR-ENTRY
+
+
+File: emacs-twist.info,  Node: Top,  Next: Introduction,  Up: (dir)
+
+Emacs Twist User Documentation
+******************************
+
+* Menu:
+
+* Introduction::
+
+
+File: emacs-twist.info,  Node: Introduction,  Prev: Top,  Up: Top
+
+1 Introduction
+**************
+
+
+
+Tag Table:
+Node: Top209
+Node: Introduction370
+
+End Tag Table
+
+
+Local Variables:
+coding: utf-8
+End:

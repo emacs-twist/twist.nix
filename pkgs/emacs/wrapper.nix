@@ -36,10 +36,15 @@ let
       fi
     '';
   };
+
+  selfInfo = builtins.path {
+    name = "emacs-twist.info";
+    path = ../../doc/emacs-twist.info;
+  };
 in
 runCommandLocal "emacs"
 {
-  buildInputs = [ lndir ];
+  buildInputs = [ lndir texinfo ];
   propagatedBuildInputs = [ emacs packageEnv ] ++ executablePackages;
   nativeBuildInputs = [ makeWrapper ];
 }
@@ -58,6 +63,10 @@ runCommandLocal "emacs"
     mkdir -p $out/share/doc
     lndir -silent ${packageEnv}/share/doc $out/share/doc
 
+    mkdir -p $out/share/info
+    install ${selfInfo} $out/share/info/emacs-twist.info
+    install-info $out/share/info/emacs-twist.info $out/share/info/dir
+
     for bin in $out/bin/*
     do
       if [[ $(basename $bin) = emacs-* ]]
@@ -66,7 +75,7 @@ runCommandLocal "emacs"
         ${lib.optionalString (length executablePackages > 0) (
           "--prefix PATH : ${lib.escapeShellArg (lib.makeBinPath executablePackages)}"
         )} \
-        --prefix INFOPATH : ${emacs}/share/info:${packageEnv}/share/info \
+        --prefix INFOPATH : ${emacs}/share/info:$out/share/info:${packageEnv}/share/info \
         ${lib.optionalString nativeComp
           "--set EMACSNATIVELOADPATH ${packageEnv}/share/emacs/native-lisp/:"
         } \

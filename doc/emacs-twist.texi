@@ -1,0 +1,34 @@
+\input texinfo    @c -*- texinfo -*-
+@c %**start of header
+@setfilename emacs-twist.info
+@settitle Emacs Twist User Documentation
+@documentencoding UTF-8
+@documentlanguage en
+@c %**end of header
+
+@dircategory Emacs
+@direntry
+* Twist: (emacs-twist). Source-based build machinery for Nix.
+@end direntry
+
+@finalout
+@titlepage
+@title Emacs Twist User Documentation
+@author default
+@end titlepage
+
+@contents
+
+@ifnottex
+@node Top
+@top Emacs Twist User Documentation
+@end ifnottex
+
+@menu
+* Introduction::
+@end menu
+
+@node Introduction
+@chapter Introduction
+
+@bye

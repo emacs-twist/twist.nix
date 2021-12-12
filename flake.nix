@@ -35,18 +35,43 @@
     }
     //
     (flake-utils.lib.eachDefaultSystem (system:
-    {
-      checks = {
-        pre-commit-check = pre-commit-hooks.lib.${system}.run {
-          src = ./.;
-          hooks = {
-            nixpkgs-fmt.enable = true;
-            nix-linter.enable = true;
+      let
+        pkgs = import nixpkgs { inherit system; };
+      in
+        {
+          # Run this app at the repository root to update documentation in the
+          # doc directory.
+          apps.generate-info = flake-utils.lib.mkApp {
+            drv = pkgs.writeShellApplication {
+              name = "generate-info";
+              runtimeInputs = with pkgs; [ emacs texinfo ];
+              text = ''
+                cd doc
+                basename=emacs-twist
+                emacs -Q --batch -l ox-texinfo \
+                  --eval "(progn
+                            (find-file \"$basename.org\")
+                            (org-texinfo-export-to-texinfo))"
+
+                shopt -s nullglob
+                for t in *.texi *.texinfo
+                do
+                  makeinfo --no-split "$t" -o "''${t%%.*}.info"
+                done
+            '';
+            };
           };
-        };
-      };
-      devShell = nixpkgs.legacyPackages.${system}.mkShell {
-        inherit (self.checks.${system}.pre-commit-check) shellHook;
-      };
-    })));
+          checks = {
+            pre-commit-check = pre-commit-hooks.lib.${system}.run {
+              src = ./.;
+              hooks = {
+                nixpkgs-fmt.enable = true;
+                nix-linter.enable = true;
+              };
+            };
+          };
+          devShell = nixpkgs.legacyPackages.${system}.mkShell {
+            inherit (self.checks.${system}.pre-commit-check) shellHook;
+          };
+        })));
 }
