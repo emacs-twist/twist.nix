@@ -45,19 +45,25 @@ let
     fi
   '';
 
+  hasFile = pred: (lib.findFirst pred null files != null);
+
   hasInfoOutput =
     # (elem "info" (meta.outputsToInstall or []))
     # &&
-    (lib.findFirst (f: match ".+\\.(info|texi(nfo)?)" f != null) null files
-    != null);
+    hasFile (f: match ".+\\.(info|texi(nfo)?)" f != null);
+
+  hasDocOutput =
+    # Ignore Org files starting with an upper-case character
+    # such as README.org, CHANGELOG.org, etc.
+    hasFile (f: match "[a-z0-9].+\.(org|texi(nfo)?)" f != null);
 
   buildInfo = ''
     cwd="$PWD"
     cd $src
-    for doc in $(find -name '*.texi' -o -name '*.texinfo')
+    for d in $(find -name '*.texi' -o -name '*.texinfo')
     do
-      local basename=$(basename $doc)
-      cd $src/$(dirname $doc)
+      local basename=$(basename $d)
+      cd $src/$(dirname $d)
       makeinfo --no-split "$basename" -o $cwd/''${basename%%.*}.info
     done
     cd $cwd
@@ -69,6 +75,18 @@ let
     for i in *.info
     do
       install -t $info/share/info $i
+    done
+  '';
+
+  installDoc = ''
+    mkdir -p $doc/share
+    install -d $doc/share/doc
+    for d in *.texi *.texinfo *.org
+    do
+      if [[ ! $d =~ ^[A-Z] ]]
+      then
+        install -t $doc/share/doc $d
+      fi
     done
   '';
 in
@@ -83,7 +101,10 @@ stdenv.mkDerivation rec {
   preferLocalBuild = true;
   allowSubstitutes = false;
 
-  outputs = [ "out" ] ++ lib.optional hasInfoOutput "info";
+  outputs =
+    [ "out" ]
+    ++ lib.optional hasDocOutput "doc"
+    ++ lib.optional hasInfoOutput "info";
 
   buildInputs = [ emacs texinfo ];
   # nativeBuildInputs = lib.optional nativeComp gcc;
@@ -140,6 +161,8 @@ stdenv.mkDerivation rec {
       | (cd $lispDir && tar xf -)
 
     ${lib.optionalString (nativeComp && nativeCompileAhead) buildAndInstallNativeLisp}
+
+    ${lib.optionalString hasDocOutput installDoc}
 
     ${lib.optionalString hasInfoOutput installInfo}
 

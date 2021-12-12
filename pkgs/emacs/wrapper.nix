@@ -20,8 +20,9 @@ let
     pathsToLink = [
       "/share/emacs/site-lisp/elpa"
       "/share/info"
+      "/share/doc"
     ] ++ lib.optional nativeComp "/share/emacs/native-lisp";
-    extraOutputsToInstall = [ "info" ];
+    extraOutputsToInstall = [ "info" "doc" ];
     buildInputs = [
       texinfo
     ];
@@ -53,6 +54,9 @@ runCommandLocal "emacs"
     mkdir -p $siteLisp
     ln -t $siteLisp -s ${packageEnv}/share/emacs/site-lisp/elpa
     ln -t $siteLisp -s ${emacs}/share/emacs/site-lisp/subdirs.el
+
+    mkdir -p $out/share/doc
+    lndir -silent ${packageEnv}/share/doc $out/share/doc
 
     for bin in $out/bin/*
     do
