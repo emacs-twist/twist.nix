@@ -10,7 +10,7 @@ in
 let
   inherit (lib) gitignoreSource;
 
-  elpaFiles = attrs: src:
+  elpaLispFiles = attrs: src:
     let
       lispDir =
         if attrs ? lisp-dir
@@ -27,12 +27,25 @@ let
       readDir
       (lib.filterAttrs (_: type: type == "regular"))
       attrNames
+      # FIXME: If :lisp-dir is specified, other files (e.g. doc) are ignored
       (map (file:
         if attrs ? lisp-dir
         then "${attrs.lisp-dir}/${file}"
         else file))
       (filter (file: all (pattern: match pattern file == null) ignorePatterns))
     ];
+
+  elpaDocFiles = attrs:
+    if ! attrs ? doc
+    then [ ]
+    else if isString attrs.doc
+    then [ attrs.doc ]
+    else if isList attrs.doc
+    then attrs.doc
+    else throw "The value of :doc must be either a string or alist: ${attrs.doc}";
+
+  elpaFiles = attrs: src:
+    lib.unique (elpaLispFiles attrs src ++ elpaDocFiles attrs);
 
   toLockData = { nodes, version, ... }:
     if version == 7

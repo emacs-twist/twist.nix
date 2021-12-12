@@ -88,7 +88,6 @@ stdenv.mkDerivation rec {
   buildInputs = [ emacs texinfo ];
   # nativeBuildInputs = lib.optional nativeComp gcc;
 
-  # TODO: Copy documents of ELPA packages specified in :doc and :readme.
   # TODO: Handle :rename of ELPA packages
   # See https://git.savannah.gnu.org/cgit/emacs/elpa.git/plain/README for details.
   unpackPhase = ''
