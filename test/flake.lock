@@ -181,13 +181,17 @@
         "pre-commit-hooks": "pre-commit-hooks"
       },
       "locked": {
-        "narHash": "sha256-4/G8bsj1lRkyQgJ7dfwXdclrjkU9a5VXQ6tTGKdRnOs=",
-        "path": "/home/akirakomamura/work/github.com/nix-libraries/emacs-twist",
-        "type": "path"
+        "lastModified": 1639382480,
+        "narHash": "sha256-J5eqloby/jdvj+eiqL3q+Xu612yA4DY+OVSE7+frxbA=",
+        "owner": "akirak",
+        "repo": "emacs-twist",
+        "rev": "3e123704a6115f242ef0355d16c20c82b4ab4bfa",
+        "type": "github"
       },
       "original": {
-        "path": "/home/akirakomamura/work/github.com/nix-libraries/emacs-twist",
-        "type": "path"
+        "owner": "akirak",
+        "repo": "emacs-twist",
+        "type": "github"
       }
     }
   },
