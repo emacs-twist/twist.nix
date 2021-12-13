@@ -1,4 +1,4 @@
-* Emacs Twist
+* Emacs Twist for Nix
 Emacs Twist is an Emacs Lisp build machinery for Nix.
 It can be used to build packages specified in your init file using Nix, in a pure and source-based way.
 
@@ -9,4 +9,4 @@ The goal of this project is to support the following two use cases:
 
 At present, the former use case is almost supported, and the documentation is in progress.
 The latter is secondary, and I have not worked on it yet.
-*Disclaimer: There may be breaking changes of the API.*
+*Thus there may be breaking changes of the API.*
