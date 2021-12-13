@@ -13,10 +13,6 @@
 let
   inherit (builtins) readFile attrNames attrValues concatLists isFunction
     split filter isString mapAttrs;
-
-  profileElisp = { passthru, ... }: lib.pipe passthru.elispAttrs [
-    (lib.filterAttrs (_: v: ! isFunction v))
-  ];
 in
 lib.makeScope pkgs.newScope (self:
   let
@@ -46,15 +42,15 @@ lib.makeScope pkgs.newScope (self:
 
     allDependencies = lib.fix (self:
       mapAttrs
-        (ename: { packageRequires, ... } @ attrs:
+        (_ename: { packageRequires, ... }:
           let
             explicitDeps = lib.subtractLists visibleBuiltinLibraries packageRequires;
           in
-            lib.unique
-              (explicitDeps
-               ++ concatLists (lib.attrVals explicitDeps self)))
+          lib.unique
+            (explicitDeps
+              ++ concatLists (lib.attrVals explicitDeps self)))
         packageInputs);
-in
+  in
   {
     inherit lib emacs;
 
@@ -101,7 +97,7 @@ in
         lib.mapAttrs
           (_: { origin, ... }: origin // { flake = false; })
           packageInputs;
-      outputs = { ... }: {};
+      outputs = { ... }: { };
     };
 
     flakeLock = import ./lock.nix {

@@ -1,4 +1,4 @@
-{ lib, stdenv, emacs, texinfo, gcc }:
+{ lib, stdenv, emacs, texinfo }:
 { ename
 , src
 , version

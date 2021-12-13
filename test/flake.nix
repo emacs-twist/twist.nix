@@ -24,8 +24,7 @@
   };
 
   outputs =
-    { self
-    , flake-utils
+    { flake-utils
     , nixpkgs
     , emacs-unstable
     , ...
@@ -81,7 +80,7 @@
       packages = {
         inherit emacs;
       };
- 
+
       apps.lock = flake-utils.lib.mkApp {
         drv = pkgs.writeShellApplication {
           name = "lock";
@@ -124,5 +123,5 @@
           '';
         };
       };
-   });
+    });
 }

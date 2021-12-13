@@ -120,17 +120,17 @@ let
   packageDesc =
     if hasPkgFile
     then lib.parsePkg (readFile (self.src + "/${pkgFile}"))
-    else {};
+    else { };
 
   metaFromPackageDesc =
     if hasPkgFile
     then {
       description = packageDesc.summary;
     }
-    else {};
+    else { };
 in
 filesInfo
-//
+  //
 {
   inherit ename;
   author = headers.Author or null;

@@ -1,5 +1,4 @@
-{
-  lib
+{ lib
 , lockFile
 , elispPackages
 }:
@@ -8,13 +7,9 @@ let
 
   prev = lib.importJSON lockFile;
 
-  newNodeAttrs = ename: value:
-    let
-      package = elispPackages.${ename};
+  newNodeAttrs = package: value:
+    rec {
       original = package.passthru.elispAttrs.origin;
-    in
-    {
-      inherit original;
       locked = original // intersectAttrs value.locked package.src;
     };
 
@@ -22,10 +17,11 @@ let
     prev
     //
     {
-      nodes = mapAttrs (ename: value:
-        if hasAttr ename elispPackages
-        then value // newNodeAttrs ename value
-        else value)
+      nodes = mapAttrs
+        (ename: value:
+          if hasAttr ename elispPackages
+          then value // newNodeAttrs elispPackages.${ename} value
+          else value)
         prev.nodes;
     };
 in

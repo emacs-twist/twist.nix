@@ -14,14 +14,14 @@ let
     spec
     //
     (if type == "melpa"
-     then { }
-     else if type == "elpa"
-     then {
-       data = lib.filterAttrs
-         (_: args: args ? core || args.url != null)
-         (lib.parseElpaPackages (readFile path));
-     }
-     else throw "Unsupported inventory type: ${type}");
+    then { }
+    else if type == "elpa"
+    then {
+      data = lib.filterAttrs
+        (_: args: args ? core || args.url != null)
+        (lib.parseElpaPackages (readFile path));
+    }
+    else throw "Unsupported inventory type: ${type}");
 
   inventories = map makeInventory inventorySpecs;
 
@@ -70,17 +70,17 @@ let
         # in the output, it must be done here.
         data' =
           if hasAttr ename inputOverrides
-          then data.extend(toOverrideFn inputOverrides.${ename})
+          then data.extend (toOverrideFn inputOverrides.${ename})
           else data;
       in
-        accumPackage
-          # You should not call extend afterwards, so remove it here.
-          (acc // { ${ename} = removeAttrs data' [ "extend" ]; })
-          (enames
-           ++
-           (filter
-             (ename: !elem ename builtinLibraries)
-             data'.packageRequires));
+      accumPackage
+        # You should not call extend afterwards, so remove it here.
+        (acc // { ${ename} = removeAttrs data' [ "extend" ]; })
+        (enames
+          ++
+          (filter
+            (ename: !elem ename builtinLibraries)
+            data'.packageRequires));
 
 in
 accumPackage { }

@@ -21,9 +21,9 @@ let
     let
       m = match magicHeaderRegex line;
     in
-      if m == null
-      then line
-      else head m;
+    if m == null
+    then line
+    else head m;
 
   summary =
     let
