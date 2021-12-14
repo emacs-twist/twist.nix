@@ -80,7 +80,7 @@ let
           ++
           (filter
             (ename: !elem ename builtinLibraries)
-            data'.packageRequires));
+            (lib.packageRequiresToLibraryNames data'.packageRequires)));
 
 in
 accumPackage { }

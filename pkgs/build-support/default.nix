@@ -2,7 +2,7 @@
 , inputs
 }:
 let
-  inherit (builtins) head attrValues replaceStrings isList;
+  inherit (builtins) head attrNames attrValues filter replaceStrings isList;
 
   fromElisp = import inputs.fromElisp {
     pkgs = { inherit lib; };
@@ -46,6 +46,13 @@ lib
     ];
 
   parseUsePackages = import ./elisp/parseUsePackages.nix { inherit lib fromElisp; };
+
+  /* Transform an attribute set of packageRequires to a list of library names,
+      excluding emacs. */
+  packageRequiresToLibraryNames = packageRequires: lib.pipe packageRequires [
+    attrNames
+    (filter (name: name != "emacs"))
+  ];
 
   # Just a shorthand for overriding a nested attribute.
   # I am looking for a better syntax for overriding multiple packages.

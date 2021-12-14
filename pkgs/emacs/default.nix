@@ -44,13 +44,19 @@ lib.makeScope pkgs.newScope (self:
       mapAttrs
         (_ename: { packageRequires, ... }:
           let
-            explicitDeps = lib.subtractLists visibleBuiltinLibraries packageRequires;
+            explicitDeps = lib.subtractLists visibleBuiltinLibraries
+              (lib.packageRequiresToLibraryNames packageRequires);
           in
           lib.unique
             (explicitDeps
               ++ concatLists (lib.attrVals explicitDeps self)))
         packageInputs);
-  in
+
+    versionStatus = import ./version-status.nix {
+      emacsVersion = emacs.version;
+      inherit lib builtinLibraries;
+    };
+in
   {
     inherit lib emacs;
 
@@ -62,6 +68,8 @@ lib.makeScope pkgs.newScope (self:
     packageInputs = lib.pipe packageInputs [
       (mapAttrs (_: lib.filterAttrs (_: v: ! isFunction v)))
     ];
+
+    versions = versionStatus packageInputs;
 
     # You cannot use callPackageWith because it will apply makeOverridable
     # which will add extra attributes, e.g. overrideDerivation, to the result.

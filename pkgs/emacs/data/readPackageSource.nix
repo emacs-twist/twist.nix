@@ -144,18 +144,9 @@ filesInfo
   inherit mainFile headers;
   packageRequires =
     if packageDesc ? packageRequires
-    then
-      lib.pipe packageDesc.packageRequires [
-        attrNames
-        (filter (name: name != "emacs"))
-      ]
+    then packageDesc.packageRequires
     else if self.headers ? Package-Requires
-    then
-      lib.pipe self.headers.Package-Requires [
-        lib.parsePackageRequireLines
-        attrNames
-        (filter (name: name != "emacs"))
-      ]
-    else [ ];
+    then lib.parsePackageRequireLines self.headers.Package-Requires
+    else { };
   inventory = lib.getAttrs [ "type" "entry" "path" ] prescription;
 }
