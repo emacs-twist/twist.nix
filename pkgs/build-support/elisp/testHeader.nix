@@ -9,7 +9,7 @@ pkgs.lib.runTests {
   testBasic = {
     expr = parseElispHeaders (readFile ./testdata/header-basic.el);
     expected = {
-      description = "A basic configuration framework for org mode";
+      summary = "A basic configuration framework for org mode";
       Author = "Akira Komamura <akira.komamura@gmail.com>";
       Version = "0.2.9";
       Package-Requires = "((emacs \"25.1\") (dash \"2.18\"))";
@@ -20,7 +20,7 @@ pkgs.lib.runTests {
   testLicense = {
     expr = parseElispHeaders (readFile ./testdata/header-license.el);
     expected = {
-      description = "A basic configuration framework for org mode";
+      summary = "A basic configuration framework for org mode";
       Author = "Akira Komamura <akira.komamura@gmail.com>";
       SPDX-License-Identifier = "GPL-3.0-or-later";
     };
@@ -37,7 +37,7 @@ pkgs.lib.runTests {
   testMultiLine = {
     expr = parseElispHeaders (readFile ./testdata/header-multi-line.el);
     expected = {
-      description = "A basic configuration framework for org mode";
+      summary = "A basic configuration framework for org mode";
       Version = "0.2.9";
       Package-Requires = "((emacs \"25.1\") (dash \"2.18\"))";
       Author = [
@@ -55,7 +55,7 @@ pkgs.lib.runTests {
   testNoLexical = {
     expr = parseElispHeaders (readFile ./testdata/header-no-lexical.el);
     expected = {
-      description = "A basic configuration framework for org mode";
+      summary = "A basic configuration framework for org mode";
       Author = "Akira Komamura <akira.komamura@gmail.com>";
     };
   };
@@ -63,7 +63,7 @@ pkgs.lib.runTests {
   testAsteriskDesc = {
     expr = parseElispHeaders (readFile ./testdata/header-asterisk-desc.el);
     expected = {
-      description = "A library that contains *asterisk* in its description";
+      summary = "A library that contains *asterisk* in its description";
       Author = "Akira Komamura <akira.komamura@gmail.com>";
     };
   };
