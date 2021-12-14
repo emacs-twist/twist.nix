@@ -1,16 +1,18 @@
 { lib
 , lockFile
-, elispPackages
+, packageInputs
 }:
 let
   inherit (builtins) intersectAttrs mapAttrs hasAttr throw;
 
+  # It would be possible to generate an entirely new lock file, but I prefer not
+  # duplicating the boilerplate into my code.
   prev = lib.importJSON lockFile;
 
-  newNodeAttrs = package: value:
+  newNodeAttrs = attrs: value:
     rec {
-      original = package.passthru.elispAttrs.origin;
-      locked = original // intersectAttrs value.locked package.src;
+      original = attrs.origin;
+      locked = original // intersectAttrs value.locked attrs.src;
     };
 
   version7 =
@@ -19,8 +21,8 @@ let
     {
       nodes = mapAttrs
         (ename: value:
-          if hasAttr ename elispPackages
-          then value // newNodeAttrs elispPackages.${ename} value
+          if hasAttr ename packageInputs
+          then value // newNodeAttrs packageInputs.${ename} value
           else value)
         prev.nodes;
     };

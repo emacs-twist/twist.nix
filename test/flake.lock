@@ -16,18 +16,19 @@
         "type": "github"
       }
     },
-    "emacs-unstable": {
+    "emacs-ci": {
+      "flake": false,
       "locked": {
-        "lastModified": 1638293342,
-        "narHash": "sha256-h76u8CEgoVtnljI+q+HvuVEg1iSXAgg2JKyLt0uwRTE=",
-        "owner": "nix-community",
-        "repo": "emacs-overlay",
-        "rev": "6961edfe6be910db4f7cf5decfafcb29c89201e2",
+        "lastModified": 1637854310,
+        "narHash": "sha256-oYwxv+rb5fkxraAle2OMTO6dfIh7yvT3XwXK8IFYUvM=",
+        "owner": "purcell",
+        "repo": "nix-emacs-ci",
+        "rev": "6ac997af7076d654521870c3a3caabdcc5c37399",
         "type": "github"
       },
       "original": {
-        "owner": "nix-community",
-        "repo": "emacs-overlay",
+        "owner": "purcell",
+        "repo": "nix-emacs-ci",
         "type": "github"
       }
     },
@@ -132,6 +133,23 @@
         "type": "github"
       }
     },
+    "nongnu-elpa": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1639091328,
+        "narHash": "sha256-uh54KdWZY9HtKpEnG/l4xE2KLyVweNawaUSDhjpaLCE=",
+        "ref": "main",
+        "rev": "c53b33e192b2de913638d0c0671ad7bd1a2eb48f",
+        "revCount": 100,
+        "type": "git",
+        "url": "https://git.savannah.gnu.org/git/emacs/nongnu.git"
+      },
+      "original": {
+        "ref": "main",
+        "type": "git",
+        "url": "https://git.savannah.gnu.org/git/emacs/nongnu.git"
+      }
+    },
     "pre-commit-hooks": {
       "inputs": {
         "flake-utils": [
@@ -159,11 +177,12 @@
     },
     "root": {
       "inputs": {
-        "emacs-unstable": "emacs-unstable",
+        "emacs-ci": "emacs-ci",
         "flake-utils": "flake-utils",
         "gnu-elpa": "gnu-elpa",
         "melpa": "melpa",
         "nixpkgs": "nixpkgs",
+        "nongnu-elpa": "nongnu-elpa",
         "twist": "twist"
       }
     },

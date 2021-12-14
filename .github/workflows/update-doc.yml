@@ -1,0 +1,38 @@
+name: Convert the document
+
+on:
+  pull_request:
+    paths:
+      - 'doc/*.org'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2.4.0
+    - uses: cachix/install-nix-action@v16
+      with:
+        install_url: https://nixos-nix-install-tests.cachix.org/serve/vij683ly7sl95nnhb67bdjjfabclr85m/install
+        install_options: '--tarball-url-prefix https://nixos-nix-install-tests.cachix.org/serve'
+
+    - uses: cachix/cachix-action@v10
+      with:
+        name: akirak
+        signingKey: '${{ secrets.CACHIX_SIGNING_KEY }}'
+        extraPullNames: emacs-ci
+        pushFilter: '(-source$|nixpkgs\.tar\.gz$|-generate-info$)'
+
+    - run: nix run .#generate-info
+      working-directory: doc
+
+    - run: git diff-tree --exit-code HEAD doc
+      id: diff
+      continue-on-error: true
+
+    - name: Commit the new data
+      if: ${{ steps.diff.outcome == 'failure' }}
+      run: |
+        git config --local user.email 6270544+github-actions[bot]@users.noreply.github.com
+        git config --local user.name github-actions[bot]
+        git commit -a -m 'Re-generate extra documentation formats' doc
+        git push

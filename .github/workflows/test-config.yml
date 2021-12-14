@@ -1,0 +1,83 @@
+name: Smoke testing
+
+on:
+  pull_request:
+    paths:
+      - 'pkgs/**'
+      - 'test/**'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2.4.0
+    - uses: cachix/install-nix-action@v16
+      with:
+        install_url: https://nixos-nix-install-tests.cachix.org/serve/vij683ly7sl95nnhb67bdjjfabclr85m/install
+        install_options: '--tarball-url-prefix https://nixos-nix-install-tests.cachix.org/serve'
+
+    - uses: cachix/cachix-action@v10
+      with:
+        name: akirak
+        signingKey: '${{ secrets.CACHIX_SIGNING_KEY }}'
+        extraPullNames: emacs-ci
+        skipPush: true
+
+    - name: Use the local repository as the input
+      run: nix flake lock --override-input twist $PWD/..
+      working-directory: test
+
+    - name: Check the precondition
+      working-directory: test
+      run: |
+        [[ ! -f repos/flake.nix ]]
+        [[ ! -f repos/flake.lock ]]
+
+    - name: Build the configuration without a lock file (which should fail)
+      id: no-lock
+      working-directory: test
+      run: nix build
+      continue-on-error: true
+
+    - name: Pure evaluation without the lock file must fail
+      if: ${{ steps.no-lock.outcome == 'success' }}
+      run: exit 1
+
+    - name: Generate the lock file
+      working-directory: test
+      run: nix run .#lock
+
+    - name: The lock file exists
+      working-directory: test
+      run: |
+        [[ -s repos/flake.nix ]]
+        [[ -s repos/flake.lock ]]
+        ! git diff-index --exit-code --cached HEAD repos/flake.lock
+
+    - name: Build the configuration with the generated lock file
+      working-directory: test
+      run: nix build
+
+    - name: Get the system
+      id: system
+      run: |
+        system=$(nix eval --impure --expr builtins.currentSystem)
+        echo "::set-output name=emacs::packages.$system.emacs"
+
+    - run: |
+        nix eval --json .#.${{ steps.system.outputs.emacs }}.initFiles \
+        | jq
+      working-directory: test
+
+    - run: |
+        nix eval --json .#.${{ steps.system.outputs.emacs }}.packageInputs \
+        | jq
+      working-directory: test
+
+    - run: |
+        nix eval --json .#.${{ steps.system.outputs.emacs }}.elispPackages.magit \
+        | jq
+      working-directory: test
+
+    - run: nix run .#sync
+      working-directory: test

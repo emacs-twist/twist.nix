@@ -18,15 +18,28 @@
     url = "git+https://git.savannah.gnu.org/git/emacs/elpa.git?ref=main";
     flake = false;
   };
-
-  inputs.emacs-unstable = {
-    url = "github:nix-community/emacs-overlay";
+  inputs.nongnu-elpa = {
+    url = "git+https://git.savannah.gnu.org/git/emacs/nongnu.git?ref=main";
+    flake = false;
   };
+
+  inputs.emacs-ci = {
+    url = "github:purcell/nix-emacs-ci";
+    flake = false;
+  };
+
+  # You could use one of the Emacs builds from emacs-overlay,
+  # but I wouldn't use it on CI.
+  #
+  # inputs.emacs-unstable = {
+  #   url = "github:nix-community/emacs-overlay";
+  # };
 
   outputs =
     { flake-utils
     , nixpkgs
-    , emacs-unstable
+    , emacs-ci
+    # , emacs-unstable
     , ...
     } @ inputs:
     flake-utils.lib.eachDefaultSystem (system:
@@ -36,7 +49,8 @@
       pkgs = import nixpkgs {
         inherit system;
         overlays = [
-          emacs-unstable.overlay
+          (import (emacs-ci.outPath + "/overlay.nix"))
+          # emacs-unstable.overlay
           inputs.twist.overlay
         ];
       };
@@ -44,7 +58,10 @@
       inherit (pkgs) lib;
 
       emacs = (pkgs.emacsTwist {
-        emacs = pkgs.emacsPgtkGcc.overrideAttrs (_: { version = "29.0.50"; });
+        # Use nix-emacs-ci which is more lightweight than a regular build
+        emacs = pkgs.emacs-snapshot;
+        # In an actual configuration, you would use this:
+        # emacs = pkgs.emacsPgtkGcc.overrideAttrs (_: { version = "29.0.50"; });
         initFiles = [
           ./init.el
         ];
@@ -53,6 +70,10 @@
           {
             type = "elpa";
             path = inputs.gnu-elpa.outPath + "/elpa-packages";
+          }
+          {
+            type = "elpa";
+            path = inputs.nongnu-elpa.outPath + "/elpa-packages";
           }
           {
             type = "melpa";
@@ -80,6 +101,7 @@
       packages = {
         inherit emacs;
       };
+      defaultPackage = emacs;
 
       apps.lock = flake-utils.lib.mkApp {
         drv = pkgs.writeShellApplication {
@@ -94,7 +116,7 @@
               git add repos/flake.nix
             fi
 
-            nix eval --impure .#packages.${system}.emacs.flakeNix \
+            nix eval --impure .#packages.${system}.emacs.flakeNix "$@" \
               | nixfmt \
               | sed -e 's/<LAMBDA>/{ ... }: { }/' \
               > repos/flake.nix
@@ -116,7 +138,7 @@
               rm -f "$tmp"
             }
             trap cleanup EXIT ERR
-            nix eval --json --impure .#packages.${system}.emacs.flakeLock \
+            nix eval --json --impure .#packages.${system}.emacs.flakeLock "$@" \
               | jq \
               > "$tmp"
             cp "$tmp" repos/flake.lock

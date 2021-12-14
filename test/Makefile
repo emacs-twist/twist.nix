@@ -1,15 +1,30 @@
-SYSTEM = $(shell nix eval --raw --impure --expr builtins.currentSystem)
+SYSTEM := $(shell nix eval --raw --impure --expr builtins.currentSystem)
 NIX := nix
 NIX_OPTIONS := --override-input twist path:$(PWD)/..
+NIX_EVAL = $(NIX) eval .#packages.$(SYSTEM).emacs.$(NIX_ATTR)
 
 build:
-	$(NIX) build .#emacs $(NIX_OPTIONS) --update-input twist $(ARGS)
+	$(NIX) build .#emacs $(NIX_OPTIONS) $(ARGS)
 .PHONY: build
 
 lock:
-	$(NIX) eval .#packages.$(SYSTEM).emacs.flakeNix $(NIX_OPTIONS) --impure >/dev/null
+	$(NIX) run .#lock -- $(NIX_OPTIONS)
 .PHONY: lock
 
 sync:
-	$(NIX) eval .#packages.$(SYSTEM).emacs.flakeLock $(NIX_OPTIONS) --json --impure >/dev/null
+	$(NIX) run .#sync -- $(NIX_OPTIONS)
 .PHONY: sync
+
+remove-lock:
+	rm -f repos/flake.nix repos/flake.lock
+.PHONY: remove-lock
+
+eval:
+	$(NIX_EVAL) $(NIX_OPTIONS) $(ARGS)
+.PHONY: eval
+
+eval-checks:
+	$(MAKE) eval NIX_ATTR=initFiles ARGS="--json"
+	$(MAKE) eval NIX_ATTR=packageInputs ARGS="--json"
+	$(MAKE) eval NIX_ATTR=elispPackages.magit ARGS="--json"
+.PHONY: eval-checks
