@@ -116,7 +116,7 @@
               git add repos/flake.nix
             fi
 
-            nix eval --impure .#packages.${system}.emacs.flakeNix \
+            nix eval --impure .#packages.${system}.emacs.flakeNix "$@" \
               | nixfmt \
               | sed -e 's/<LAMBDA>/{ ... }: { }/' \
               > repos/flake.nix
@@ -138,7 +138,7 @@
               rm -f "$tmp"
             }
             trap cleanup EXIT ERR
-            nix eval --json --impure .#packages.${system}.emacs.flakeLock \
+            nix eval --json --impure .#packages.${system}.emacs.flakeLock "$@" \
               | jq \
               > "$tmp"
             cp "$tmp" repos/flake.lock
