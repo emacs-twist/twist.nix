@@ -23,6 +23,10 @@ jobs:
         extraPullNames: emacs-ci
         skipPush: true
 
+    - name: Use the local repository as the input
+      run: nix flake lock --override-input twist $PWD/..
+      working-directory: test
+
     - name: Check the precondition
       working-directory: test
       run: |
