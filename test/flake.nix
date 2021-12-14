@@ -18,6 +18,10 @@
     url = "git+https://git.savannah.gnu.org/git/emacs/elpa.git?ref=main";
     flake = false;
   };
+  inputs.nongnu-elpa = {
+    url = "git+https://git.savannah.gnu.org/git/emacs/nongnu.git?ref=main";
+    flake = false;
+  };
 
   inputs.emacs-unstable = {
     url = "github:nix-community/emacs-overlay";
@@ -53,6 +57,10 @@
           {
             type = "elpa";
             path = inputs.gnu-elpa.outPath + "/elpa-packages";
+          }
+          {
+            type = "elpa";
+            path = inputs.nongnu-elpa.outPath + "/elpa-packages";
           }
           {
             type = "melpa";
