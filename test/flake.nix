@@ -101,6 +101,7 @@
       packages = {
         inherit emacs;
       };
+      defaultPackage = emacs;
 
       apps.lock = flake-utils.lib.mkApp {
         drv = pkgs.writeShellApplication {
