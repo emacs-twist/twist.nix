@@ -43,7 +43,7 @@ let
     (filter ({ entry, ... }: entry != null))
     (results:
       if length results == 0
-      then "No prescription found for ${ename}"
+      then throw "No prescription found for ${ename}"
       else head results)
   ];
 
