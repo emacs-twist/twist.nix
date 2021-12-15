@@ -12,7 +12,7 @@
 }:
 let
   inherit (builtins) readFile attrNames attrValues concatLists isFunction
-    split filter isString mapAttrs;
+    split filter isString mapAttrs match isList;
 in
 lib.makeScope pkgs.newScope (self:
   let

@@ -32,6 +32,22 @@
         "type": "github"
       }
     },
+    "epkgs": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1639408662,
+        "narHash": "sha256-W0hMJdMzBKh7JdAeHy/b7+uZiZILOOOB2d6/dOVsgc0=",
+        "owner": "emacsmirror",
+        "repo": "epkgs",
+        "rev": "7d712dad42f2be943c2d1671ed1d1144c7642c7e",
+        "type": "github"
+      },
+      "original": {
+        "owner": "emacsmirror",
+        "repo": "epkgs",
+        "type": "github"
+      }
+    },
     "flake-utils": {
       "locked": {
         "lastModified": 1637014545,
@@ -178,6 +194,7 @@
     "root": {
       "inputs": {
         "emacs-ci": "emacs-ci",
+        "epkgs": "epkgs",
         "flake-utils": "flake-utils",
         "gnu-elpa": "gnu-elpa",
         "melpa": "melpa",

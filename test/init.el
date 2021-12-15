@@ -8,3 +8,7 @@
 
 (use-package ivy
   :ensure t)
+
+;; Archived in emacsattic, which means it is only available from emacsmirror
+(use-package undo-browse
+  :ensure t)

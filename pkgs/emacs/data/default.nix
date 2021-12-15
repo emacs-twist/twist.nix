@@ -21,6 +21,10 @@ let
         (_: args: args ? core || args.url != null)
         (lib.parseElpaPackages (readFile path));
     }
+    else if type == "gitmodules"
+    then {
+      data = lib.readGitModulesFile path;
+    }
     else throw "Unsupported inventory type: ${type}");
 
   inventories = map makeInventory inventorySpecs;
@@ -37,6 +41,8 @@ let
           if type == "melpa"
           then readMelpaRecipeMaybe (i.path + "/${ename}")
           else if type == "elpa"
+          then i.data.${ename} or null
+          else if type == "gitmodules"
           then i.data.${ename} or null
           else throw "FIXME";
       })))

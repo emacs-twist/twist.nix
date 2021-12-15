@@ -22,6 +22,10 @@
     url = "git+https://git.savannah.gnu.org/git/emacs/nongnu.git?ref=main";
     flake = false;
   };
+  inputs.epkgs = {
+    url = "github:emacsmirror/epkgs";
+    flake = false;
+  };
 
   inputs.emacs-ci = {
     url = "github:purcell/nix-emacs-ci";
@@ -78,6 +82,10 @@
           {
             type = "melpa";
             path = inputs.melpa.outPath + "/recipes";
+          }
+          {
+            type = "gitmodules";
+            path = inputs.epkgs.outPath + "/.gitmodules";
           }
         ];
         inputOverrides = {

@@ -2,8 +2,7 @@ inputs:
 pkgs:
 let
   lib = import ./build-support {
-    inherit inputs;
-    inherit (pkgs) lib;
+    inherit inputs pkgs;
   };
 in
 {

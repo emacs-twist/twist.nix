@@ -1,8 +1,11 @@
-{ lib
+{ pkgs
 , inputs
 }:
 let
-  inherit (builtins) head attrNames attrValues filter replaceStrings isList length;
+  inherit (builtins) head attrNames attrValues filter replaceStrings isList length
+    listToAttrs split match elemAt isString readFile;
+
+  inherit (pkgs) lib;
 
   fromElisp = import inputs.fromElisp {
     pkgs = { inherit lib; };
@@ -13,6 +16,21 @@ let
   };
 
   packReqEntriesToAttrs = import ./elisp/packReqEntriesToAttrs.nix { inherit lib; };
+
+  gitUrlToAttrs = import ./gitUrlToAttrs.nix;
+
+  parseSubmoduleConfigEntries = s: lib.pipe s [
+    (split "\n")
+    (filter isString)
+    # Exclude entries starting with _
+    (map (match "submodule.([^_][^.]+).url=(.+)"))
+    (filter isList)
+    (map (x: ({
+      name = elemAt x 0;
+      value = gitUrlToAttrs (elemAt x 1);
+    })))
+    listToAttrs
+  ];
 in
 lib
   //
@@ -55,6 +73,12 @@ lib
     attrNames
     (filter (name: name != "emacs"))
   ];
+
+  readGitModulesFile = file: parseSubmoduleConfigEntries
+    (readFile (pkgs.callPackage ({ git, runCommandLocal }:
+      runCommandLocal "gitmodules-output" { } ''
+        ${git}/bin/git --no-pager config --list -f ${file} > $out
+      '') { }));
 
   # Just a shorthand for overriding a nested attribute.
   # I am looking for a better syntax for overriding multiple packages.
