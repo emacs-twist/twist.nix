@@ -21,7 +21,7 @@ let
       then
         echo "warn: Byte-compile is skipped."
       else
-        echo "To allow this error, set allowErrors.allowSkipCompiling to true."
+        echo "To allow this error, set allowSkipCompiling to true."
         exit 1
       fi
     fi
