@@ -13,7 +13,7 @@ let
   # Regular expression patterns
   descriptionRegex = ";;;.+ --- (.+?)";
   magicHeaderRegex = "(.+)-\\*-.+-\\*-[[:space:]]*";
-  headerRegex = ";;[[:space:]]*([-[:alpha:]]+):([[:space:]]+.+)?";
+  headerRegex = ";;[[:space:]]*([-[:alpha:]]+):([[:space:]]*.*)?";
 
   headLine = head lines;
 

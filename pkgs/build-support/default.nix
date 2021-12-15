@@ -2,7 +2,7 @@
 , inputs
 }:
 let
-  inherit (builtins) head attrNames attrValues filter replaceStrings isList;
+  inherit (builtins) head attrNames attrValues filter replaceStrings isList length;
 
   fromElisp = import inputs.fromElisp {
     pkgs = { inherit lib; };
@@ -39,9 +39,11 @@ lib
   parseElispHeaders = import ./elisp/parseElispHeaders.nix { inherit lib; };
 
   parsePackageRequireLines = lines:
-    lib.pipe (if isList lines then lib.concatStringsSep " " lines else lines) [
+    if lines == null
+    then {}
+    else lib.pipe (if isList lines then lib.concatStringsSep " " lines else lines) [
       fromElisp.fromElisp
-      head
+      (xs: if length xs == 0 then [] else head xs)
       packReqEntriesToAttrs
     ];
 
