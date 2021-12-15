@@ -18,10 +18,6 @@
     url = "github:talyz/fromElisp";
     flake = false;
   };
-  inputs.gitignore = {
-    url = "github:hercules-ci/gitignore.nix";
-    inputs.nixpkgs.follows = "nixpkgs";
-  };
 
   outputs =
     { self

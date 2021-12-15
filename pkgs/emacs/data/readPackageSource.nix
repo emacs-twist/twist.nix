@@ -8,8 +8,6 @@ in
 , lockFile
 }:
 let
-  inherit (lib) gitignoreSource;
-
   elpaLispFiles = attrs: src:
     let
       lispDir =
