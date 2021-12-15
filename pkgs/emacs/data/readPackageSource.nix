@@ -114,7 +114,14 @@ let
     then head elispFiles
     else throw "Package ${ename} contains no *.el file. See ${self.sourceDir}";
 
-  headers = lib.parseElispHeaders (readFile (self.src + "/${self.mainFile}"));
+  # builtins.readFile fails when the source file contains control characters.
+  # pydoc.el is an example. A workaround is to take only the first N bytes of
+  # the file using `head` command and read its output.
+  headers = lib.parseElispHeaders
+    (lib.readFirstBytes
+      # magit.el has a relatively long header, so other libraries would be shorter.
+      (self.headerLengthLimit or 1500)
+      (self.src + "/${self.mainFile}"));
 
   metaFromHeaders = import ./meta.nix {
     inherit lib headers;

@@ -80,6 +80,12 @@ lib
         ${git}/bin/git --no-pager config --list -f ${file} > $out
       '') { }));
 
+  readFirstBytes = limit: file:
+    readFile (pkgs.callPackage ({ runCommandLocal }:
+      runCommandLocal "main-file" { } ''
+        head -c ${toString limit} ${file} > $out
+      '') { });
+
   # Just a shorthand for overriding a nested attribute.
   # I am looking for a better syntax for overriding multiple packages.
   # I would want a kind of recursive updating with recursion limit.
