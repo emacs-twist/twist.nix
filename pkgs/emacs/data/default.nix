@@ -62,7 +62,7 @@ let
       let
         ename = head enames;
         prescription = findPrescription ename;
-        data = lib.makeExtensible (import ./readPackageSource.nix
+        data = lib.makeExtensible (import ./package.nix
           {
             inherit lib emacs lockFile;
           }
