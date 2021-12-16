@@ -53,6 +53,9 @@ let
       else head results)
   ];
 
+  # This recursion produces a deep stack trace. The more packages you have, the
+  # more traces it will produce. I want to avoid it, but I don't know how,
+  # because Nix doesn't support mutable data structures.
   accumPackage = acc: enames:
     if length enames == 0
     then acc
