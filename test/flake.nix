@@ -89,16 +89,19 @@
           }
         ];
         inputOverrides = {
-          ivy = _: ivy: {
-            # You can filter package files.
-            files = lib.pipe ivy.files [
-              (filter (name: match "ivy.+" name != null || name == "colir.el"))
-              (filter (name: ! elem name [
-                "ivy-test.el"
-                "ivy-avy.el"
-                "ivy-hydra.el"
-              ]))
-            ];
+          ivy = _: _: {
+            inventory = null;
+            origin = {
+              type = "tarball";
+              url = "https://elpa.gnu.org/packages/ivy-0.13.4.tar";
+            };
+          };
+          bbdb = _: _: {
+            inventory = null;
+            origin = {
+              type = "tarball";
+              url = "https://elpa.gnu.org/packages/bbdb-3.2.tar";
+            };
           };
         };
       });

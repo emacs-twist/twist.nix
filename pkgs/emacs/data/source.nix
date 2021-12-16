@@ -17,7 +17,9 @@ self:
     then fetchTree lockData.${ename}
     else fetchTree self.origin;
   files =
-    if type == "elpa"
+    if self.inventory == null
+    then lib.expandMelpaRecipeFiles self.src null
+    else if type == "elpa"
     then elpaFiles entry self.src
     else if type == "melpa"
     then lib.expandMelpaRecipeFiles self.src (entry.files or null)

@@ -12,3 +12,6 @@
 ;; Archived in emacsattic, which means it is only available from emacsmirror
 (use-package undo-browse
   :ensure t)
+
+(use-package bbdb
+  :ensure t)
