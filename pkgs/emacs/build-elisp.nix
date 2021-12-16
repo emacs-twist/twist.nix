@@ -63,8 +63,12 @@ let
     for d in $(find -name '*.texi' -o -name '*.texinfo')
     do
       local basename=$(basename $d)
-      cd $src/$(dirname $d)
-      makeinfo --no-split "$basename" -o $cwd/''${basename%%.*}.info
+      local i=$cwd/''${basename%%.*}.info
+      if [[ ! -e "$i" ]]
+      then
+        cd $src/$(dirname $d)
+        makeinfo --no-split "$basename" -o "$i"
+      fi
     done
     cd $cwd
   '';
