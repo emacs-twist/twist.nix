@@ -31,7 +31,7 @@ let
     then
       cat > ${ename}-pkg.el <<PKG
       (define-package "${ename}" "${version}"
-        "${meta.description or ""}"
+        ""
         '(${
           # It may be necessary to include the version actually specified in the
           # header, but it won't matter anyway.
