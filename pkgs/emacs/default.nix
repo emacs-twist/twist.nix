@@ -19,7 +19,15 @@ lib.makeScope pkgs.newScope (self:
     userConfig = lib.pipe self.initFiles [
       (map (file: lib.parseUsePackages (readFile file)))
       lib.zipAttrs
-      (lib.mapAttrs (_: concatLists))
+      (lib.mapAttrs (name: values:
+        if name == "elispPackages"
+        then concatLists values
+        else if name == "elispPackagePins"
+        then lib.foldl' (acc: x: acc // x) { } values
+        else if name == "systemPackages"
+        then concatLists values
+        else throw "${name} is an unknown attribute"
+      ))
     ];
 
     explicitPackages = userConfig.elispPackages ++ extraPackages;
@@ -34,6 +42,7 @@ lib.makeScope pkgs.newScope (self:
     enumerateConcretePackageSet = import ./data {
       inherit lib emacs lockFile
         builtinLibraries inventorySpecs inputOverrides;
+      inherit (userConfig) elispPackagePins;
     };
 
     packageInputs = enumerateConcretePackageSet explicitPackages;
