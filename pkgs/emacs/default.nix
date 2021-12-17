@@ -100,7 +100,7 @@ in
     inherit (self.emacsWrapper) name type outputName outPath drvPath;
 
     flakeNix = {
-      description = "This is an auto-generated file. Please don't edit it manually.";
+      description = "THIS IS AN AUTO-GENERATED FILE. PLEASE DON'T EDIT IT MANUALLY.";
       inputs =
         lib.mapAttrs
           (_: { origin, ... }: origin // { flake = false; })
