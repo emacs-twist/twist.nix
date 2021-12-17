@@ -15,6 +15,10 @@ sync:
 	$(NIX) run .#sync -- $(NIX_OPTIONS)
 .PHONY: sync
 
+update:
+	$(NIX) run .#update -- $(NIX_OPTIONS)
+.PHONY: update
+
 remove-lock:
 	rm -f repos/flake.nix repos/flake.lock
 .PHONY: remove-lock

@@ -26,6 +26,10 @@ let
     then {
       data = lib.readGitModulesFile path;
     }
+    else if type == "archive-data"
+    then {
+      data = lib.importJSON path;
+    }
     else throw "Unsupported inventory type: ${type}");
 
   inventories = map makeInventory inventorySpecs;
@@ -51,6 +55,8 @@ let
         then i.data.${ename} or null
         else if type == "gitmodules"
         then i.data.${ename} or null
+        else if type == "archive-data"
+        then i.data.tarballs.${ename} or null
         else throw "FIXME";
     };
 

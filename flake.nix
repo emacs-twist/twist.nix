@@ -27,6 +27,12 @@
     , ...
     } @ inputs:
     ({
+      lib = import ./lib {
+        inherit (nixpkgs) lib;
+        fromElisp = import inputs.fromElisp {
+          pkgs = { inherit (nixpkgs) lib; };
+        };
+      };
       overlay = _self: import ./pkgs inputs;
     }
     //

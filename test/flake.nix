@@ -46,6 +46,11 @@
     # , emacs-unstable
     , ...
     } @ inputs:
+    {
+      data.elpa = inputs.twist.lib.readArchiveContents
+        "https://elpa.gnu.org/packages/";
+    }
+    //
     flake-utils.lib.eachDefaultSystem (system:
     let
       inherit (builtins) filter match elem;
@@ -72,6 +77,10 @@
         lockFile = ./repos/flake.lock;
         inventorySpecs = [
           {
+            type = "archive-data";
+            path = ./repos/elpa-archives.json;
+          }
+          {
             type = "elpa";
             path = inputs.gnu-elpa.outPath + "/elpa-packages";
           }
@@ -96,13 +105,6 @@
               url = "https://elpa.gnu.org/packages/ivy-0.13.4.tar";
             };
           };
-          bbdb = _: _: {
-            inventory = null;
-            origin = {
-              type = "tarball";
-              url = "https://elpa.gnu.org/packages/bbdb-3.2.tar";
-            };
-          };
         };
       });
 
@@ -113,6 +115,16 @@
         inherit emacs;
       };
       defaultPackage = emacs;
+
+      apps.update = flake-utils.lib.mkApp {
+        drv = pkgs.writeShellScriptBin "update" ''
+          touch repos/elpa-archives.json
+          git add repos/elpa-archives.json
+          nix eval --json --impure .#data.elpa "$@" \
+            | jq \
+            > repos/elpa-archives.json
+        '';
+      };
 
       apps.lock = flake-utils.lib.mkApp {
         drv = pkgs.writeShellApplication {

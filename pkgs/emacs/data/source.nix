@@ -25,7 +25,7 @@ self:
     then lib.expandMelpaRecipeFiles self.src (entry.files or null)
     # Use the default files spec of MELPA.
     # I don't know if this is correct
-    else if type == "gitmodules"
+    else if type == "gitmodules" || type == "archive-data"
     then lib.expandMelpaRecipeFiles self.src null
     else throw "FIXME";
   origin =
@@ -34,6 +34,8 @@ self:
     else if type == "melpa"
     then lib.flakeRefAttrsFromMelpaRecipe entry
     else if type == "gitmodules"
+    then entry
+    else if type == "archive-data"
     then entry
     else throw "Unsupported type: ${type}";
 }
