@@ -78,6 +78,10 @@ jobs:
       if: ${{ steps.no-lock.outcome == 'success' }}
       run: exit 1
 
+    - name: Fetch the latest package archive contents
+      working-directory: test
+      run: nix run .#update
+
     - name: Generate the lock file
       working-directory: test
       run: nix run .#lock
