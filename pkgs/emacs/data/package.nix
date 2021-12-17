@@ -1,6 +1,6 @@
 let
   inherit (builtins) pathExists fetchTree replaceStrings map readDir hasAttr
-    readFile attrNames filter all match isString isList typeOf length head;
+    readFile attrNames filter all match isString isList typeOf length head toJSON;
 in
 { lib
 , emacs
@@ -37,7 +37,12 @@ let
     then head mainFiles
     else if length elispFiles > 0
     then head elispFiles
-    else throw "Package ${ename} contains no *.el file. See ${self.sourceDir}";
+    else throw ''
+           Package ${ename} contains no *.el file.
+           Check the contents in the store: ${self.src}
+           Files: ${toJSON self.files}
+           Entry: ${toJSON entry}
+         '';
 
   # builtins.readFile fails when the source file contains control characters.
   # pydoc.el is an example. A workaround is to take only the first N bytes of
