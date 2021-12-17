@@ -1,6 +1,6 @@
 let
   inherit (builtins) length head tail hasAttr filter elem mapAttrs readFile
-    pathExists concatLists isFunction removeAttrs;
+    pathExists concatLists isFunction removeAttrs attrNames;
 in
 { lib
 , emacs
@@ -87,8 +87,9 @@ let
         (acc // { ${ename} = removeAttrs data' [ "extend" ]; })
         (enames
           ++
-          (filter
-            (ename: !elem ename builtinLibraries)
+          # Reduce the list as much as possible to keep the stack trace sane.
+          (lib.subtractLists
+            (builtinLibraries ++ attrNames acc ++ enames)
             (lib.packageRequiresToLibraryNames data'.packageRequires)));
 
 in
