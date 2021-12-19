@@ -26,6 +26,7 @@ let
         exit 1
       fi
     fi
+    rm -f "${ename}-autoloads.el"
     emacs --batch -l package --eval "(package-generate-autoloads '${ename} \".\")"
 
     if [[ ! -e "${ename}-pkg.el" ]]
