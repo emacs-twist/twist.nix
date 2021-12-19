@@ -1,4 +1,5 @@
 { lib
+, writeText
 , fromElisp
 }:
 prefixUrl:
@@ -33,4 +34,6 @@ lib.pipe (fetchurl (prefixUrl + "archive-contents")) [
   (filter (x: x != null))
   listToAttrs
   (lib.setAttrByPath ["tarballs"])
+  toJSON
+  (writeText "archive.json")
 ]

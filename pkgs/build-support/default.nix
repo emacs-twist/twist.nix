@@ -88,4 +88,8 @@ lib
   # I am looking for a better syntax for overriding multiple packages.
   # I would want a kind of recursive updating with recursion limit.
   # overrideAttrsByPath = import ./overrideAttrsByPath.nix { inherit lib; };
+
+  emacsPackageArchiveJson = pkgs.callPackage ./elisp/packageArchiveJson.nix {
+    inherit fromElisp;
+  };
 }

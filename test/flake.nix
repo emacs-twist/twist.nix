@@ -46,11 +46,6 @@
     # , emacs-unstable
     , ...
     } @ inputs:
-    {
-      data.elpa = inputs.twist.lib.readArchiveContents
-        "https://elpa.gnu.org/packages/";
-    }
-    //
     flake-utils.lib.eachDefaultSystem (system:
     let
       inherit (builtins) filter match elem;
@@ -120,9 +115,7 @@
         drv = pkgs.writeShellScriptBin "update" ''
           touch repos/elpa-archives.json
           git add repos/elpa-archives.json
-          nix eval --json --impure .#data.elpa "$@" \
-            | jq \
-            > repos/elpa-archives.json
+          cp ${pkgs.emacsPackageArchiveJson "https://elpa.gnu.org/packages/"} gnu-elpa.json
         '';
       };
 
