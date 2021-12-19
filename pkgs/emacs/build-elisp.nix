@@ -15,6 +15,7 @@ let
   nativeComp = emacs.nativeComp or false;
 
   buildCmd = ''
+    ls
     if ! emacs --batch -L . -f batch-byte-compile *.el
     then
       if [[ "${lib.boolToString allowSkipCompiling}" = true ]]
