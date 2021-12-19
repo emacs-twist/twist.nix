@@ -71,6 +71,11 @@ then {
     else if isList entry.core
     then entry.core
     else throw "Invalid core value type: ${typeOf entry.core}";
+  origin = {
+    type = "github";
+    owner = "emacs-mirror";
+    repo = "emacs";
+  };
 } else
   nonCoreSourceInfo self {
     inherit ename type entry;
