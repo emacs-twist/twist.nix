@@ -18,6 +18,7 @@
     url = "github:talyz/fromElisp";
     flake = false;
   };
+  inputs.flake-no-path.url = "github:akirak/flake-no-path";
 
   outputs =
     { self
@@ -47,7 +48,16 @@
           hooks = {
             nixpkgs-fmt.enable = true;
             nix-linter.enable = true;
-          };
+            flake-no-path = {
+              enable = true;
+              name = "Ensure that flake.lock does not contain a local path";
+              entry = "${
+                inputs.flake-no-path.packages.${system}.flake-no-path
+              }/bin/flake-no-path";
+              files = "flake\.lock$";
+              pass_filenames = true;
+            };
+         };
         };
       };
       devShell = nixpkgs.legacyPackages.${system}.mkShell {
