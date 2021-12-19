@@ -6,7 +6,7 @@
     inputs.nixpkgs.follows = "nixpkgs";
   };
   inputs.pre-commit-hooks = {
-    url = "github:cachix/pre-commit-hooks.nix";
+    url = "github:cachix/pre-commit-hooks.nix/50cfce93606c020b9e69dce24f039b39c34a4c2d";
     inputs.nixpkgs.follows = "nixpkgs";
     inputs.flake-utils.follows = "flake-utils";
   };
