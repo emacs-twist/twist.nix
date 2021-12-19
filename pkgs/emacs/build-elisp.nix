@@ -8,7 +8,7 @@
 , nativeCompileAhead
 , elispInputs
 , ...
-}:
+} @ attrs:
 let
   inherit (builtins) concatStringsSep replaceStrings match elem;
 
@@ -96,7 +96,7 @@ let
     done
   '';
 in
-stdenv.mkDerivation rec {
+stdenv.mkDerivation (rec {
   inherit src ename meta version;
 
   pname = concatStringsSep "-" [
@@ -114,15 +114,6 @@ stdenv.mkDerivation rec {
 
   buildInputs = [ emacs texinfo ];
   # nativeBuildInputs = lib.optional nativeComp gcc;
-
-  # TODO: Handle :rename of ELPA packages
-  # See https://git.savannah.gnu.org/cgit/emacs/elpa.git/plain/README for details.
-  unpackPhase = ''
-    for file in ${lib.escapeShellArgs files}
-    do
-      cp -r $src/$file .
-    done
-  '';
 
   EMACSLOADPATH = lib.concatStrings
     (map (pkg: "${pkg.outPath}/share/emacs/site-lisp/elpa/${pkg.ename}-${pkg.version}:")
@@ -174,4 +165,13 @@ stdenv.mkDerivation rec {
 
     runHook postInstall
   '';
-}
+} // lib.optionalAttrs (attrs.customUnpackPhase or true) {
+  # TODO: Handle :rename of ELPA packages
+  # See https://git.savannah.gnu.org/cgit/emacs/elpa.git/plain/README for details.
+  unpackPhase = ''
+    for file in ${lib.escapeShellArgs files}
+    do
+      cp -r $src/$file .
+    done
+  '';
+})

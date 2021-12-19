@@ -16,8 +16,9 @@ self:
     if self.pure
     then fetchTree lockData.${ename}
     else fetchTree self.origin;
+  customUnpackPhase = !(self.inventory == null || type == "archive-data");
   files =
-    if self.inventory == null
+    if !self.customUnpackPhase
     then lib.expandMelpaRecipeFiles self.src null
     else if type == "elpa"
     then elpaFiles entry self.src
@@ -25,7 +26,7 @@ self:
     then lib.expandMelpaRecipeFiles self.src (entry.files or null)
     # Use the default files spec of MELPA.
     # I don't know if this is correct
-    else if type == "gitmodules" || type == "archive-data"
+    else if type == "gitmodules"
     then lib.expandMelpaRecipeFiles self.src null
     else throw "FIXME";
   origin =
