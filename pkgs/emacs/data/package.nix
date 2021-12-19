@@ -83,6 +83,7 @@ then {
   //
 {
   inherit ename;
+  inherit elispFiles;
   author = headers.Author or null;
   version =
     packageDesc.version

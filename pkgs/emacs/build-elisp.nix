@@ -3,6 +3,7 @@
 , src
 , version
 , files
+, elispFiles
 , meta
 , allowSkipCompiling ? false
 , nativeCompileAhead
@@ -16,7 +17,7 @@ let
 
   buildCmd = ''
     ls
-    if ! emacs --batch -L . -f batch-byte-compile *.el
+    if ! emacs --batch -L . -f batch-byte-compile ${lib.escapeShellArgs elispFiles}
     then
       if [[ "${lib.boolToString allowSkipCompiling}" = true ]]
       then
