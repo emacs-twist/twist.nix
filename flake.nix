@@ -57,7 +57,7 @@
               files = "flake\.lock$";
               pass_filenames = true;
             };
-         };
+          };
         };
       };
       devShell = nixpkgs.legacyPackages.${system}.mkShell {

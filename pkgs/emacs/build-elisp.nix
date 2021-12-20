@@ -3,21 +3,29 @@
 , src
 , version
 , files
-, elispFiles
+, lispFiles
 , meta
 , allowSkipCompiling ? false
 , nativeCompileAhead
 , elispInputs
 , ...
 } @ attrs:
+with builtins;
 let
-  inherit (builtins) concatStringsSep replaceStrings match elem;
-
   nativeComp = emacs.nativeComp or false;
+
+  regex = ".*/([^/]+)";
+
+  stringBaseName = file:
+    if match regex file != null
+    then head (match regex file)
+    else file;
 
   buildCmd = ''
     ls
-    if ! emacs --batch -L . -f batch-byte-compile ${lib.escapeShellArgs elispFiles}
+    if ! emacs --batch -L . -f batch-byte-compile ${
+      lib.escapeShellArgs (map stringBaseName lispFiles)
+    }
     then
       if [[ "${lib.boolToString allowSkipCompiling}" = true ]]
       then
@@ -110,8 +118,8 @@ stdenv.mkDerivation (rec {
 
   outputs =
     [ "out" ]
-    ++ lib.optional hasDocOutput "doc"
-    ++ lib.optional hasInfoOutput "info";
+      ++ lib.optional hasDocOutput "doc"
+      ++ lib.optional hasInfoOutput "info";
 
   buildInputs = [ emacs texinfo ];
   # nativeBuildInputs = lib.optional nativeComp gcc;

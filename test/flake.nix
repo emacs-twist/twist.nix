@@ -18,12 +18,13 @@
     url = "git+https://git.savannah.gnu.org/git/emacs/elpa.git?ref=main";
     flake = false;
   };
-  inputs.nongnu-elpa = {
-    url = "git+https://git.savannah.gnu.org/git/emacs/nongnu.git?ref=main";
-    flake = false;
-  };
   inputs.epkgs = {
     url = "github:emacsmirror/epkgs";
+    flake = false;
+  };
+
+  inputs.emacs = {
+    url = "github:emacs-mirror/emacs";
     flake = false;
   };
 
@@ -61,7 +62,7 @@
 
       inherit (pkgs) lib;
 
-      emacs = (pkgs.emacsTwist {
+      emacs = pkgs.emacsTwist {
         # Use nix-emacs-ci which is more lightweight than a regular build
         emacs = pkgs.emacs-snapshot;
         # In an actual configuration, you would use this:
@@ -69,39 +70,38 @@
         initFiles = [
           ./init.el
         ];
-        lockFile = ./repos/flake.lock;
-        inventorySpecs = [
+        flakeLockFile = ./repos/flake.lock;
+        archiveLockFile = ./repos/archive.lock;
+        inventories = [
           {
-            type = "archive-data";
-            path = ./repos/elpa-archives.json;
-          }
-          {
-            type = "elpa";
+            type = "elpa-core";
             path = inputs.gnu-elpa.outPath + "/elpa-packages";
+            src = inputs.emacs.outPath;
           }
           {
-            type = "elpa";
-            path = inputs.nongnu-elpa.outPath + "/elpa-packages";
-          }
-          {
+            name = "melpa";
             type = "melpa";
             path = inputs.melpa.outPath + "/recipes";
           }
           {
+            name = "gnu";
+            type = "archive";
+            url = "https://elpa.gnu.org/packages/";
+          }
+          # Duplicate attribute set for the locked packages, but would be no
+          # problem in functionality.
+          {
+            name = "nongnu";
+            type = "archive";
+            url = "https://elpa.nongnu.org/nongnu/";
+          }
+          {
+            name = "emacsmirror";
             type = "gitmodules";
             path = inputs.epkgs.outPath + "/.gitmodules";
           }
         ];
-        inputOverrides = {
-          ivy = _: _: {
-            inventory = null;
-            origin = {
-              type = "tarball";
-              url = "https://elpa.gnu.org/packages/ivy-0.13.4.tar";
-            };
-          };
-        };
-      });
+      };
 
       inherit (flake-utils.lib) mkApp;
     in
@@ -111,11 +111,23 @@
       };
       defaultPackage = emacs;
 
-      apps.update = flake-utils.lib.mkApp {
-        drv = pkgs.writeShellScriptBin "update" ''
-          touch repos/elpa-archives.json
-          git add repos/elpa-archives.json
-          cp ${pkgs.emacsPackageArchiveJson "https://elpa.gnu.org/packages/"} gnu-elpa.json
+      apps.update-elpa = flake-utils.lib.mkApp {
+        drv = pkgs.writeShellScriptBin "update-elpa" ''
+          if [[ ! -e repos/archive.lock ]]
+          then
+            touch repos/archive.lock
+            git add repos/archive.lock
+          fi
+
+          tmp=$(mktemp -t archive-XXX.lock)
+          cleanup() {
+            rm -f "$tmp"
+          }
+
+          nix eval --impure --json .#packages.${system}.emacs.archiveLock "$@" \
+            | jq \
+            > $tmp
+          cp $tmp repos/archive.lock
         '';
       };
 

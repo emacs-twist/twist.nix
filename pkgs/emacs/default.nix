@@ -2,8 +2,9 @@
 , pkgs
 }:
 { emacs ? pkgs.emacs
-, lockFile
-, inventorySpecs
+, flakeLockFile
+, archiveLockFile
+, inventories
 , initFiles
 , extraPackages ? [ "use-package" ]
 , addSystemPackages ? true
@@ -40,12 +41,12 @@ lib.makeScope pkgs.newScope (self:
     ];
 
     enumerateConcretePackageSet = import ./data {
-      inherit lib emacs lockFile
-        builtinLibraries inventorySpecs inputOverrides;
+      inherit lib flakeLockFile archiveLockFile
+        builtinLibraries inventories inputOverrides;
       inherit (userConfig) elispPackagePins;
     };
 
-    packageInputs = enumerateConcretePackageSet explicitPackages;
+    packageInputs = enumerateConcretePackageSet "build" explicitPackages;
 
     visibleBuiltinLibraries = lib.subtractLists explicitPackages builtinLibraries;
 
@@ -65,7 +66,7 @@ lib.makeScope pkgs.newScope (self:
       emacsVersion = emacs.version;
       inherit lib builtinLibraries;
     };
-in
+  in
   {
     inherit lib emacs;
 
@@ -110,14 +111,23 @@ in
 
     flakeNix = {
       description = "THIS IS AN AUTO-GENERATED FILE. PLEASE DON'T EDIT IT MANUALLY.";
-      inputs =
-        lib.mapAttrs
-          (_: { origin, ... }: origin // { flake = false; })
-          packageInputs;
+      inputs = lib.pipe packageInputs [
+        (lib.filterAttrs (_: attrs: attrs ? origin))
+        (lib.mapAttrs (_: { origin, ... }: origin // { flake = false; }))
+      ];
       outputs = { ... }: { };
     };
 
-    flakeLock = import ./lock.nix {
-      inherit lib lockFile packageInputs;
+    flakeLock = import ./flake-lock.nix {
+      inherit lib flakeLockFile packageInputs;
     };
+
+    archiveLock = lib.pipe (enumerateConcretePackageSet "update" explicitPackages) [
+      (lib.filterAttrs (_: attrs: attrs ? archive))
+      (mapAttrs (_: lib.getAttrs [
+        "version"
+        "archive"
+        "packageRequires"
+      ]))
+    ];
   })

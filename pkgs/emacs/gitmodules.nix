@@ -1,5 +1,4 @@
-{
-  git
+{ git
 , runCommandLocal
 }:
 file:

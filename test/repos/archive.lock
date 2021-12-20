@@ -1,0 +1,13 @@
+{
+  "ivy": {
+    "archive": {
+      "narHash": "sha256-qoK7Sk3npmID1UD2BZ4IQGJpMtfmYpTXhrpz0/uJb6w=",
+      "type": "tarball",
+      "url": "https://elpa.gnu.org/packages/ivy-0.13.4.tar"
+    },
+    "packageRequires": {
+      "emacs": "24.5"
+    },
+    "version": "0.13.4"
+  }
+}

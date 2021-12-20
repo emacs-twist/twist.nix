@@ -65,7 +65,7 @@ rec {
         lib.last
       ];
       details =
-        map (status: removeAttrs status ["actual" "ename" "satisfied"]) statuses;
+        map (status: removeAttrs status [ "actual" "ename" "satisfied" ]) statuses;
     }))
   ];
   errors = lib.pipe packages [

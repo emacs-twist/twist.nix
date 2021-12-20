@@ -9,6 +9,4 @@ in
   emacsTwist = lib.makeOverridable (import ./emacs {
     inherit pkgs lib;
   });
-
-  inherit (lib) emacsPackageArchiveJson;
 }

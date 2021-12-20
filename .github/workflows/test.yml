@@ -59,8 +59,10 @@ jobs:
     - name: Check the precondition
       working-directory: test
       run: |
+        make clean
         [[ ! -f repos/flake.nix ]]
         [[ ! -f repos/flake.lock ]]
+        [[ ! -f repos/archive.lock ]]
 
     - name: Build the configuration without a lock file (which should fail)
       id: no-lock

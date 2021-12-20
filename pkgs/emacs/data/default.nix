@@ -1,82 +1,70 @@
 let
   inherit (builtins) length head tail hasAttr filter elem mapAttrs readFile
-    pathExists concatLists isFunction removeAttrs attrNames;
+    pathExists concatLists isFunction removeAttrs attrNames foldl' listToAttrs;
 in
 { lib
-, emacs
 , builtinLibraries
-, inventorySpecs
-, lockFile
+, inventories
+, flakeLockFile
+, archiveLockFile
 , inputOverrides
 , elispPackagePins
 }:
+mode:
 let
-  makeInventory = { type, path, ... } @ spec:
-    spec
-    //
-    (if type == "melpa"
-    then { }
-    else if type == "elpa"
-    then {
-      data = lib.filterAttrs
-        (_: args: args ? core || args.url != null)
-        (lib.parseElpaPackages (readFile path));
-    }
-    else if type == "gitmodules"
-    then {
-      data = lib.readGitModulesFile path;
-    }
-    else if type == "archive-data"
-    then {
-      data = lib.importJSON path;
-    }
-    else throw "Unsupported inventory type: ${type}");
+  toLockData = { nodes, version, ... }:
+    if version == 7
+    then lib.mapAttrs (_: { locked, ... }: locked) nodes
+    else throw "Unsupported flake.lock version ${version}";
 
-  inventories = map makeInventory inventorySpecs;
+  flakeLockData =
+    if pathExists flakeLockFile
+    then toLockData (lib.importJSON flakeLockFile)
+    else { };
 
-  findInventoryByName = name:
-    lib.findFirst (i: i.name or null == name)
-      (throw "There is no inventory named ${name}")
+  archiveLockData =
+    if pathExists archiveLockFile
+    then lib.importJSON archiveLockFile
+    else { };
+
+  makeInventory = import ./inventory {
+    inherit lib flakeLockData archiveLockData;
+  };
+
+  inventoryPackageSets =
+    map
+      (spec: {
+        name = spec.name or null;
+        value = makeInventory spec mode;
+      })
       inventories;
 
-  readMelpaRecipeMaybe = file:
-    if pathExists file
-    then lib.parseMelpaRecipe (readFile file)
-    else null;
+  namedInventories = lib.pipe inventoryPackageSets [
+    (filter ({ name, ... }: name != null))
+    listToAttrs
+  ];
 
-  lookupInventory = ename: i @ { type, ... }:
-    i
-    //
-    {
-      entry =
-        if type == "melpa"
-        then readMelpaRecipeMaybe (i.path + "/${ename}")
-        else if type == "elpa"
-        then i.data.${ename} or null
-        else if type == "gitmodules"
-        then i.data.${ename} or null
-        else if type == "archive-data"
-        then i.data.tarballs.${ename} or null
-        else throw "FIXME";
-    };
+  packageData = foldl' (acc: { value, ... }: value // acc) { } inventoryPackageSets;
 
-  # Like lookupInventory, but throws an error if the entry is not found.
-  lookupNamedInventory = ename: name:
-    if (lookupInventory ename (findInventoryByName name)).entry == null
-    then throw "The inventory named ${name} does not contain a package named ${ename}"
-    else lookupInventory ename (findInventoryByName name);
+  findPrescription = ename:
+    packageData.${ename} or (throw "Package ${ename} is not found");
 
-  findPrescription = ename: pin:
-    if pin != null
-    then lookupNamedInventory ename pin
-    else lib.pipe inventories [
-      (map (lookupInventory ename))
-      (filter ({ entry, ... }: entry != null))
-      (results:
-        if length results == 0
-        then throw "No prescription found for ${ename}"
-        else head results)
-    ];
+  findFromPinned = ename: inventory:
+    if hasAttr ename inventory
+    then inventory.${ename}
+    else if inventory ? _impure
+    then inventory._impure.${ename}
+    else throw "Package ${ename} does not exist in the pinned inventory";
+
+  findPrescription' = ename: pin:
+    if pin == null
+    then findPrescription ename
+    else
+      findFromPinned ename
+        (
+          namedInventories.${pin}
+            or (throw "Inventory named ${pin} does not exist")
+        );
 
   # This recursion produces a deep stack trace. The more packages you have, the
   # more traces it will produce. I want to avoid it, but I don't know how,
@@ -90,14 +78,11 @@ let
       let
         ename = head enames;
         pin = elispPackagePins.${ename} or null;
-        data = lib.makeExtensible (import ./package.nix
-          {
-            inherit lib emacs lockFile;
-          }
+        data = lib.makeExtensible (import ./package.nix { inherit lib; }
           ename
           # It would be nice if it were possible to set the pin from inside
           # overrideInputs, but it causes infinite recursion unfortunately :(
-          (findPrescription ename pin));
+          (findPrescription' ename pin));
         toOverrideFn = overrides:
           if isFunction overrides
           then overrides
@@ -110,8 +95,14 @@ let
           else data;
       in
       accumPackage
-        # You should not call extend afterwards, so remove it here.
-        (acc // { ${ename} = removeAttrs data' [ "extend" ]; })
+        (acc
+          //
+          {
+            # You should not call extend afterwards, so remove it here.
+            ${ename} = lib.pipe (removeAttrs data' [ "extend" ]) [
+              (lib.filterAttrs (_: v: v != null))
+            ];
+          })
         (enames
           ++
           # Reduce the list as much as possible to keep the stack trace sane.
