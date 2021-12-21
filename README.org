@@ -1,16 +1,17 @@
 * Emacs Twist for Nix
 Emacs Twist is an alternative Emacs Lisp build machinery for Nix.
-It can be used to build packages specified in your init file using Nix, in a pure and source-based way.
 
 The goal of this project is to support the following two use cases:
 
-- Let people manage their Emacs configurations using Nix in a reproducible, but much more configurable way than =emacsWithPackages= + =emacs-overlay=.
+- Let people manage their Emacs configurations using Nix, in a reproducible but much more configurable manner than the Nix wrapper combined with [[https://github.com/nix-community/emacs-overlay][emacs-overlay]].
 - Help with testing of Emacs Lisp packages that have difficult dependencies, such as dynamic libraries and Emacs Lisp packages that are not on any package registry.
 
 At present, the former use case is almost supported.
-It is currently being tested against real configurations to ensure feature parity.
+It is actively developed to ensure it can build existing live configurations.
 The documentation will become available afterwards.
-The latter is secondary, and I have not worked on it yet.
-*Thus there may be breaking changes in the API.*
+
+The latter use case is secondary, and I have not worked on it yet.
+
+It is still an alpha version, so there may be breaking changes.
 ** Examples
 I am preparing [[https://github.com/akirak/emacs-twist-examples][a repository of configuration examples]].
