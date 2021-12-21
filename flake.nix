@@ -28,7 +28,7 @@
     , ...
     } @ inputs:
     ({
-      overlay = _self: import ./pkgs inputs;
+      overlay = import ./pkgs inputs;
     }
     //
     (flake-utils.lib.eachDefaultSystem (system:

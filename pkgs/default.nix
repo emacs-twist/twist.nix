@@ -1,5 +1,5 @@
 inputs:
-pkgs:
+_final: pkgs:
 let
   lib = import ./build-support {
     inherit inputs pkgs;
