@@ -34,7 +34,7 @@ let
 in
 {
   inherit ename;
-  inherit (attrs) inventory;
+  inherit (attrs) inventory customUnpackPhase;
   entry = attrs.entry or null;
 
   origin = attrs.origin or null;

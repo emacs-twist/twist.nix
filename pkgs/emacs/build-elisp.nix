@@ -174,7 +174,7 @@ stdenv.mkDerivation (rec {
 
     runHook postInstall
   '';
-} // lib.optionalAttrs (attrs.customUnpackPhase or true) {
+} // lib.optionalAttrs attrs.customUnpackPhase {
   # TODO: Handle :rename of ELPA packages
   # See https://git.savannah.gnu.org/cgit/emacs/elpa.git/plain/README for details.
   unpackPhase = ''
