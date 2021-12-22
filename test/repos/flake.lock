@@ -51,43 +51,27 @@
     "git-commit": {
       "flake": false,
       "locked": {
-        "lastModified": 1639893301,
-        "narHash": "sha256-1OiQXVnLffdyBEmEJ5ecvWdGwR6o0eePywC5kE5R3AY=",
+        "lastModified": 1640124774,
+        "narHash": "sha256-qatqtTsxRIXDnzeCoaJRu2Hj5vC/EN8N7/ia6x+B+T8=",
         "owner": "magit",
         "repo": "magit",
-        "rev": "4c469037756ace8b0cc42c05da0dd1864c5bc2a4",
+        "rev": "fa620ed3e45b08c45466f9930e348bf957c27e66",
         "type": "github"
       },
       "original": {
         "owner": "magit",
         "repo": "magit",
-        "type": "github"
-      }
-    },
-    "ivy": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1633013415,
-        "narHash": "sha256-exhoN4CzVWxdVeJCI4M3h1DvVY9Wha2nsdYpiiYWHfE=",
-        "owner": "abo-abo",
-        "repo": "swiper",
-        "rev": "1c6b3da377a840e898b14020133f59fca9ceea1c",
-        "type": "github"
-      },
-      "original": {
-        "owner": "abo-abo",
-        "repo": "swiper",
         "type": "github"
       }
     },
     "magit": {
       "flake": false,
       "locked": {
-        "lastModified": 1639893301,
-        "narHash": "sha256-1OiQXVnLffdyBEmEJ5ecvWdGwR6o0eePywC5kE5R3AY=",
+        "lastModified": 1640124774,
+        "narHash": "sha256-qatqtTsxRIXDnzeCoaJRu2Hj5vC/EN8N7/ia6x+B+T8=",
         "owner": "magit",
         "repo": "magit",
-        "rev": "4c469037756ace8b0cc42c05da0dd1864c5bc2a4",
+        "rev": "fa620ed3e45b08c45466f9930e348bf957c27e66",
         "type": "github"
       },
       "original": {
@@ -99,11 +83,11 @@
     "magit-section": {
       "flake": false,
       "locked": {
-        "lastModified": 1639893301,
-        "narHash": "sha256-1OiQXVnLffdyBEmEJ5ecvWdGwR6o0eePywC5kE5R3AY=",
+        "lastModified": 1640124774,
+        "narHash": "sha256-qatqtTsxRIXDnzeCoaJRu2Hj5vC/EN8N7/ia6x+B+T8=",
         "owner": "magit",
         "repo": "magit",
-        "rev": "4c469037756ace8b0cc42c05da0dd1864c5bc2a4",
+        "rev": "fa620ed3e45b08c45466f9930e348bf957c27e66",
         "type": "github"
       },
       "original": {
@@ -134,7 +118,6 @@
         "dash": "dash",
         "doom-themes": "doom-themes",
         "git-commit": "git-commit",
-        "ivy": "ivy",
         "magit": "magit",
         "magit-section": "magit-section",
         "queue": "queue",

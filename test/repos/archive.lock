@@ -5,6 +5,10 @@
       "type": "tarball",
       "url": "https://elpa.gnu.org/packages/ivy-0.13.4.tar"
     },
+    "inventory": {
+      "type": "archive",
+      "url": "https://elpa.gnu.org/packages/"
+    },
     "packageRequires": {
       "emacs": "24.5"
     },

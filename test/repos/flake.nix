@@ -26,12 +26,6 @@
       repo = "magit";
       type = "github";
     };
-    ivy = {
-      flake = false;
-      owner = "abo-abo";
-      repo = "swiper";
-      type = "github";
-    };
     magit = {
       flake = false;
       owner = "magit";
