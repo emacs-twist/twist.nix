@@ -1,5 +1,5 @@
 { lib
-, flakeLock
+, flakeLockFile
 , packageInputs
 }:
 let
@@ -7,7 +7,7 @@ let
 
   # It would be possible to generate an entirely new lock file, but I prefer not
   # duplicating the boilerplate into my code.
-  prev = lib.importJSON flakeLock;
+  prev = lib.importJSON flakeLockFile;
 
   newNodeAttrs = attrs: value:
     if attrs ? origin && attrs.origin != null
