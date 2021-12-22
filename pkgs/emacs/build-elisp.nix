@@ -5,9 +5,10 @@
 , files
 , lispFiles
 , meta
-, allowSkipCompiling ? false
 , nativeCompileAhead
 , elispInputs
+# Whether to fail on byte-compile warnings
+, debugOnError ? false
 , ...
 } @ attrs:
 with builtins;
@@ -23,18 +24,9 @@ let
 
   buildCmd = ''
     ls
-    if ! emacs --batch -L . -f batch-byte-compile ${
-      lib.escapeShellArgs (map stringBaseName lispFiles)
-    }
-    then
-      if [[ "${lib.boolToString allowSkipCompiling}" = true ]]
-      then
-        echo "warn: Byte-compile is skipped."
-      else
-        echo "To allow this error, set allowSkipCompiling to true."
-        exit 1
-      fi
-    fi
+    emacs --batch -L . --eval "(setq debug-on-error ${if debugOnError then "t" else "nil"})" \
+      -f batch-byte-compile ${lib.escapeShellArgs (map stringBaseName lispFiles)}
+
     rm -f "${ename}-autoloads.el"
     emacs --batch -l package --eval "(package-generate-autoloads '${ename} \".\")"
 
