@@ -34,6 +34,7 @@ let
 in
 {
   inherit ename;
+  inherit (attrs) inventory;
   entry = attrs.entry or null;
 
   origin = attrs.origin or null;
@@ -61,7 +62,7 @@ in
           Package ${ename} contains no *.el file.
           Check the contents in the store: ${self.src}
           Files: ${toJSON self.lispFiles}
-          Entry: ${toJSON attrs.entry}
+          Entry: ${toJSON attrs.inventory}
         '')
       self.lispFiles;
 

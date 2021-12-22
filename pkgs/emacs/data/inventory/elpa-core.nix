@@ -15,7 +15,10 @@ lib.pipe (readFile path) [
         if isString core
         then [ core ]
         else core;
-      inherit entry;
+      inventory = {
+        type = "elpa-core";
+        inherit path src;
+      };
     }
   ))
 ]

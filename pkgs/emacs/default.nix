@@ -128,6 +128,7 @@ lib.makeScope pkgs.newScope (self:
         "version"
         "archive"
         "packageRequires"
+        "inventory"
       ]))
     ];
   })

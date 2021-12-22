@@ -28,6 +28,10 @@ let
       } // lib.getAttrs [
         "narHash"
       ] src;
+      inventory = {
+        type = "archive";
+        inherit url;
+      };
     };
 
   latest = lib.pipe (lib.readPackageArchiveContents url) [
@@ -39,7 +43,7 @@ let
     (_: locked: {
       src = builtins.fetchTree locked.archive;
       customUnpackPhase = false;
-      inherit (locked) version packageRequires archive;
+      inherit (locked) version packageRequires archive inventory;
     })
     archiveLockData;
 in

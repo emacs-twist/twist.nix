@@ -3,7 +3,7 @@
 }:
 with builtins;
 let
-  fromEntry = { ename, ... } @ entry: self:
+  fromEntry = inventory: { ename, ... } @ entry: self:
     {
       src =
         if hasAttr ename flakeLockData
@@ -12,15 +12,21 @@ let
       customUnpackPhase = true;
       files = lib.expandMelpaRecipeFiles self.src (entry.files or null);
       origin = lib.flakeRefAttrsFromMelpaRecipe entry;
-      inherit entry;
+      inventory = inventory // { inherit entry; };
     };
 in
 { path
 }:
+let
+  inventory = {
+    type = "melpa";
+    inherit path;
+  };
+in
 _mode:
 lib.pipe (readDir path) [
   (lib.filterAttrs (_: type: type == "regular"))
-  (mapAttrs (ename: _:
-    fromEntry (lib.parseMelpaRecipe (readFile (path + "/${ename}"))))
-  )
+  (mapAttrs
+    (ename: _:
+      (fromEntry inventory (lib.parseMelpaRecipe (readFile (path + "/${ename}"))))))
 ]
