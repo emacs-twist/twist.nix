@@ -22,6 +22,7 @@ jobs:
             - 'pkgs/build-support/**'
           test:
             - 'test/**'
+            - '.github/workflows/test.yml'
 
   unit-tests:
     needs: changes
