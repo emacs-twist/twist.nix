@@ -66,6 +66,41 @@ let
             or (throw "Inventory named ${pin} does not exist")
         );
 
+  getPackageData = ename:
+    lib.makeExtensible (import ./package.nix { inherit lib; }
+      ename
+      # It would be nice if it were possible to set the pin from inside
+      # overrideInputs, but it causes infinite recursion unfortunately :(
+      (findPrescription' ename (elispPackagePins.${ename} or null)));
+
+  toOverrideFn = overrides:
+    if isFunction overrides
+    then overrides
+    else _: _: overrides;
+
+  getPackageData' = ename: lib.pipe
+    # Because this extending operation affects which packages are included in the
+    # output, it must be done before the entire package set is calculated.
+    (if hasAttr ename inputOverrides
+    then (getPackageData ename).extend (toOverrideFn inputOverrides.${ename})
+    else getPackageData ename)
+    [
+      # The user should not call extend after the package set is calculated, so
+      # remove it here.
+      (lib.flip removeAttrs [ "extend" ])
+      (lib.filterAttrs (_: v: v != null))
+    ];
+
+  go = acc: enames: ename: data:
+    accumPackage
+      (acc // { ${ename} = data; })
+      (enames
+        ++
+        # Reduce the list as much as possible to keep the stack trace sane.
+        (lib.subtractLists
+          (builtinLibraries ++ attrNames acc ++ enames)
+          (lib.packageRequiresToLibraryNames data.packageRequires)));
+
   # This recursion produces a deep stack trace. The more packages you have, the
   # more traces it will produce. I want to avoid it, but I don't know how,
   # because Nix doesn't support mutable data structures.
@@ -74,41 +109,6 @@ let
     then acc
     else if hasAttr (head enames) acc
     then accumPackage acc (tail enames)
-    else
-      let
-        ename = head enames;
-        pin = elispPackagePins.${ename} or null;
-        data = lib.makeExtensible (import ./package.nix { inherit lib; }
-          ename
-          # It would be nice if it were possible to set the pin from inside
-          # overrideInputs, but it causes infinite recursion unfortunately :(
-          (findPrescription' ename pin));
-        toOverrideFn = overrides:
-          if isFunction overrides
-          then overrides
-          else _: _: overrides;
-        # Because this extending operation affects which packages are included
-        # in the output, it must be done here.
-        data' =
-          if hasAttr ename inputOverrides
-          then data.extend (toOverrideFn inputOverrides.${ename})
-          else data;
-      in
-      accumPackage
-        (acc
-          //
-          {
-            # You should not call extend afterwards, so remove it here.
-            ${ename} = lib.pipe (removeAttrs data' [ "extend" ]) [
-              (lib.filterAttrs (_: v: v != null))
-            ];
-          })
-        (enames
-          ++
-          # Reduce the list as much as possible to keep the stack trace sane.
-          (lib.subtractLists
-            (builtinLibraries ++ attrNames acc ++ enames)
-            (lib.packageRequiresToLibraryNames data'.packageRequires)));
-
+    else go acc enames (head enames) (getPackageData' (head enames));
 in
 accumPackage { }
