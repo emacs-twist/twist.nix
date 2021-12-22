@@ -123,6 +123,7 @@
           cleanup() {
             rm -f "$tmp"
           }
+          trap cleanup EXIT ERR
 
           nix eval --impure --json .#packages.${system}.emacs.archiveLock "$@" \
             | jq \
