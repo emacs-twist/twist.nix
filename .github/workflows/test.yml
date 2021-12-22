@@ -89,8 +89,6 @@ jobs:
         [[ -s repos/archive.lock ]]
         [[ -s repos/flake.nix ]]
         [[ -s repos/flake.lock ]]
-        ! git diff-index --exit-code --cached HEAD repos/archive.lock
-        ! git diff-index --exit-code --cached HEAD repos/flake.lock
 
     - name: Build the configuration with the generated lock file
       working-directory: test
