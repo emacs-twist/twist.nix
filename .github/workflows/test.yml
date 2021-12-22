@@ -101,17 +101,17 @@ jobs:
         echo "::set-output name=emacs::packages.$system.emacs"
 
     - run: |
-        nix eval --json .#.${{ steps.system.outputs.emacs }}.initFiles \
+        nix eval --json .#${{ steps.system.outputs.emacs }}.initFiles \
         | jq
       working-directory: test
 
     - run: |
-        nix eval --json .#.${{ steps.system.outputs.emacs }}.packageInputs \
+        nix eval --json .#${{ steps.system.outputs.emacs }}.packageInputs \
         | jq
       working-directory: test
 
     - run: |
-        nix eval --json .#.${{ steps.system.outputs.emacs }}.elispPackages.magit \
+        nix eval --json .#${{ steps.system.outputs.emacs }}.elispPackages.magit \
         | jq
       working-directory: test
 
