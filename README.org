@@ -7,10 +7,10 @@ The goal of this project is to support the following two use cases:
 - Help with testing of Emacs Lisp packages that have difficult dependencies, such as dynamic libraries and Emacs Lisp packages that are not on any package registry.
 
 At present, the former use case is almost supported.
-It is actively developed to ensure it can build existing live configurations.
-The documentation will become available afterwards.
+It is being actively developed to ensure that it can build existing live configurations.
+The documentation will become available at some point during the phase.
 
-The latter use case is secondary, and I have not worked on it yet.
+The latter use case is secondary, and I have not started working on it yet.
 
 It is still an alpha version, so there may be breaking changes.
 ** Examples
