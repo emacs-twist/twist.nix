@@ -3,15 +3,24 @@ Emacs Twist is an alternative Emacs Lisp build machinery for Nix.
 
 The goal of this project is to support the following two use cases:
 
-- Let people manage their Emacs configurations using Nix, in a reproducible but much more configurable manner than the Nix wrapper combined with [[https://github.com/nix-community/emacs-overlay][emacs-overlay]].
+- Let people manage their Emacs configurations using Nix, in a reproducible but more contributor-friendly way than the standard Emacs infrastructure of Nixpkgs.
 - Help with testing of Emacs Lisp packages that have difficult dependencies, such as dynamic libraries and Emacs Lisp packages that are not on any package registry.
 
-At present, the former use case is almost supported.
-It is being actively developed to ensure that it can build existing live configurations.
+I am currently working on the first use case to ensure that it can build existing live configurations.
 The documentation will become available at some point during the phase.
 
 The latter use case is secondary, and I have not started working on it yet.
 
 It is still an alpha version, so there may be breaking changes.
+
+Note that this framework is not compatible with [[https://github.com/NixOS/nixpkgs/blob/master/pkgs/build-support/emacs/generic.nix][the Emacs infrastructure]] of Nixpkgs.
+This is primarily because I want to minimize maintenance work related to specific packages.
+It would require an extra effort to constantly follow updates in the Nixpkgs and [[https://github.com/nix-community/emacs-overlay][emacs-overlay]], and I do not want to do that.
+They are great projects, but this project does not reuse the infrastructure.
+An entire infrastructure was written from scratch, and this would allow keeping each configuration explicit and predictable.
+No package workarounds are turned on by default, nor will I include such things in this repository.
+
+Nonetheless, it would be possible to provide workarounds as an overlay from a separate repository.
+If this project turns out to be viable, I will do that.
 ** Examples
 I am preparing [[https://github.com/akirak/emacs-twist-examples][a repository of configuration examples]].
