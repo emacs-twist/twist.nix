@@ -2,7 +2,7 @@
 , pkgs
 , final
 }:
-{ emacs ? pkgs.emacs
+{ emacsPackage ? pkgs.emacs
 , flakeLockFile
 , archiveLockFile
 , inventories
@@ -64,12 +64,13 @@ lib.makeScope pkgs.newScope (self:
         packageInputs);
 
     versionStatus = import ./version-status.nix {
-      emacsVersion = emacs.version;
+      emacsVersion = emacsPackage.version;
       inherit lib builtinLibraries;
     };
   in
   {
-    inherit lib emacs;
+    inherit lib;
+    emacs = emacsPackage;
 
     # Expose only for convenience.
     inherit initFiles;
