@@ -64,7 +64,7 @@
 
       emacs = pkgs.emacsTwist {
         # Use nix-emacs-ci which is more lightweight than a regular build
-        emacs = pkgs.emacs-snapshot;
+        emacsPackage = pkgs.emacs-snapshot;
         # In an actual configuration, you would use this:
         # emacs = pkgs.emacsPgtkGcc.overrideAttrs (_: { version = "29.0.50"; });
         initFiles = [
