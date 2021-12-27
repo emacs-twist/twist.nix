@@ -1,5 +1,6 @@
 { lib
 , pkgs
+, final
 }:
 { emacs ? pkgs.emacs
 , flakeLockFile
@@ -102,7 +103,7 @@ lib.makeScope pkgs.newScope (self:
         # split by ".".
         executablePackages =
           if addSystemPackages
-          then lib.attrVals userConfig.systemPackages pkgs
+          then lib.attrVals userConfig.systemPackages final
           else [ ];
       };
 
