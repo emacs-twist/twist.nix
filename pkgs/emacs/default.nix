@@ -96,7 +96,7 @@ in
     elispPackages = lib.makeScope self.newScope (eself:
       mapAttrs
         (ename: attrs:
-          self.callPackage ./build-elisp.nix { }
+          self.callPackage ./build { }
             ({
               nativeCompileAhead = nativeCompileAheadDefault;
               elispInputs = lib.attrVals allDependencies.${ename} eself;
