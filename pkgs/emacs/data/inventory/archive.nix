@@ -53,6 +53,8 @@ in
 mode:
 if mode == "update"
 then latest
+else if mode == "lock"
+then pinned // latest
 else
   pinned
     //

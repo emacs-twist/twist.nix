@@ -3,8 +3,7 @@
 , final
 }:
 { emacsPackage ? pkgs.emacs
-, flakeLockFile
-, archiveLockFile
+, lockDir
 , inventories
 , initFiles
 , extraPackages ? [ "use-package" ]
@@ -18,6 +17,10 @@ let
 in
 lib.makeScope pkgs.newScope (self:
   let
+    flakeLockFile = lockDir + "/flake.lock";
+
+    archiveLockFile = lockDir + "/archive.lock";
+
     userConfig = lib.pipe self.initFiles [
       (map (file: lib.parseUsePackages (readFile file)))
       lib.zipAttrs
@@ -67,7 +70,11 @@ lib.makeScope pkgs.newScope (self:
       emacsVersion = emacsPackage.version;
       inherit lib builtinLibraries;
     };
-  in
+
+    generateLockFiles = self.callPackage ./lock.nix {
+      inherit flakeLockFile;
+    };
+in
   {
     inherit lib;
     emacs = emacsPackage;
@@ -111,26 +118,25 @@ lib.makeScope pkgs.newScope (self:
     # This makes the attrset a derivation for a shorthand.
     inherit (self.emacsWrapper) name type outputName outPath drvPath;
 
-    flakeNix = {
-      description = "THIS IS AN AUTO-GENERATED FILE. PLEASE DON'T EDIT IT MANUALLY.";
-      inputs = lib.pipe packageInputs [
-        (lib.filterAttrs (_: attrs: attrs ? origin))
-        (lib.mapAttrs (_: { origin, ... }: origin // { flake = false; }))
-      ];
-      outputs = { ... }: { };
+    # Generate flake.nix and archive.lock with a complete package set. You
+    # have to run `nix flake lock`` in the target directory to update
+    # flake.lock.
+    lock = generateLockFiles {
+      packageInputs = enumerateConcretePackageSet "lock" explicitPackages;
+      flakeNix = true;
+      archiveLock = true;
+      postCommand = "nix flake lock";
     };
 
-    flakeLock = import ./flake-lock.nix {
-      inherit lib flakeLockFile packageInputs;
+    # Generate flake.lock with the current revisions
+    sync = generateLockFiles {
+      inherit packageInputs;
+      flakeLock = true;
     };
 
-    archiveLock = lib.pipe (enumerateConcretePackageSet "update" explicitPackages) [
-      (lib.filterAttrs (_: attrs: attrs ? archive))
-      (mapAttrs (_: lib.getAttrs [
-        "version"
-        "archive"
-        "packageRequires"
-        "inventory"
-      ]))
-    ];
+    # Generate archive.lock with latest packages from ELPA package archives
+    update = generateLockFiles {
+      packageInputs = enumerateConcretePackageSet "update" explicitPackages;
+      archiveLock = true;
+    };
   })

@@ -70,8 +70,7 @@
         initFiles = [
           ./init.el
         ];
-        flakeLockFile = ./repos/flake.lock;
-        archiveLockFile = ./repos/archive.lock;
+        lockDir = ./repos;
         inventories = [
           {
             type = "elpa-core";
@@ -112,67 +111,15 @@
       defaultPackage = emacs;
 
       apps.update-elpa = flake-utils.lib.mkApp {
-        drv = pkgs.writeShellScriptBin "update-elpa" ''
-          if [[ ! -e repos/archive.lock ]]
-          then
-            touch repos/archive.lock
-            git add repos/archive.lock
-          fi
-
-          tmp=$(mktemp -t archive-XXX.lock)
-          cleanup() {
-            rm -f "$tmp"
-          }
-          trap cleanup EXIT ERR
-
-          nix eval --impure --json .#packages.${system}.emacs.archiveLock "$@" \
-            | jq \
-            > $tmp
-          cp $tmp repos/archive.lock
-        '';
+        drv = emacs.update.writeToDir "repos";
       };
 
       apps.lock = flake-utils.lib.mkApp {
-        drv = pkgs.writeShellApplication {
-          name = "lock";
-          runtimeInputs = [
-            pkgs.nixfmt
-          ];
-          text = ''
-            if [[ ! -f repos/flake.nix ]]
-            then
-              touch repos/flake.nix
-              git add repos/flake.nix
-            fi
-
-            nix eval --impure .#packages.${system}.emacs.flakeNix "$@" \
-              | nixfmt \
-              | sed -e 's/<LAMBDA>/{ ... }: { }/' \
-              > repos/flake.nix
-            cd repos
-            nix flake lock
-          '';
-        };
+        drv = emacs.lock.writeToDir "repos";
       };
 
       apps.sync = flake-utils.lib.mkApp {
-        drv = pkgs.writeShellApplication {
-          name = "sync";
-          runtimeInputs = [
-            pkgs.jq
-          ];
-          text = ''
-            tmp=$(mktemp -t emacs-XXX.lock)
-            cleanup() {
-              rm -f "$tmp"
-            }
-            trap cleanup EXIT ERR
-            nix eval --json --impure .#packages.${system}.emacs.flakeLock "$@" \
-              | jq \
-              > "$tmp"
-            cp "$tmp" repos/flake.lock
-          '';
-        };
+        drv = emacs.sync.writeToDir "repos";
       };
     });
 }

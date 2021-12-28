@@ -46,6 +46,8 @@ lib
   makeSourceVersion = version: _src: version;
   toPName = replaceStrings [ "@" ] [ "at" ];
 
+  toNix = import ./toNix.nix { inherit lib; };
+
   findLicense = spdxId:
     lib.findFirst
       (license: (license ? spdxId && license.spdxId == spdxId))
