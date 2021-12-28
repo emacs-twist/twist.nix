@@ -1,4 +1,6 @@
 * Emacs Twist for Nix
+[[https://github.com/akirak/emacs-twist/actions/workflows/test.yml][file:https://github.com/akirak/emacs-twist/actions/workflows/test.yml/badge.svg]]
+
 Emacs Twist is an alternative Emacs Lisp build machinery for Nix.
 
 The goal of this project is to support the following two use cases:
