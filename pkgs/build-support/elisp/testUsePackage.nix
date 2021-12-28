@@ -1,8 +1,6 @@
 with builtins;
 let
-  pkgs = import (fetchTree (fromJSON (readFile ../../../flake.lock)).nodes.nixpkgs.locked) {
-    system = builtins.currentSystem;
-  };
+  pkgs = import <nixpkgs> { };
   fromElisp = import (fetchTree (fromJSON (readFile ../../../flake.lock)).nodes.fromElisp.locked) {
     inherit pkgs;
   };
