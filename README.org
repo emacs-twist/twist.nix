@@ -16,8 +16,8 @@ The latter use case is secondary, and I have not started working on it yet.
 It is still an alpha version, so there may be breaking changes.
 
 Note that this framework is not compatible with [[https://github.com/NixOS/nixpkgs/blob/master/pkgs/build-support/emacs/generic.nix][the Emacs infrastructure]] of Nixpkgs.
-This is primarily because I want to minimize maintenance work related to specific packages.
-It would require an extra effort to constantly follow updates in the Nixpkgs and [[https://github.com/nix-community/emacs-overlay][emacs-overlay]], and I do not want to do that.
+This repository provides the core library, and it should be stable.
+I don't want to constantly follow updates in the Nixpkgs and [[https://github.com/nix-community/emacs-overlay][emacs-overlay]].
 They are great projects, but this project does not reuse the infrastructure.
 An entire infrastructure was written from scratch, and this would allow keeping each configuration explicit and predictable.
 No package workarounds are turned on by default, nor will I include such things in this repository.
