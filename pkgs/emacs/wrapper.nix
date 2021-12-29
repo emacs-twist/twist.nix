@@ -47,6 +47,8 @@ runCommandLocal "emacs"
   buildInputs = [ lndir texinfo ];
   propagatedBuildInputs = [ emacs packageEnv ] ++ executablePackages;
   nativeBuildInputs = [ makeWrapper ];
+  # Useful for use with flake-utils.lib.mkApp
+  passthru.exePath = "/bin/emacs";
 }
   ''
     for dir in bin share/applications share/icons
