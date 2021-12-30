@@ -3,7 +3,7 @@
 }:
 let
   inherit (builtins) head attrNames attrValues filter replaceStrings isList length
-    listToAttrs split match elemAt isString readFile;
+    listToAttrs split match elemAt isString readFile baseNameOf;
 
   inherit (pkgs) lib;
 
@@ -86,7 +86,7 @@ lib
   readFirstBytes = limit: file:
     readFile (pkgs.callPackage
       ({ runCommandLocal }:
-        runCommandLocal "main-file" { } ''
+        runCommandLocal (baseNameOf file) { } ''
           head -c ${toString limit} ${file} > $out
         '')
       { });
