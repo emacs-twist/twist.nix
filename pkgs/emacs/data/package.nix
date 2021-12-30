@@ -68,6 +68,7 @@ in
 
   inherit headers;
 
+  # TODO: Check https://github.com/melpa/melpa/issues/2955 on the right versioning scheme
   version =
     attrs.version
       or packageDesc.version
