@@ -25,4 +25,5 @@ No package workarounds are turned on by default, nor will I include such things 
 Nonetheless, it would be possible to provide workarounds as an overlay from a separate repository.
 If this project turns out to be viable, I will do that.
 ** Examples
-I am preparing [[https://github.com/akirak/emacs-twist-examples][a repository of configuration examples]].
+- I am preparing [[https://github.com/akirak/emacs-twist-examples][a repository of configuration examples]].
+- The author's [[https://github.com/akirak/nix-config][nix-config]] repository uses Twist.
