@@ -51,6 +51,8 @@ runCommandLocal "emacs"
 
   passAsFile = [ "subdirs" ];
 
+  nativeLoadPath =
+    "${packageEnv}/share/emacs/native-lisp/:${emacs}/share/emacs/native-lisp/:";
   subdirs = lib.concatMapStrings
     (path: "(push \"${path}/share/emacs/site-lisp/\" load-path)\n") elispInputs;
 }
@@ -86,8 +88,7 @@ runCommandLocal "emacs"
           "--prefix PATH : ${lib.escapeShellArg (lib.makeBinPath executablePackages)}"
         )} \
         --prefix INFOPATH : ${emacs}/share/info:$out/share/info:${packageEnv}/share/info \
-        ${lib.optionalString nativeComp
-          "--set EMACSNATIVELOADPATH ${packageEnv}/share/emacs/native-lisp/:"
+        ${lib.optionalString nativeComp "--set EMACSNATIVELOADPATH $nativeLoadPath"
         } \
         --set EMACSLOADPATH "$siteLisp:"
       fi
