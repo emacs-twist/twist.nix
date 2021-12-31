@@ -117,7 +117,7 @@ stdenv.mkDerivation (rec {
   # nativeBuildInputs = lib.optional nativeComp gcc;
 
   EMACSLOADPATH = lib.concatStrings
-    (map (pkg: "${pkg.outPath}/share/emacs/site-lisp/elpa/${pkg.ename}-${pkg.version}:")
+    (map (pkg: "${pkg.outPath}/share/emacs/site-lisp/:")
       elispInputs);
 
   buildPhase = ''
@@ -153,7 +153,7 @@ stdenv.mkDerivation (rec {
   installPhase = ''
     runHook preInstall
 
-    lispDir=$out/share/emacs/site-lisp/elpa/$ename-$version
+    lispDir=$out/share/emacs/site-lisp/
     install -d $lispDir
     tar cf - --exclude='*.info' --exclude='eln-cache' . \
       | (cd $lispDir && tar xf -)

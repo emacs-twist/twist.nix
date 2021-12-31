@@ -18,7 +18,6 @@ let
     name = "elisp-packages";
     paths = elispInputs;
     pathsToLink = [
-      "/share/emacs/site-lisp/elpa"
       "/share/info"
       "/share/doc"
     ] ++ lib.optional nativeComp "/share/emacs/native-lisp";
@@ -49,6 +48,11 @@ runCommandLocal "emacs"
   nativeBuildInputs = [ makeWrapper ];
   # Useful for use with flake-utils.lib.mkApp
   passthru.exePath = "/bin/emacs";
+
+  passAsFile = [ "subdirs" ];
+
+  subdirs = lib.concatMapStrings
+    (path: "(push \"${path}/share/emacs/site-lisp/\" load-path)\n") elispInputs;
 }
   ''
     for dir in bin share/applications share/icons
@@ -59,8 +63,12 @@ runCommandLocal "emacs"
 
     siteLisp=$out/share/emacs/site-lisp
     mkdir -p $siteLisp
-    ln -t $siteLisp -s ${packageEnv}/share/emacs/site-lisp/elpa
-    ln -t $siteLisp -s ${emacs}/share/emacs/site-lisp/subdirs.el
+    if [[ -e $subdirsPath ]]
+    then
+      install -m 444 $subdirsPath $siteLisp/subdirs.el
+    else
+      echo -n "$subdirs" > $siteLisp/subdirs.el
+    fi
 
     mkdir -p $out/share/doc
     lndir -silent ${packageEnv}/share/doc $out/share/doc
