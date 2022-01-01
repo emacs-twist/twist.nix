@@ -19,12 +19,16 @@ pkgs.lib.runTests {
       (setup magit
         (:package magit))
 
+      (setup (:package aftermath afterlife))
+
     '';
 
     expected = {
       elispPackages = [
         "dash"
         "magit"
+        "aftermath"
+        "afterlife"
       ];
     };
 

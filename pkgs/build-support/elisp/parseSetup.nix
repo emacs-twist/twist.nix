@@ -14,9 +14,10 @@ let
       elispPackages = elispPackages ++ lib.pipe fields [
         (map (field:
           if isList field && length field > 0 && head field == packageKeyword
-          then elemAt field 1
+          then tail field
           else null))
-        (filter isString)
+        (filter lib.isList)
+        lib.concatLists
       ];
       rest = (lib.pipe fields [
         (filter isList)
