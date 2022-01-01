@@ -28,8 +28,10 @@ let
       -f batch-byte-compile ${lib.escapeShellArgs (map stringBaseName lispFiles)}
 
     rm -f "${ename}-autoloads.el"
-    emacs --batch -l package --eval "(package-generate-autoloads '${ename} \".\")"
- '';
+    emacs --batch -l autoload \
+        --eval "(setq generated-autoload-file \"${ename}-autoloads.el\")" \
+        -f batch-update-autoloads .
+  '';
 
   hasFile = pred: (lib.findFirst pred null files != null);
 
