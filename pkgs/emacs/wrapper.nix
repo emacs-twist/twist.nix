@@ -40,6 +40,12 @@ let
     name = "emacs-twist.info";
     path = ../../doc/emacs-twist.info;
   };
+
+  wrap = open: end: body: open + body + end;
+
+  lispList = strings:
+    wrap "'(" ")"
+      (lib.concatMapStringsSep " " (wrap "\"" "\"") strings);
 in
 runCommandLocal "emacs"
 {
@@ -49,12 +55,24 @@ runCommandLocal "emacs"
   # Useful for use with flake-utils.lib.mkApp
   passthru.exePath = "/bin/emacs";
 
-  passAsFile = [ "subdirs" ];
+  passAsFile = [ "subdirs" "siteStartExtra" ];
 
   nativeLoadPath =
     "${packageEnv}/share/emacs/native-lisp/:${emacs}/share/emacs/native-lisp/:";
-  subdirs = lib.concatMapStrings
-    (path: "(push \"${path}/share/emacs/site-lisp/\" load-path)\n") elispInputs;
+
+  subdirs = ''
+    (setq load-path (append ${
+      lispList (map (path: "${path}/share/emacs/site-lisp/") elispInputs)
+    } load-path))
+  '';
+
+  siteStartExtra = ''
+    (when init-file-user
+      ${lib.concatMapStrings (pkg: ''
+          (load "${pkg}/share/emacs/site-lisp/${pkg.ename}-autoloads.el" nil t)
+      '') elispInputs
+    })
+  '';
 }
   ''
     for dir in bin share/applications share/icons
@@ -72,6 +90,25 @@ runCommandLocal "emacs"
       echo -n "$subdirs" > $siteLisp/subdirs.el
     fi
 
+    # Append autoloads to the site-start.el provided by nixpkgs
+    install -m 644 ${emacs}/share/emacs/site-lisp/site-start.el $siteLisp/site-start.el
+    if [[ -e $siteStartExtraPath ]]
+    then
+      cat $siteStartExtraPath >> $siteLisp/site-start.el
+    else
+      echo -n "$siteStartExtra" >> $siteLisp/site-start.el
+    fi
+
+    cd $siteLisp
+    ${emacs}/bin/emacs --batch -f batch-byte-compile site-start.el
+    ${lib.optionalString nativeComp ''
+      nativeLisp=$out/share/emacs/native-lisp
+      emacs --batch \
+        --eval "(push \"$nativeLisp/\" native-comp-eln-load-path)" \
+        --eval "(setq native-compile-target-directory \"$nativeLisp/\")" \
+        -f batch-native-compile "$siteLisp/site-start.el"
+    ''}
+
     mkdir -p $out/share/doc
     lndir -silent ${packageEnv}/share/doc $out/share/doc
 
@@ -88,7 +125,7 @@ runCommandLocal "emacs"
           "--prefix PATH : ${lib.escapeShellArg (lib.makeBinPath executablePackages)}"
         )} \
         --prefix INFOPATH : ${emacs}/share/info:$out/share/info:${packageEnv}/share/info \
-        ${lib.optionalString nativeComp "--set EMACSNATIVELOADPATH $nativeLoadPath"
+        ${lib.optionalString nativeComp "--set EMACSNATIVELOADPATH $nativeLisp:$nativeLoadPath"
         } \
         --set EMACSLOADPATH "$siteLisp:"
       fi
