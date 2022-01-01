@@ -6,6 +6,7 @@
 , lockDir
 , inventories
 , initFiles
+, initParser ? lib.parseUsePackages
 , extraPackages ? [ "use-package" ]
 , addSystemPackages ? true
 , inputOverrides ? { }
@@ -22,7 +23,7 @@ lib.makeScope pkgs.newScope (self:
     archiveLockFile = lockDir + "/archive.lock";
 
     userConfig = lib.pipe self.initFiles [
-      (map (file: lib.parseUsePackages (readFile file)))
+      (map (file: initParser (readFile file)))
       lib.zipAttrs
       (lib.mapAttrs (name: values:
         if name == "elispPackages"
@@ -47,7 +48,7 @@ lib.makeScope pkgs.newScope (self:
     enumerateConcretePackageSet = import ./data {
       inherit lib flakeLockFile archiveLockFile
         builtinLibraries inventories inputOverrides;
-      inherit (userConfig) elispPackagePins;
+      elispPackagePins = userConfig.elispPackagePins or { };
     };
 
     packageInputs = enumerateConcretePackageSet "build" explicitPackages;
@@ -111,7 +112,7 @@ in
         # split by ".".
         executablePackages =
           if addSystemPackages
-          then lib.attrVals userConfig.systemPackages final
+          then lib.attrVals (userConfig.systemPackages or [ ]) final
           else [ ];
       };
 

@@ -8,14 +8,16 @@ let
     inherit (pkgs) lib;
     inherit fromElisp;
   };
+
+  validateConfig = import ./validateConfig.nix { inherit (pkgs) lib; };
 in
 pkgs.lib.runTests {
   testDirect = {
-    expr = parseUsePackages ''
+    expr = validateConfig (parseUsePackages ''
       (use-package hello)
 
       (use-package bye :ensure t)
-    '';
+    '');
     expected = {
       elispPackages = [ "bye" ];
       elispPackagePins = { };
