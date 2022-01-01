@@ -12,6 +12,8 @@
 
   outputs = { ... } @ inputs:
     {
+      # lib is experimental at present, so it may be removed in the future.
+      lib = import ./lib inputs;
       overlay = import ./pkgs inputs;
     };
 }
