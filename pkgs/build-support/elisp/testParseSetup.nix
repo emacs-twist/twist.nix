@@ -17,7 +17,8 @@ pkgs.lib.runTests {
       (setup (:package dash))
 
       (setup magit
-        (:package magit))
+        (:package magit)
+        (:nixpkgs git))
 
       (setup (:package aftermath afterlife))
 
@@ -29,6 +30,9 @@ pkgs.lib.runTests {
         "magit"
         "aftermath"
         "afterlife"
+      ];
+      systemPackages = [
+        "git"
       ];
     };
 
@@ -67,6 +71,7 @@ pkgs.lib.runTests {
         "marriage"
         "work-visa"
       ];
+      systemPackages = [ ];
     };
 
   };

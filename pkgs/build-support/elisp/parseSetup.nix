@@ -3,6 +3,7 @@
 , fromElisp
 }:
 { packageKeyword ? ":package"
+, nixpkgsKeyword ? ":nixpkgs"
 }:
 with builtins;
 string:
@@ -19,4 +20,12 @@ in
     lib.concatLists
     lib.unique
   ];
+
+  systemPackages =
+    if isString nixpkgsKeyword
+    then lib.pipe (collect nixpkgsKeyword setups) [
+      lib.concatLists
+      lib.unique
+    ]
+    else [ ];
 }
