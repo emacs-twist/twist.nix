@@ -118,8 +118,8 @@
         drv = emacs.lock.writeToDir "repos";
       };
 
-      apps.sync = flake-utils.lib.mkApp {
-        drv = emacs.sync.writeToDir "repos";
-      };
+      # apps.sync = flake-utils.lib.mkApp {
+      #   drv = emacs.sync.writeToDir "repos";
+      # };
     });
 }
