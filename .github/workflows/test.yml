@@ -116,6 +116,3 @@ jobs:
         nix eval --json .#${{ steps.system.outputs.emacs }}.elispPackages.magit \
         | jq
       working-directory: test
-
-    - run: nix run .#sync --impure
-      working-directory: test
