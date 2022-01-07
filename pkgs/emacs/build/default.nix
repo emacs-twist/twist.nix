@@ -64,6 +64,7 @@ let
   installInfo = ''
     mkdir -p $info/share
     install -d $info/share/info
+    rm -f gpl.info contributors.info
     for i in *.info
     do
       install -t $info/share/info $i
