@@ -70,7 +70,7 @@
         initFiles = [
           ./init.el
         ];
-        lockDir = ./repos;
+        lockDir = ./lock;
         inventories = [
           {
             type = "elpa-core";
