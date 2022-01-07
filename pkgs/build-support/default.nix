@@ -40,8 +40,12 @@ lib
     parseElpaPackages
     flakeRefAttrsFromElpaAttrs
     parseMelpaRecipe
-    flakeRefAttrsFromMelpaRecipe
-    expandMelpaRecipeFiles;
+    flakeRefAttrsFromMelpaRecipe;
+
+  expandMelpaRecipeFiles = src: spec:
+    # Ignore *-pkg.el
+    filter (name: match ".+-pkg\.el" name == null)
+      (elispHelpers.expandMelpaRecipeFiles src spec);
 
   makeSourceVersion = version: _src: version;
   toPName = replaceStrings [ "@" ] [ "at" ];
