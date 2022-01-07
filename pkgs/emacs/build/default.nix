@@ -3,46 +3,34 @@
 , src
 , version
 , files
+, lispFiles
 , meta
-, allowSkipCompiling ? false
 , nativeCompileAhead
 , elispInputs
+# Whether to fail on byte-compile warnings
+, debugOnError ? false
 , ...
-}:
+} @ attrs:
+with builtins;
 let
-  inherit (builtins) concatStringsSep replaceStrings match elem;
-
   nativeComp = emacs.nativeComp or false;
 
-  buildCmd = ''
-    if ! emacs --batch -L . -f batch-byte-compile *.el
-    then
-      if [[ "${lib.boolToString allowSkipCompiling}" = true ]]
-      then
-        echo "warn: Byte-compile is skipped."
-      else
-        echo "To allow this error, set allowErrors.allowSkipCompiling to true."
-        exit 1
-      fi
-    fi
-    emacs --batch -l package --eval "(package-generate-autoloads '${ename} \".\")"
+  regex = ".*/([^/]+)";
 
-    if [[ ! -e "${ename}-pkg.el" ]]
-    then
-      cat > ${ename}-pkg.el <<PKG
-      (define-package "${ename}" "${version}"
-        "${meta.description or ""}"
-        '(${
-          # It may be necessary to include the version actually specified in the
-          # header, but it won't matter anyway.
-          lib.concatMapStrings (name: "(" + name + " \"0\")")
-            (lib.catAttrs "ename" elispInputs)
-        }))
-      ;; Local Variables:
-      ;; no-byte-compile: t
-      ;; End:
-    PKG
-    fi
+  stringBaseName = file:
+    if match regex file != null
+    then head (match regex file)
+    else file;
+
+  buildCmd = ''
+    ls
+    emacs --batch -L . --eval "(setq debug-on-error ${if debugOnError then "t" else "nil"})" \
+      -f batch-byte-compile ${lib.escapeShellArgs (map stringBaseName lispFiles)}
+
+    rm -f "${ename}-autoloads.el"
+    emacs --batch -l autoload \
+        --eval "(setq generated-autoload-file \"${ename}-autoloads.el\")" \
+        -f batch-update-autoloads .
   '';
 
   hasFile = pred: (lib.findFirst pred null files != null);
@@ -63,8 +51,12 @@ let
     for d in $(find -name '*.texi' -o -name '*.texinfo')
     do
       local basename=$(basename $d)
-      cd $src/$(dirname $d)
-      makeinfo --no-split "$basename" -o $cwd/''${basename%%.*}.info
+      local i=$cwd/''${basename%%.*}.info
+      if [[ ! -e "$i" ]]
+      then
+        cd $src/$(dirname $d)
+        makeinfo --no-split "$basename" -o "$i"
+      fi
     done
     cd $cwd
   '';
@@ -72,6 +64,7 @@ let
   installInfo = ''
     mkdir -p $info/share
     install -d $info/share/info
+    rm -f gpl.info contributors.info
     for i in *.info
     do
       install -t $info/share/info $i
@@ -90,7 +83,7 @@ let
     done
   '';
 in
-stdenv.mkDerivation rec {
+stdenv.mkDerivation (rec {
   inherit src ename meta version;
 
   pname = concatStringsSep "-" [
@@ -103,23 +96,14 @@ stdenv.mkDerivation rec {
 
   outputs =
     [ "out" ]
-    ++ lib.optional hasDocOutput "doc"
-    ++ lib.optional hasInfoOutput "info";
+      ++ lib.optional hasDocOutput "doc"
+      ++ lib.optional hasInfoOutput "info";
 
   buildInputs = [ emacs texinfo ];
   # nativeBuildInputs = lib.optional nativeComp gcc;
 
-  # TODO: Handle :rename of ELPA packages
-  # See https://git.savannah.gnu.org/cgit/emacs/elpa.git/plain/README for details.
-  unpackPhase = ''
-    for file in ${lib.escapeShellArgs files}
-    do
-      cp -r $src/$file .
-    done
-  '';
-
   EMACSLOADPATH = lib.concatStrings
-    (map (pkg: "${pkg.outPath}/share/emacs/site-lisp/elpa/${pkg.ename}-${pkg.version}:")
+    (map (pkg: "${pkg.outPath}/share/emacs/site-lisp/:")
       elispInputs);
 
   buildPhase = ''
@@ -155,7 +139,7 @@ stdenv.mkDerivation rec {
   installPhase = ''
     runHook preInstall
 
-    lispDir=$out/share/emacs/site-lisp/elpa/$ename-$version
+    lispDir=$out/share/emacs/site-lisp/
     install -d $lispDir
     tar cf - --exclude='*.info' --exclude='eln-cache' . \
       | (cd $lispDir && tar xf -)
@@ -168,4 +152,13 @@ stdenv.mkDerivation rec {
 
     runHook postInstall
   '';
-}
+} // lib.optionalAttrs attrs.customUnpackPhase {
+  # TODO: Handle :rename of ELPA packages
+  # See https://git.savannah.gnu.org/cgit/emacs/elpa.git/plain/README for details.
+  unpackPhase = ''
+    for file in ${lib.escapeShellArgs files}
+    do
+      cp -r $src/$file .
+    done
+  '';
+})

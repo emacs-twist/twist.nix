@@ -15,9 +15,13 @@ sync:
 	$(NIX) run .#sync -- $(NIX_OPTIONS)
 .PHONY: sync
 
-remove-lock:
-	rm -f repos/flake.nix repos/flake.lock
-.PHONY: remove-lock
+update-elpa:
+	$(NIX) run .#update-elpa -- $(NIX_OPTIONS)
+.PHONY: update-elpa
+
+clean:
+	rm -f repos/flake.nix repos/flake.lock repos/archive.lock
+.PHONY: clean
 
 eval:
 	$(NIX_EVAL) $(NIX_OPTIONS) $(ARGS)

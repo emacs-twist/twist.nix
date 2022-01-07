@@ -1,8 +1,6 @@
 with builtins;
 let
-  pkgs = import (fetchTree (fromJSON (readFile ../../../flake.lock)).nodes.nixpkgs.locked) {
-    system = builtins.currentSystem;
-  };
+  pkgs = import <nixpkgs> { };
   parseElispHeaders = import ./parseElispHeaders.nix { inherit (pkgs) lib; };
 in
 pkgs.lib.runTests {
@@ -68,4 +66,12 @@ pkgs.lib.runTests {
     };
   };
 
+  testMiniEdit = {
+    expr = parseElispHeaders (readFile ./testdata/header-miniedit.el);
+    expected = {
+      summary = "Enhanced editing for minibuffer fields.";
+      Version = "2.0";
+      # Author(s) is currently ignored, as it's not a conventional header
+    };
+  };
 }

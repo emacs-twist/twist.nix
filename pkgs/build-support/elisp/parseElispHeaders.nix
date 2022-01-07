@@ -13,7 +13,9 @@ let
   # Regular expression patterns
   descriptionRegex = ";;;.+ --- (.+?)";
   magicHeaderRegex = "(.+)-\\*-.+-\\*-[[:space:]]*";
-  headerRegex = ";;[[:space:]]*([-[:alpha:]]+):([[:space:]]+.+)?";
+  headerRegex = ";;[[:space:]]*(.*[^[:space:]]):([[:space:]]*.*)?";
+
+  makeHeaderRegex = key: ";;[[:space:]]*${lib.escapeRegex key}[[:space:]]*:([[:space:]]*.*)?";
 
   headLine = head lines;
 
@@ -41,36 +43,63 @@ let
 
   isNotHeader = s: ! (isHeader s);
 
-  p1 = s: match ";;.+" s != null && !(isHeader s);
+  findHeader = key: dropWhile (s: match (makeHeaderRegex key) s == null) lines';
 
-  go' = acc: first: extra: input:
-    go
-      (acc // {
-        ${elemAt first 0} =
-          if length extra == 0
-          then trim (elemAt first 1)
-          else if elemAt first 1 == null
-          then extra
-          else [ (trim (elemAt first 1)) ] ++ extra;
-      })
-      (lib.drop (1 + length extra) input);
+  safeHead = xs:
+    if length xs == 0
+    then null
+    else head xs;
 
-  go = acc: rest:
-    if length rest == 0
-    then acc
-    else if isHeader (head rest)
-    then
-      go' acc (match headerRegex (head rest))
-        (lib.pipe (tail rest) [
-          (takeWhile p1)
-          (map (s: substring 2 (lib.stringLength s - 2) s))
-          (map trim)
-        ])
-        rest
-    else go acc (dropWhile isNotHeader rest);
+  headerContent = key: s: lib.pipe s [
+    (match (makeHeaderRegex key))
+    (lib.mapNullable (m: trim (head m)))
+  ];
 
-  headers = go { } lines';
+  lookupHeader = key: lib.pipe (findHeader key) [
+    safeHead
+    (lib.mapNullable (headerContent key))
+  ];
+
+  uncommentLine = s: lib.pipe (match ";+[[:space:]]*(.+)" s) [
+    head
+    trim
+  ];
+
+  lookupMultiLineHeader = key: pred: lib.pipe (findHeader key) [
+    (xs:
+      if length xs == 0
+      then [ ]
+      else [ (headerContent key (head xs)) ]
+        ++
+        lib.pipe (tail xs)
+          [
+            (takeWhile pred)
+            (map uncommentLine)
+          ])
+    (filter (s: s != ""))
+    (xs:
+      if length xs == 0
+      then null
+      else if length xs == 1
+      then head xs
+      else xs)
+  ];
+
+  succeeding = s: isNotHeader s && s != "";
 in
-(lib.optionalAttrs (summary != null) { inherit summary; })
-  //
-headers
+lib.filterAttrs (_: v: v != null) ({
+  inherit summary;
+
+  Version = lookupHeader "Version";
+  Package-Version = lookupHeader "Package-Version";
+  URL = lookupHeader "URL";
+  Homepage = lookupHeader "Homepage";
+  SPDX-License-Identifier = lookupHeader "SPDX-License-Identifier";
+  Keywords = lookupHeader "Keywords";
+  Package-Requires = lookupMultiLineHeader "Package-Requires" succeeding;
+  Author = lookupMultiLineHeader "Author" succeeding;
+  Maintainer = lookupMultiLineHeader "Maintainer" succeeding;
+
+  # Below is optional
+  # Created
+})

@@ -4,9 +4,6 @@
 ;;
 ;; Based on code from https://www.emacswiki.org/emacs/GccEmacs#h5o-14
 
-;; (dolist (dir (split-string (getenv "ELNLOADPATH") ":"))
-;;   (push dir native-comp-eln-load-path))
-
 (defun run-native-compile-sync ()
   (native-compile-async (or (pop command-line-args-left)
                             (error "Specify a source directory as the argument"))

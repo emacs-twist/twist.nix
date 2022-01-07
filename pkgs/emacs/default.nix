@@ -1,10 +1,12 @@
 { lib
 , pkgs
+, final
 }:
-{ emacs ? pkgs.emacs
-, lockFile
-, inventorySpecs
+{ emacsPackage ? pkgs.emacs
+, lockDir
+, inventories
 , initFiles
+, initParser ? lib.parseUsePackages
 , extraPackages ? [ "use-package" ]
 , addSystemPackages ? true
 , inputOverrides ? { }
@@ -12,14 +14,26 @@
 }:
 let
   inherit (builtins) readFile attrNames attrValues concatLists isFunction
-    split filter isString mapAttrs;
+    split filter isString mapAttrs match isList;
 in
 lib.makeScope pkgs.newScope (self:
   let
+    flakeLockFile = lockDir + "/flake.lock";
+
+    archiveLockFile = lockDir + "/archive.lock";
+
     userConfig = lib.pipe self.initFiles [
-      (map (file: lib.parseUsePackages (readFile file)))
+      (map (file: initParser (readFile file)))
       lib.zipAttrs
-      (lib.mapAttrs (_: concatLists))
+      (lib.mapAttrs (name: values:
+        if name == "elispPackages"
+        then concatLists values
+        else if name == "elispPackagePins"
+        then lib.foldl' (acc: x: acc // x) { } values
+        else if name == "systemPackages"
+        then concatLists values
+        else throw "${name} is an unknown attribute"
+      ))
     ];
 
     explicitPackages = userConfig.elispPackages ++ extraPackages;
@@ -32,11 +46,12 @@ lib.makeScope pkgs.newScope (self:
     ];
 
     enumerateConcretePackageSet = import ./data {
-      inherit lib emacs lockFile
-        builtinLibraries inventorySpecs inputOverrides;
+      inherit lib flakeLockFile archiveLockFile
+        builtinLibraries inventories inputOverrides;
+      elispPackagePins = userConfig.elispPackagePins or { };
     };
 
-    packageInputs = enumerateConcretePackageSet explicitPackages;
+    packageInputs = enumerateConcretePackageSet "build" explicitPackages;
 
     visibleBuiltinLibraries = lib.subtractLists explicitPackages builtinLibraries;
 
@@ -44,15 +59,26 @@ lib.makeScope pkgs.newScope (self:
       mapAttrs
         (_ename: { packageRequires, ... }:
           let
-            explicitDeps = lib.subtractLists visibleBuiltinLibraries packageRequires;
+            explicitDeps = lib.subtractLists visibleBuiltinLibraries
+              (lib.packageRequiresToLibraryNames packageRequires);
           in
           lib.unique
             (explicitDeps
               ++ concatLists (lib.attrVals explicitDeps self)))
         packageInputs);
-  in
+
+    versionStatus = import ./tools/check-versions.nix {
+      emacsVersion = emacsPackage.version;
+      inherit lib builtinLibraries;
+    };
+
+    generateLockFiles = self.callPackage ./lock {
+      inherit flakeLockFile;
+    };
+in
   {
-    inherit lib emacs;
+    inherit lib;
+    emacs = emacsPackage;
 
     # Expose only for convenience.
     inherit initFiles;
@@ -63,13 +89,15 @@ lib.makeScope pkgs.newScope (self:
       (mapAttrs (_: lib.filterAttrs (_: v: ! isFunction v)))
     ];
 
+    versions = versionStatus packageInputs;
+
     # You cannot use callPackageWith because it will apply makeOverridable
     # which will add extra attributes, e.g. overrideDerivation, to the result.
     # It will make builtins.attrNames unusable to this attribute.
     elispPackages = lib.makeScope self.newScope (eself:
       mapAttrs
         (ename: attrs:
-          self.callPackage ./build-elisp.nix { }
+          self.callPackage ./build { }
             ({
               nativeCompileAhead = nativeCompileAheadDefault;
               elispInputs = lib.attrVals allDependencies.${ename} eself;
@@ -84,23 +112,33 @@ lib.makeScope pkgs.newScope (self:
         # split by ".".
         executablePackages =
           if addSystemPackages
-          then lib.attrVals userConfig.systemPackages pkgs
+          then lib.attrVals (userConfig.systemPackages or [ ]) final
           else [ ];
       };
 
     # This makes the attrset a derivation for a shorthand.
     inherit (self.emacsWrapper) name type outputName outPath drvPath;
 
-    flakeNix = {
-      description = "This is an auto-generated file. Please don't edit it manually.";
-      inputs =
-        lib.mapAttrs
-          (_: { origin, ... }: origin // { flake = false; })
-          packageInputs;
-      outputs = { ... }: { };
+    # Generate flake.nix and archive.lock with a complete package set. You
+    # have to run `nix flake lock`` in the target directory to update
+    # flake.lock.
+    lock = generateLockFiles {
+      packageInputs = enumerateConcretePackageSet "lock" explicitPackages;
+      flakeNix = true;
+      archiveLock = true;
+      postCommand = "nix flake lock";
     };
 
-    flakeLock = import ./lock.nix {
-      inherit lib lockFile packageInputs;
+    # Generate flake.lock with the current revisions
+    #
+    # sync = generateLockFiles {
+    #   inherit packageInputs;
+    #   flakeLock = true;
+    # };
+
+    # Generate archive.lock with latest packages from ELPA package archives
+    update = generateLockFiles {
+      packageInputs = enumerateConcretePackageSet "update" explicitPackages;
+      archiveLock = true;
     };
   })

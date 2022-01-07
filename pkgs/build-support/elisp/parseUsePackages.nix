@@ -14,6 +14,7 @@ let
   isEnsured = form: plistGet form ":ensure" == true;
   isEnabled = form: plistGet form ":disabled" != true;
   ensuredPackageName = form: plistGet form ":ensure";
+  findPin = form: plistGet form ":pin";
   isUsePackageForm = xs:
     isList xs
     && length xs > 0
@@ -40,5 +41,14 @@ let
 in
 {
   elispPackages = lib.unique (directPackages ++ indirectPackages);
+  elispPackagePins = lib.pipe usePackageForms [
+    (map (form: {
+      # Don't consider :ensure keyword for now.
+      name = enameFromUsePackage form;
+      value = findPin form;
+    }))
+    (filter ({ value, ... }: value != null))
+    listToAttrs
+  ];
   systemPackages = lib.concatMap ensuredSystemPackages usePackageForms;
 }

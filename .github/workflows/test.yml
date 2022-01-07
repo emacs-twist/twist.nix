@@ -2,9 +2,6 @@ name: Test
 
 on:
   push:
-    branches:
-      - master
-  pull_request:
 
 jobs:
   changes:
@@ -25,6 +22,7 @@ jobs:
             - 'pkgs/build-support/**'
           test:
             - 'test/**'
+            - '.github/workflows/test.yml'
 
   unit-tests:
     needs: changes
@@ -34,8 +32,7 @@ jobs:
     - uses: actions/checkout@v2.4.0
     - uses: cachix/install-nix-action@v16
       with:
-        install_url: https://nixos-nix-install-tests.cachix.org/serve/vij683ly7sl95nnhb67bdjjfabclr85m/install
-        install_options: '--tarball-url-prefix https://nixos-nix-install-tests.cachix.org/serve'
+        nix_path: nixpkgs=channel:nixos-unstable
 
     - name: Run unit tests
       run: |
@@ -50,9 +47,6 @@ jobs:
     steps:
     - uses: actions/checkout@v2.4.0
     - uses: cachix/install-nix-action@v16
-      with:
-        install_url: https://nixos-nix-install-tests.cachix.org/serve/vij683ly7sl95nnhb67bdjjfabclr85m/install
-        install_options: '--tarball-url-prefix https://nixos-nix-install-tests.cachix.org/serve'
 
     - uses: cachix/cachix-action@v10
       with:
@@ -68,8 +62,10 @@ jobs:
     - name: Check the precondition
       working-directory: test
       run: |
+        make clean
         [[ ! -f repos/flake.nix ]]
         [[ ! -f repos/flake.lock ]]
+        [[ ! -f repos/archive.lock ]]
 
     - name: Build the configuration without a lock file (which should fail)
       id: no-lock
@@ -81,16 +77,20 @@ jobs:
       if: ${{ steps.no-lock.outcome == 'success' }}
       run: exit 1
 
-    - name: Generate the lock file
+    - name: Lock the ELPA packages
       working-directory: test
-      run: nix run .#lock
+      run: nix run .#update-elpa --impure
+
+    - name: Generate the lock file for MELPA packages
+      working-directory: test
+      run: nix run .#lock --impure
 
     - name: The lock file exists
       working-directory: test
       run: |
+        [[ -s repos/archive.lock ]]
         [[ -s repos/flake.nix ]]
         [[ -s repos/flake.lock ]]
-        ! git diff-index --exit-code --cached HEAD repos/flake.lock
 
     - name: Build the configuration with the generated lock file
       working-directory: test
@@ -103,19 +103,16 @@ jobs:
         echo "::set-output name=emacs::packages.$system.emacs"
 
     - run: |
-        nix eval --json .#.${{ steps.system.outputs.emacs }}.initFiles \
+        nix eval --json .#${{ steps.system.outputs.emacs }}.initFiles \
         | jq
       working-directory: test
 
     - run: |
-        nix eval --json .#.${{ steps.system.outputs.emacs }}.packageInputs \
+        nix eval --json .#${{ steps.system.outputs.emacs }}.packageInputs \
         | jq
       working-directory: test
 
     - run: |
-        nix eval --json .#.${{ steps.system.outputs.emacs }}.elispPackages.magit \
+        nix eval --json .#${{ steps.system.outputs.emacs }}.elispPackages.magit \
         | jq
-      working-directory: test
-
-    - run: nix run .#sync
       working-directory: test

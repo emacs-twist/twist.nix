@@ -18,8 +18,13 @@
     url = "git+https://git.savannah.gnu.org/git/emacs/elpa.git?ref=main";
     flake = false;
   };
-  inputs.nongnu-elpa = {
-    url = "git+https://git.savannah.gnu.org/git/emacs/nongnu.git?ref=main";
+  inputs.epkgs = {
+    url = "github:emacsmirror/epkgs";
+    flake = false;
+  };
+
+  inputs.emacs = {
+    url = "github:emacs-mirror/emacs";
     flake = false;
   };
 
@@ -57,43 +62,45 @@
 
       inherit (pkgs) lib;
 
-      emacs = (pkgs.emacsTwist {
+      emacs = pkgs.emacsTwist {
         # Use nix-emacs-ci which is more lightweight than a regular build
-        emacs = pkgs.emacs-snapshot;
+        emacsPackage = pkgs.emacs-snapshot;
         # In an actual configuration, you would use this:
         # emacs = pkgs.emacsPgtkGcc.overrideAttrs (_: { version = "29.0.50"; });
         initFiles = [
           ./init.el
         ];
-        lockFile = ./repos/flake.lock;
-        inventorySpecs = [
+        lockDir = ./lock;
+        inventories = [
           {
-            type = "elpa";
+            type = "elpa-core";
             path = inputs.gnu-elpa.outPath + "/elpa-packages";
+            src = inputs.emacs.outPath;
           }
           {
-            type = "elpa";
-            path = inputs.nongnu-elpa.outPath + "/elpa-packages";
-          }
-          {
+            name = "melpa";
             type = "melpa";
             path = inputs.melpa.outPath + "/recipes";
           }
+          {
+            name = "gnu";
+            type = "archive";
+            url = "https://elpa.gnu.org/packages/";
+          }
+          # Duplicate attribute set for the locked packages, but would be no
+          # problem in functionality.
+          {
+            name = "nongnu";
+            type = "archive";
+            url = "https://elpa.nongnu.org/nongnu/";
+          }
+          {
+            name = "emacsmirror";
+            type = "gitmodules";
+            path = inputs.epkgs.outPath + "/.gitmodules";
+          }
         ];
-        inputOverrides = {
-          ivy = _: ivy: {
-            # You can filter package files.
-            files = lib.pipe ivy.files [
-              (filter (name: match "ivy.+" name != null || name == "colir.el"))
-              (filter (name: ! elem name [
-                "ivy-test.el"
-                "ivy-avy.el"
-                "ivy-hydra.el"
-              ]))
-            ];
-          };
-        };
-      });
+      };
 
       inherit (flake-utils.lib) mkApp;
     in
@@ -103,47 +110,16 @@
       };
       defaultPackage = emacs;
 
+      apps.update-elpa = flake-utils.lib.mkApp {
+        drv = emacs.update.writeToDir "repos";
+      };
+
       apps.lock = flake-utils.lib.mkApp {
-        drv = pkgs.writeShellApplication {
-          name = "lock";
-          runtimeInputs = [
-            pkgs.nixfmt
-          ];
-          text = ''
-            if [[ ! -f repos/flake.nix ]]
-            then
-              touch repos/flake.nix
-              git add repos/flake.nix
-            fi
-
-            nix eval --impure .#packages.${system}.emacs.flakeNix "$@" \
-              | nixfmt \
-              | sed -e 's/<LAMBDA>/{ ... }: { }/' \
-              > repos/flake.nix
-            cd repos
-            nix flake lock
-          '';
-        };
+        drv = emacs.lock.writeToDir "repos";
       };
 
-      apps.sync = flake-utils.lib.mkApp {
-        drv = pkgs.writeShellApplication {
-          name = "sync";
-          runtimeInputs = [
-            pkgs.jq
-          ];
-          text = ''
-            tmp=$(mktemp -t emacs-XXX.lock)
-            cleanup() {
-              rm -f "$tmp"
-            }
-            trap cleanup EXIT ERR
-            nix eval --json --impure .#packages.${system}.emacs.flakeLock "$@" \
-              | jq \
-              > "$tmp"
-            cp "$tmp" repos/flake.lock
-          '';
-        };
-      };
+      # apps.sync = flake-utils.lib.mkApp {
+      #   drv = emacs.sync.writeToDir "repos";
+      # };
     });
 }
