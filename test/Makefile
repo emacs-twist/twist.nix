@@ -20,7 +20,7 @@ update-elpa:
 .PHONY: update-elpa
 
 clean:
-	rm -f repos/flake.nix repos/flake.lock repos/archive.lock
+	rm -f lock/flake.nix lock/flake.lock lock/archive.lock
 .PHONY: clean
 
 eval:

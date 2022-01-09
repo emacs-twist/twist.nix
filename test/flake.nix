@@ -111,15 +111,15 @@
       defaultPackage = emacs;
 
       apps.update-elpa = flake-utils.lib.mkApp {
-        drv = emacs.update.writeToDir "repos";
+        drv = emacs.update.writeToDir "lock";
       };
 
       apps.lock = flake-utils.lib.mkApp {
-        drv = emacs.lock.writeToDir "repos";
+        drv = emacs.lock.writeToDir "lock";
       };
 
       # apps.sync = flake-utils.lib.mkApp {
-      #   drv = emacs.sync.writeToDir "repos";
+      #   drv = emacs.sync.writeToDir "lock";
       # };
     });
 }
