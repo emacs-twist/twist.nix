@@ -86,7 +86,12 @@ in
     # Expose for inspecting the configuration. Don't override this attribute
     # using overrideScope', it doesn't affect anything.
     packageInputs = lib.pipe packageInputs [
-      (mapAttrs (_: lib.filterAttrs (_: v: ! isFunction v)))
+      (mapAttrs (_: attrs:
+        lib.filterAttrs (_: v: ! isFunction v)
+          (attrs // lib.optionalAttrs (attrs.src ? lastModified) {
+            inherit (attrs.src) lastModified;
+          })
+      ))
     ];
 
     versions = versionStatus packageInputs;
