@@ -86,6 +86,11 @@ let
   ];
 
   succeeding = s: isNotHeader s && s != "";
+
+  splitKeywords = s:
+    if s == ""
+    then [ ]
+    else filter isString (split "[,[:space:]]+" s);
 in
 lib.filterAttrs (_: v: v != null) ({
   inherit summary;
@@ -95,7 +100,7 @@ lib.filterAttrs (_: v: v != null) ({
   URL = lookupHeader "URL";
   Homepage = lookupHeader "Homepage";
   SPDX-License-Identifier = lookupHeader "SPDX-License-Identifier";
-  Keywords = lookupHeader "Keywords";
+  Keywords = lib.mapNullable (s: splitKeywords (trim s)) (lookupHeader "Keywords");
   Package-Requires = lookupMultiLineHeader "Package-Requires" succeeding;
   Author = lookupMultiLineHeader "Author" succeeding;
   Maintainer = lookupMultiLineHeader "Maintainer" succeeding;
