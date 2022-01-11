@@ -67,10 +67,10 @@ lib.makeScope pkgs.newScope (self:
               ++ concatLists (lib.attrVals explicitDeps self)))
         packageInputs);
 
-    versionStatus = import ./tools/check-versions.nix {
+    depsCheck = self.callPackage ./tools/check-versions.nix {
       emacsVersion = emacsPackage.version;
       inherit lib builtinLibraries;
-    };
+    } packageInputs;
 
     generateLockFiles = self.callPackage ./lock {
       inherit flakeLockFile;
@@ -94,7 +94,7 @@ in
       ))
     ];
 
-    versions = versionStatus packageInputs;
+    inherit depsCheck;
 
     # You cannot use callPackageWith because it will apply makeOverridable
     # which will add extra attributes, e.g. overrideDerivation, to the result.
