@@ -22,6 +22,52 @@ let
     then head (match regex file)
     else file;
 
+  hasFile = pred: (lib.findFirst pred null files != null);
+
+  canProduceInfo = hasFile (f: match ".+\\.(info|texi(nfo)?)" f != null);
+
+  # Ignore Org files starting with an upper-case character
+  # such as README.org, CHANGELOG.org, etc.
+  canProduceDoc = hasFile (f: match "[a-z0-9].+\.(org|texi(nfo)?)" f != null);
+in
+stdenv.mkDerivation (rec {
+  inherit src ename meta version;
+
+  pname = concatStringsSep "-" [
+    (replaceStrings [ "." ] [ "-" ] emacs.name)
+    (lib.toPName ename)
+  ];
+
+  preferLocalBuild = true;
+  allowSubstitutes = false;
+
+  outputs =
+    [ "out" ]
+    ++ lib.optional canProduceDoc "doc"
+    ++ lib.optional canProduceInfo "info";
+
+  buildInputs = [ emacs texinfo ];
+  # nativeBuildInputs = lib.optional nativeComp gcc;
+
+  EMACSLOADPATH = lib.concatStrings
+    (map (pkg: "${pkg.outPath}/share/emacs/site-lisp/:")
+      elispInputs);
+
+  buildPhase = ''
+    export EMACSLOADPATH
+
+    runHook preBuild
+
+    runHook buildCmd
+
+    if [[ " ''${outputs[*]} " = *" info "* ]]
+    then
+      runHook buildInfo
+    fi
+
+    runHook postBuild
+  '';
+
   buildCmd = ''
     ls
     emacs --batch -L . --eval "(setq debug-on-error ${if debugOnError then "t" else "nil"})" \
@@ -32,18 +78,6 @@ let
         --eval "(setq generated-autoload-file \"${ename}-autoloads.el\")" \
         -f batch-update-autoloads .
   '';
-
-  hasFile = pred: (lib.findFirst pred null files != null);
-
-  hasInfoOutput =
-    # (elem "info" (meta.outputsToInstall or []))
-    # &&
-    hasFile (f: match ".+\\.(info|texi(nfo)?)" f != null);
-
-  hasDocOutput =
-    # Ignore Org files starting with an upper-case character
-    # such as README.org, CHANGELOG.org, etc.
-    hasFile (f: match "[a-z0-9].+\.(org|texi(nfo)?)" f != null);
 
   buildInfo = ''
     cwd="$PWD"
@@ -59,63 +93,6 @@ let
       fi
     done
     cd $cwd
-  '';
-
-  installInfo = ''
-    mkdir -p $info/share
-    install -d $info/share/info
-    rm -f gpl.info contributors.info
-    for i in *.info
-    do
-      install -t $info/share/info $i
-    done
-  '';
-
-  installDoc = ''
-    mkdir -p $doc/share
-    install -d $doc/share/doc
-    for d in *.texi *.texinfo *.org
-    do
-      if [[ ! $d =~ ^[A-Z] ]]
-      then
-        install -t $doc/share/doc $d
-      fi
-    done
-  '';
-in
-stdenv.mkDerivation (rec {
-  inherit src ename meta version;
-
-  pname = concatStringsSep "-" [
-    (replaceStrings [ "." ] [ "-" ] emacs.name)
-    (lib.toPName ename)
-  ];
-
-  preferLocalBuild = true;
-  allowSubstitutes = false;
-
-  outputs =
-    [ "out" ]
-      ++ lib.optional hasDocOutput "doc"
-      ++ lib.optional hasInfoOutput "info";
-
-  buildInputs = [ emacs texinfo ];
-  # nativeBuildInputs = lib.optional nativeComp gcc;
-
-  EMACSLOADPATH = lib.concatStrings
-    (map (pkg: "${pkg.outPath}/share/emacs/site-lisp/:")
-      elispInputs);
-
-  buildPhase = ''
-    export EMACSLOADPATH
-
-    runHook preBuild
-
-    ${buildCmd}
-
-    ${lib.optionalString hasInfoOutput buildInfo}
-
-    runHook postBuild
   '';
 
   EMACSNATIVELOADPATH = "${
@@ -146,12 +123,41 @@ stdenv.mkDerivation (rec {
 
     ${lib.optionalString (nativeComp && nativeCompileAhead) buildAndInstallNativeLisp}
 
-    ${lib.optionalString hasDocOutput installDoc}
+    if [[ " ''${outputs[*]} " = *" doc "* ]]
+    then
+      runHook installDoc
+    fi
 
-    ${lib.optionalString hasInfoOutput installInfo}
+    if [[ " ''${outputs[*]} " = *" info "* ]]
+    then
+      runHook installInfo
+    fi
 
     runHook postInstall
   '';
+
+  installDoc = ''
+    mkdir -p $doc/share
+    install -d $doc/share/doc
+    for d in *.texi *.texinfo *.org
+    do
+      if [[ ! $d =~ ^[A-Z] ]]
+      then
+        install -t $doc/share/doc $d
+      fi
+    done
+  '';
+
+  installInfo = ''
+    mkdir -p $info/share
+    install -d $info/share/info
+    rm -f gpl.info contributors.info
+    for i in *.info
+    do
+      install -t $info/share/info $i
+    done
+  '';
+
 } // lib.optionalAttrs attrs.customUnpackPhase {
   # TODO: Handle :rename of ELPA packages
   # See https://git.savannah.gnu.org/cgit/emacs/elpa.git/plain/README for details.
