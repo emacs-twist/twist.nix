@@ -11,6 +11,7 @@
 , addSystemPackages ? true
 , inputOverrides ? { }
 , nativeCompileAheadDefault ? true
+, extraOutputsToInstall ? [ "info" "doc" ]
 }:
 let
   inherit (builtins) readFile attrNames attrValues concatLists isFunction
@@ -119,6 +120,7 @@ in
           if addSystemPackages
           then lib.attrVals (userConfig.systemPackages or [ ]) final
           else [ ];
+        inherit extraOutputsToInstall;
       };
 
     # This makes the attrset a derivation for a shorthand.

@@ -7,6 +7,7 @@
 , texinfo
 , elispInputs
 , executablePackages
+, extraOutputsToInstall
 }:
 let
   inherit (builtins) length;
@@ -21,7 +22,7 @@ let
       "/share/info"
       "/share/doc"
     ] ++ lib.optional nativeComp "/share/emacs/native-lisp";
-    extraOutputsToInstall = [ "info" "doc" ];
+    inherit extraOutputsToInstall;
     buildInputs = [
       texinfo
     ];
