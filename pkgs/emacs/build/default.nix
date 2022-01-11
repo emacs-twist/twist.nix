@@ -22,62 +22,13 @@ let
     then head (match regex file)
     else file;
 
-  buildCmd = ''
-    ls
-    emacs --batch -L . --eval "(setq debug-on-error ${if debugOnError then "t" else "nil"})" \
-      -f batch-byte-compile ${lib.escapeShellArgs (map stringBaseName lispFiles)}
-
-    rm -f "${ename}-autoloads.el"
-    emacs --batch -l autoload \
-        --eval "(setq generated-autoload-file \"${ename}-autoloads.el\")" \
-        -f batch-update-autoloads .
-  '';
-
   hasFile = pred: (lib.findFirst pred null files != null);
 
   canProduceInfo = hasFile (f: match ".+\\.(info|texi(nfo)?)" f != null);
 
-  buildInfo = ''
-    cwd="$PWD"
-    cd $src
-    for d in $(find -name '*.texi' -o -name '*.texinfo')
-    do
-      local basename=$(basename $d)
-      local i=$cwd/''${basename%%.*}.info
-      if [[ ! -e "$i" ]]
-      then
-        cd $src/$(dirname $d)
-        makeinfo --no-split "$basename" -o "$i"
-      fi
-    done
-    cd $cwd
-  '';
-
-  installInfo = ''
-    mkdir -p $info/share
-    install -d $info/share/info
-    rm -f gpl.info contributors.info
-    for i in *.info
-    do
-      install -t $info/share/info $i
-    done
-  '';
-
   # Ignore Org files starting with an upper-case character
   # such as README.org, CHANGELOG.org, etc.
   canProduceDoc = hasFile (f: match "[a-z0-9].+\.(org|texi(nfo)?)" f != null);
-
-  installDoc = ''
-    mkdir -p $doc/share
-    install -d $doc/share/doc
-    for d in *.texi *.texinfo *.org
-    do
-      if [[ ! $d =~ ^[A-Z] ]]
-      then
-        install -t $doc/share/doc $d
-      fi
-    done
-  '';
 in
 stdenv.mkDerivation (rec {
   inherit src ename meta version;
@@ -107,14 +58,41 @@ stdenv.mkDerivation (rec {
 
     runHook preBuild
 
-    ${buildCmd}
+    runHook buildCmd
 
     if [[ " ''${outputs[*]} " = *" info "* ]]
     then
-      ${buildInfo}
+      runHook buildInfo
     fi
 
     runHook postBuild
+  '';
+
+  buildCmd = ''
+    ls
+    emacs --batch -L . --eval "(setq debug-on-error ${if debugOnError then "t" else "nil"})" \
+      -f batch-byte-compile ${lib.escapeShellArgs (map stringBaseName lispFiles)}
+
+    rm -f "${ename}-autoloads.el"
+    emacs --batch -l autoload \
+        --eval "(setq generated-autoload-file \"${ename}-autoloads.el\")" \
+        -f batch-update-autoloads .
+  '';
+
+  buildInfo = ''
+    cwd="$PWD"
+    cd $src
+    for d in $(find -name '*.texi' -o -name '*.texinfo')
+    do
+      local basename=$(basename $d)
+      local i=$cwd/''${basename%%.*}.info
+      if [[ ! -e "$i" ]]
+      then
+        cd $src/$(dirname $d)
+        makeinfo --no-split "$basename" -o "$i"
+      fi
+    done
+    cd $cwd
   '';
 
   EMACSNATIVELOADPATH = "${
@@ -147,16 +125,39 @@ stdenv.mkDerivation (rec {
 
     if [[ " ''${outputs[*]} " = *" doc "* ]]
     then
-      ${installDoc}
+      runHook installDoc
     fi
 
     if [[ " ''${outputs[*]} " = *" info "* ]]
     then
-      ${installInfo}
+      runHook installInfo
     fi
 
     runHook postInstall
   '';
+
+  installDoc = ''
+    mkdir -p $doc/share
+    install -d $doc/share/doc
+    for d in *.texi *.texinfo *.org
+    do
+      if [[ ! $d =~ ^[A-Z] ]]
+      then
+        install -t $doc/share/doc $d
+      fi
+    done
+  '';
+
+  installInfo = ''
+    mkdir -p $info/share
+    install -d $info/share/info
+    rm -f gpl.info contributors.info
+    for i in *.info
+    do
+      install -t $info/share/info $i
+    done
+  '';
+
 } // lib.optionalAttrs attrs.customUnpackPhase {
   # TODO: Handle :rename of ELPA packages
   # See https://git.savannah.gnu.org/cgit/emacs/elpa.git/plain/README for details.
