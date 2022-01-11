@@ -35,15 +35,7 @@ let
 
   hasFile = pred: (lib.findFirst pred null files != null);
 
-  hasInfoOutput =
-    # (elem "info" (meta.outputsToInstall or []))
-    # &&
-    hasFile (f: match ".+\\.(info|texi(nfo)?)" f != null);
-
-  hasDocOutput =
-    # Ignore Org files starting with an upper-case character
-    # such as README.org, CHANGELOG.org, etc.
-    hasFile (f: match "[a-z0-9].+\.(org|texi(nfo)?)" f != null);
+  canProduceInfo = hasFile (f: match ".+\\.(info|texi(nfo)?)" f != null);
 
   buildInfo = ''
     cwd="$PWD"
@@ -71,6 +63,10 @@ let
     done
   '';
 
+  # Ignore Org files starting with an upper-case character
+  # such as README.org, CHANGELOG.org, etc.
+  canProduceDoc = hasFile (f: match "[a-z0-9].+\.(org|texi(nfo)?)" f != null);
+
   installDoc = ''
     mkdir -p $doc/share
     install -d $doc/share/doc
@@ -96,8 +92,8 @@ stdenv.mkDerivation (rec {
 
   outputs =
     [ "out" ]
-      ++ lib.optional hasDocOutput "doc"
-      ++ lib.optional hasInfoOutput "info";
+    ++ lib.optional canProduceDoc "doc"
+    ++ lib.optional canProduceInfo "info";
 
   buildInputs = [ emacs texinfo ];
   # nativeBuildInputs = lib.optional nativeComp gcc;
@@ -113,7 +109,10 @@ stdenv.mkDerivation (rec {
 
     ${buildCmd}
 
-    ${lib.optionalString hasInfoOutput buildInfo}
+    if [[ " ''${outputs[*]} " = *" info "* ]]
+    then
+      ${buildInfo}
+    fi
 
     runHook postBuild
   '';
@@ -146,9 +145,15 @@ stdenv.mkDerivation (rec {
 
     ${lib.optionalString (nativeComp && nativeCompileAhead) buildAndInstallNativeLisp}
 
-    ${lib.optionalString hasDocOutput installDoc}
+    if [[ " ''${outputs[*]} " = *" doc "* ]]
+    then
+      ${installDoc}
+    fi
 
-    ${lib.optionalString hasInfoOutput installInfo}
+    if [[ " ''${outputs[*]} " = *" info "* ]]
+    then
+      ${installInfo}
+    fi
 
     runHook postInstall
   '';
