@@ -3,11 +3,11 @@
     "elisp-helpers": {
       "flake": false,
       "locked": {
-        "lastModified": 1639125092,
-        "narHash": "sha256-jbkgsZEqmnoA37Hy8ET98DMdoPxPmwbPAUIQKVv0aBE=",
+        "lastModified": 1641996288,
+        "narHash": "sha256-0Fz5COcAvNc7Lfmwg+1LcmDiGJivRpHdAFx0SCpjixk=",
         "owner": "akirak",
         "repo": "nix-elisp-helpers",
-        "rev": "d8d0bc2de16f88c2dac93cec1e70df13668817da",
+        "rev": "ec7eaf0f1af9eda3f34d434a6ab4b852629289f4",
         "type": "github"
       },
       "original": {
@@ -180,9 +180,12 @@
         "fromElisp": "fromElisp"
       },
       "locked": {
-        "narHash": "sha256-g98FRPl1kYSKVttN9oDv4ouHpmALzeTdWBVD2ifGrMg=",
-        "path": "/assets/work/github.com/nix-libraries/emacs-twist/test/..",
-        "type": "path"
+        "lastModified": 1642002021,
+        "narHash": "sha256-wuVtjO2ne+lDtsjrUemfRLd840YJla+tDIX+yf8EaaQ=",
+        "owner": "akirak",
+        "repo": "emacs-twist",
+        "rev": "34cff2f0c14dbe675e027af89dd7644c31a48c7a",
+        "type": "github"
       },
       "original": {
         "owner": "akirak",
