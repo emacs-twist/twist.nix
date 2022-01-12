@@ -92,7 +92,13 @@ runCommandLocal "emacs"
     fi
 
     # Append autoloads to the site-start.el provided by nixpkgs
-    install -m 644 ${emacs}/share/emacs/site-lisp/site-start.el $siteLisp/site-start.el
+    origSiteStart="${emacs}/share/emacs/site-lisp/site-start.el"
+    if [[ -f "$origSiteStart" ]]
+    then
+      install -m 644 "$origSiteStart" $siteLisp/site-start.el
+    else
+      touch $siteLisp/site-start.el
+    fi
     if [[ -e $siteStartExtraPath ]]
     then
       cat $siteStartExtraPath >> $siteLisp/site-start.el
