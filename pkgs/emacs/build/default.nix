@@ -22,9 +22,33 @@ let
     then head (match regex file)
     else file;
 
-  hasFile = pred: (lib.findFirst pred null files != null);
+  filesAsList =
+    if isAttrs files
+    then attrNames files
+    else files;
+
+  hasFile = pred: (lib.findFirst pred null filesAsList != null);
 
   canProduceInfo = hasFile (f: match ".+\\.(info|texi(nfo)?)" f != null);
+
+  copySourceCommand =
+    if isList files
+    then
+      ''
+        for file in ${lib.escapeShellArgs files}
+        do
+          cp -r $src/$file build
+        done
+      ''
+    else
+      concatStringsSep "\n" (lib.mapAttrsToList
+        (origin: dest:
+          ''
+            mkdir -p $(dirname "build/${dest}")
+            cp -r "$src/${origin}" "build/${dest}"
+          ''
+        )
+        files);
 in
 stdenv.mkDerivation {
   inherit src ename meta version;
@@ -39,7 +63,7 @@ stdenv.mkDerivation {
 
   outputs =
     [ "out" ]
-      ++ lib.optional canProduceInfo "info";
+    ++ lib.optional canProduceInfo "info";
 
   buildInputs = [ emacs texinfo gnumake ];
   # nativeBuildInputs = lib.optional nativeComp gcc;
@@ -70,14 +94,11 @@ stdenv.mkDerivation {
   setSourceRoot =
     if attrs.doTangle
     then
-    ''
-      mkdir build
-      for file in ${lib.escapeShellArgs files}
-      do
-        cp -r $src/$file build
-      done
-      sourceRoot="$PWD/build"
-    ''
+      ''
+        mkdir build
+        ${copySourceCommand}
+        sourceRoot="$PWD/build"
+      ''
     else "";
 
   buildPhase = ''

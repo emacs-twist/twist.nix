@@ -111,10 +111,10 @@
         ];
         inputOverrides = {
           bbdb = _: super: {
-            files = lib.subtractLists [
+            files = builtins.removeAttrs super.files [
               "bbdb-vm.el"
               "bbdb-vm-aux.el"
-            ] super.files;
+            ];
           };
         };
       };

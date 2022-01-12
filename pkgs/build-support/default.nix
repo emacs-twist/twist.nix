@@ -44,7 +44,7 @@ lib
 
   expandMelpaRecipeFiles = src: spec:
     # Ignore *-pkg.el
-    filter (name: match ".+-pkg\.el" name == null)
+    lib.filterAttrs (name: _: match ".+-pkg\.el" name == null)
       (elispHelpers.expandMelpaRecipeFiles src spec);
 
   makeSourceVersion = version: _src: version;
