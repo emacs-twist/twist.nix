@@ -1,4 +1,20 @@
 {
+  "bbdb": {
+    "archive": {
+      "narHash": "sha256-nldTaqGYqmeQlzgB2vbLADqkx1V/ZfR8ERQfcikg/kk=",
+      "type": "tarball",
+      "url": "https://elpa.gnu.org/packages/bbdb-3.2.tar"
+    },
+    "inventory": {
+      "type": "archive",
+      "url": "https://elpa.gnu.org/packages/"
+    },
+    "packageRequires": {
+      "cl-lib": "0.5",
+      "emacs": "24"
+    },
+    "version": "3.2"
+  },
   "ivy": {
     "archive": {
       "narHash": "sha256-qoK7Sk3npmID1UD2BZ4IQGJpMtfmYpTXhrpz0/uJb6w=",

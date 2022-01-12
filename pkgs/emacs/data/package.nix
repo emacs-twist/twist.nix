@@ -32,13 +32,13 @@ let
       1500
       (self.src + "/${self.mainFile}"));
 in
+lib.getAttrs (filter (name: hasAttr name attrs) [
+  "entry" "renames" "origin" "archives" "preBuild"
+]) attrs
+//
 {
   inherit ename;
   inherit (attrs) inventory customUnpackPhase;
-  entry = attrs.entry or null;
-
-  origin = attrs.origin or null;
-  archive = attrs.archive or null;
   src = attrs.src;
 
   files = attrs.files or (lib.expandMelpaRecipeFiles self.src null);
@@ -51,8 +51,9 @@ in
       self.files;
 
   mainFile =
-    attrs.mainFile
-      or
+    if attrs ? mainFile
+    then attrs.mainFile
+    else
       lib.findFirst
       (file: baseNameOf file == ename + ".el")
       (if length self.lispFiles > 0

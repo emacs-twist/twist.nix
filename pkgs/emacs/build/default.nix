@@ -1,4 +1,4 @@
-{ lib, stdenv, emacs, texinfo }:
+{ lib, stdenv, emacs, texinfo, gnumake }:
 { ename
 , src
 , version
@@ -7,7 +7,7 @@
 , meta
 , nativeCompileAhead
 , elispInputs
-# Whether to fail on byte-compile warnings
+  # Whether to fail on byte-compile warnings
 , debugOnError ? false
 , ...
 } @ attrs:
@@ -26,7 +26,7 @@ let
 
   canProduceInfo = hasFile (f: match ".+\\.(info|texi(nfo)?)" f != null);
 in
-stdenv.mkDerivation (rec {
+stdenv.mkDerivation ({
   inherit src ename meta version;
 
   pname = concatStringsSep "-" [
@@ -39,32 +39,41 @@ stdenv.mkDerivation (rec {
 
   outputs =
     [ "out" ]
-    ++ lib.optional canProduceInfo "info";
+      ++ lib.optional canProduceInfo "info";
 
-  buildInputs = [ emacs texinfo ];
+  buildInputs = [ emacs texinfo gnumake ];
   # nativeBuildInputs = lib.optional nativeComp gcc;
+
+  # If the repository contains a Makefile, configurePhase can be problematic, so
+  # exclude it.
+  phases = [ "unpackPhase" "buildPhase" "installPhase" ];
+
+  renamePhase = lib.optionalString (attrs ? renames && attrs.renames != null) (
+    lib.pipe attrs.renames [
+      (lib.mapAttrsToList (origin: dest:
+        "mv ${
+          if lib.hasSuffix "/" origin
+          then origin + "*.*"
+          else lib.removeSuffix "/" origin
+        } ${
+          if dest == ""
+          then "."
+          else dest
+        }"
+      ))
+      (concatStringsSep "\n")
+    ]
+  );
 
   EMACSLOADPATH = lib.concatStrings
     (map (pkg: "${pkg.outPath}/share/emacs/site-lisp/:")
       elispInputs);
 
-  buildPhase = ''
-    export EMACSLOADPATH
-
-    runHook preBuild
-
-    runHook buildCmd
-
-    if [[ " ''${outputs[*]} " = *" info "* ]]
-    then
-      runHook buildInfo
-    fi
-
-    runHook postBuild
-  '';
+  EMACSNATIVELOADPATH = "${
+    lib.makeSearchPath "share/emacs/native-lisp/" elispInputs
+  }:";
 
   buildCmd = ''
-    ls
     emacs --batch -L . --eval "(setq debug-on-error ${if debugOnError then "t" else "nil"})" \
       -f batch-byte-compile ${lib.escapeShellArgs (map stringBaseName lispFiles)}
 
@@ -73,26 +82,6 @@ stdenv.mkDerivation (rec {
         --eval "(setq generated-autoload-file \"${ename}-autoloads.el\")" \
         -f batch-update-autoloads .
   '';
-
-  buildInfo = ''
-    cwd="$PWD"
-    cd $src
-    for d in $(find -name '*.texi' -o -name '*.texinfo')
-    do
-      local basename=$(basename $d)
-      local i=$cwd/''${basename%%.*}.info
-      if [[ ! -e "$i" ]]
-      then
-        cd $src/$(dirname $d)
-        makeinfo --no-split "$basename" -o "$i"
-      fi
-    done
-    cd $cwd
-  '';
-
-  EMACSNATIVELOADPATH = "${
-    lib.makeSearchPath "share/emacs/native-lisp/" elispInputs
-  }:";
 
   # Because eln depends on the file name hash of the source file, native
   # compilation must be done after the elisp files are installed. For details,
@@ -108,6 +97,8 @@ stdenv.mkDerivation (rec {
         -f run-native-compile-sync $lispDir
   '';
 
+  doNativeComp = nativeComp && nativeCompileAhead;
+
   installPhase = ''
     runHook preInstall
 
@@ -121,7 +112,10 @@ stdenv.mkDerivation (rec {
       . \
       | (cd $lispDir && tar xf -)
 
-    ${lib.optionalString (nativeComp && nativeCompileAhead) buildAndInstallNativeLisp}
+    if [[ -n "$doNativeComp" ]]
+    then
+      runHook buildAndInstallNativeLisp
+    fi
 
     if [[ " ''${outputs[*]} " = *" info "* ]]
     then
@@ -142,13 +136,52 @@ stdenv.mkDerivation (rec {
     done
   '';
 
-} // lib.optionalAttrs attrs.customUnpackPhase {
-  # TODO: Handle :rename of ELPA packages
-  # See https://git.savannah.gnu.org/cgit/emacs/elpa.git/plain/README for details.
-  unpackPhase = ''
-    for file in ${lib.escapeShellArgs files}
-    do
-      cp -r $src/$file .
-    done
+}
+//
+{
+  inherit (attrs) customUnpackPhase;
+
+  preBuild = attrs.preBuild or "";
+
+  buildPhase = ''
+    export EMACSLOADPATH
+    runHook preBuild
+
+    if [[ -n "$customUnpackPhase" ]]
+    then
+      mkdir _build
+      for file in ${lib.escapeShellArgs files}
+      do
+        cp -r $file _build
+      done
+      cd _build
+
+      runHook renamePhase
+    fi
+
+    runHook buildCmd
+    runHook postBuild
+
+    if [[ " ''${outputs[*]} " = *" info "* ]]
+    then
+      runHook buildInfo
+    fi
   '';
-})
+
+  buildInfo = ''
+    cwd="$PWD"
+    cd $src
+    for d in $(find -name '*.texi' -o -name '*.texinfo')
+    do
+      local basename=$(basename $d)
+      local i=$cwd/''${basename%%.*}.info
+      if [[ ! -e "$i" ]]
+      then
+        cd $src/$(dirname $d)
+        makeinfo --no-split "$basename" -o "$i"
+      fi
+    done
+    cd $cwd
+  '';
+}
+)
