@@ -113,7 +113,12 @@ stdenv.mkDerivation (rec {
 
     lispDir=$out/share/emacs/site-lisp/
     install -d $lispDir
-    tar cf - --exclude='*.info' --exclude='eln-cache' . \
+    tar cf - \
+      --exclude='*.info' \
+      --exclude='*.texi' \
+      --exclude='*.texinfo' \
+      --exclude='eln-cache' \
+      . \
       | (cd $lispDir && tar xf -)
 
     ${lib.optionalString (nativeComp && nativeCompileAhead) buildAndInstallNativeLisp}
