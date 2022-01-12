@@ -8,7 +8,7 @@ build:
 .PHONY: build
 
 lock:
-	$(NIX) run .#lock -- $(NIX_OPTIONS)
+	$(NIX) run .#lock --impure -- $(NIX_OPTIONS)
 .PHONY: lock
 
 sync:
@@ -16,7 +16,7 @@ sync:
 .PHONY: sync
 
 update-elpa:
-	$(NIX) run .#update-elpa -- $(NIX_OPTIONS)
+	$(NIX) run .#update-elpa --impure -- $(NIX_OPTIONS)
 .PHONY: update-elpa
 
 clean:
