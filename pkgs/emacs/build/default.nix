@@ -25,10 +25,6 @@ let
   hasFile = pred: (lib.findFirst pred null files != null);
 
   canProduceInfo = hasFile (f: match ".+\\.(info|texi(nfo)?)" f != null);
-
-  # Ignore Org files starting with an upper-case character
-  # such as README.org, CHANGELOG.org, etc.
-  canProduceDoc = hasFile (f: match "[a-z0-9].+\.(org|texi(nfo)?)" f != null);
 in
 stdenv.mkDerivation (rec {
   inherit src ename meta version;
@@ -43,7 +39,6 @@ stdenv.mkDerivation (rec {
 
   outputs =
     [ "out" ]
-    ++ lib.optional canProduceDoc "doc"
     ++ lib.optional canProduceInfo "info";
 
   buildInputs = [ emacs texinfo ];
@@ -123,29 +118,12 @@ stdenv.mkDerivation (rec {
 
     ${lib.optionalString (nativeComp && nativeCompileAhead) buildAndInstallNativeLisp}
 
-    if [[ " ''${outputs[*]} " = *" doc "* ]]
-    then
-      runHook installDoc
-    fi
-
     if [[ " ''${outputs[*]} " = *" info "* ]]
     then
       runHook installInfo
     fi
 
     runHook postInstall
-  '';
-
-  installDoc = ''
-    mkdir -p $doc/share
-    install -d $doc/share/doc
-    for d in *.texi *.texinfo *.org
-    do
-      if [[ ! $d =~ ^[A-Z] ]]
-      then
-        install -t $doc/share/doc $d
-      fi
-    done
   '';
 
   installInfo = ''

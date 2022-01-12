@@ -20,7 +20,6 @@ let
     paths = elispInputs;
     pathsToLink = [
       "/share/info"
-      "/share/doc"
     ] ++ lib.optional nativeComp "/share/emacs/native-lisp";
     inherit extraOutputsToInstall;
     buildInputs = [
@@ -109,9 +108,6 @@ runCommandLocal "emacs"
         --eval "(setq native-compile-target-directory \"$nativeLisp/\")" \
         -f batch-native-compile "$siteLisp/site-start.el"
     ''}
-
-    mkdir -p $out/share/doc
-    lndir -silent ${packageEnv}/share/doc $out/share/doc
 
     mkdir -p $out/share/info
     install ${selfInfo} $out/share/info/emacs-twist.info

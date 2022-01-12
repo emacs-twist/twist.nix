@@ -11,7 +11,7 @@
 , addSystemPackages ? true
 , inputOverrides ? { }
 , nativeCompileAheadDefault ? true
-, extraOutputsToInstall ? [ "info" "doc" ]
+, extraOutputsToInstall ? [ "info" ]
 }:
 let
   inherit (builtins) readFile attrNames attrValues concatLists isFunction
