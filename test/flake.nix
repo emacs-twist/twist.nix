@@ -73,9 +73,9 @@
         lockDir = ./lock;
         inventories = [
           {
-            type = "elpa-core";
+            type = "elpa";
             path = inputs.gnu-elpa.outPath + "/elpa-packages";
-            src = inputs.emacs.outPath;
+            core-src = inputs.emacs.outPath;
           }
           {
             name = "melpa";

@@ -1,24 +1,23 @@
 { lib }:
 with builtins;
 { path
-, src
-}:
+, core-src
+} @ args:
 _mode:
 lib.pipe (readFile path) [
   lib.parseElpaPackages
-  (lib.filterAttrs (_: args: args ? core))
+  (lib.filterAttrs (_: entry: entry ? core))
   (lib.mapAttrs (_: { core, ... } @ entry:
     {
-      inherit src;
+      src = core-src;
       customUnpackPhase = true;
       files =
         if isString core
         then [ core ]
         else core;
       inventory = {
-        type = "elpa-core";
-        inherit path src;
-      };
+        type = "elpa";
+      } // args;
     }
   ))
 ]

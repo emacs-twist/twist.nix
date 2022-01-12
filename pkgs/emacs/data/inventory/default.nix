@@ -14,8 +14,8 @@ removeAttrs
   (
     (if type == "melpa"
     then import ./melpa.nix { inherit lib flakeLockData; }
-    else if type == "elpa-core"
-    then import ./elpa-core.nix { inherit lib; }
+     else if type == "elpa"
+     then import ./elpa.nix { inherit lib; }
     else if type == "archive"
     then import ./archive.nix { inherit lib archiveLockData; }
     else if type == "gitmodules"
