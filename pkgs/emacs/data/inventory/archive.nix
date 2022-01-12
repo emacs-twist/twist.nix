@@ -5,7 +5,7 @@ with builtins;
 let
   versionString = numbers: concatStringsSep "." (map toString numbers);
 
-  customUnpackPhase = false;
+  doTangle = false;
 
   tarballEntry = ename: value:
     rec {
@@ -34,7 +34,7 @@ let
         type = "archive";
         inherit url;
       };
-      inherit customUnpackPhase;
+      inherit doTangle;
     };
 
   latest = lib.pipe (lib.readPackageArchiveContents url) [
@@ -45,7 +45,7 @@ let
   pinned = mapAttrs
     (_: locked: {
       src = builtins.fetchTree locked.archive;
-      inherit customUnpackPhase;
+      inherit doTangle;
       inherit (locked) version packageRequires archive inventory;
     })
     archiveLockData;

@@ -11,7 +11,7 @@ lib.pipe (lib.readGitModulesFile path) [
       if hasAttr ename flakeLockData
       then fetchTree flakeLockData.${ename}
       else fetchTree self.origin;
-    customUnpackPhase = false;
+    doTangle = false;
     files = lib.expandMelpaRecipeFiles self.src null;
     inherit origin;
     inventory = {

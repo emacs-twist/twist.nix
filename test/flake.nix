@@ -18,6 +18,10 @@
     url = "git+https://git.savannah.gnu.org/git/emacs/elpa.git?ref=main";
     flake = false;
   };
+  inputs.nongnu = {
+    url = "git+https://git.savannah.gnu.org/git/emacs/nongnu.git?ref=main";
+    flake = false;
+  };
   inputs.epkgs = {
     url = "github:emacsmirror/epkgs";
     flake = false;
@@ -73,14 +77,19 @@
         lockDir = ./lock;
         inventories = [
           {
-            type = "elpa-core";
+            type = "elpa";
             path = inputs.gnu-elpa.outPath + "/elpa-packages";
-            src = inputs.emacs.outPath;
+            core-src = inputs.emacs.outPath;
+            auto-sync-only = true;
           }
           {
             name = "melpa";
             type = "melpa";
             path = inputs.melpa.outPath + "/recipes";
+          }
+          {
+            type = "elpa";
+            path = inputs.nongnu.outPath + "/elpa-packages";
           }
           {
             name = "gnu";
@@ -100,6 +109,14 @@
             path = inputs.epkgs.outPath + "/.gitmodules";
           }
         ];
+        inputOverrides = {
+          bbdb = _: super: {
+            files = builtins.removeAttrs super.files [
+              "bbdb-vm.el"
+              "bbdb-vm-aux.el"
+            ];
+          };
+        };
       };
 
       inherit (flake-utils.lib) mkApp;

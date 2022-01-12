@@ -32,39 +32,47 @@ let
       1500
       (self.src + "/${self.mainFile}"));
 in
+lib.getAttrs
+  (filter (name: hasAttr name attrs) [
+    "entry"
+    "renames"
+    "origin"
+    "archive"
+    "preBuild"
+  ])
+  attrs
+  //
 {
   inherit ename;
-  inherit (attrs) inventory customUnpackPhase;
-  entry = attrs.entry or null;
-
-  origin = attrs.origin or null;
-  archive = attrs.archive or null;
+  inherit (attrs) inventory doTangle;
   src = attrs.src;
 
   files = attrs.files or (lib.expandMelpaRecipeFiles self.src null);
 
   lispFiles =
-    attrs.lispFiles
-      or
-      filter
-      (file: match ".+\\.el" file != null)
-      self.files;
+    lib.pipe self.files [
+      # Some packages contain contributing files in a subdirectory. See slime,
+      # ESS, etc. They are usually not supposed to be byte-compiled.
+      (lib.filterAttrs (_: file: match "[^/]+\\.el" file != null))
+      attrNames
+    ];
 
   mainFile =
-    attrs.mainFile
-      or
+    if attrs ? mainFile
+    then attrs.mainFile
+    else
       lib.findFirst
-      (file: baseNameOf file == ename + ".el")
-      (if length self.lispFiles > 0
-      then head self.lispFiles
-      else
-        throw ''
-          Package ${ename} contains no *.el file.
-          Check the contents in the store: ${self.src}
-          Files: ${toJSON self.lispFiles}
-          Entry: ${toJSON attrs.inventory}
-        '')
-      self.lispFiles;
+        (file: baseNameOf file == ename + ".el")
+        (if length self.lispFiles > 0
+        then head self.lispFiles
+        else
+          throw ''
+            Package ${ename} contains no *.el file.
+            Check the contents in the store: ${self.src}
+            Files: ${toJSON self.lispFiles}
+            Entry: ${toJSON attrs.inventory}
+          '')
+        self.lispFiles;
 
   inherit headers;
 

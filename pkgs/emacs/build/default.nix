@@ -1,4 +1,4 @@
-{ lib, stdenv, emacs, texinfo }:
+{ lib, stdenv, emacs, texinfo, gnumake }:
 { ename
 , src
 , version
@@ -7,7 +7,7 @@
 , meta
 , nativeCompileAhead
 , elispInputs
-# Whether to fail on byte-compile warnings
+  # Whether to fail on byte-compile warnings
 , debugOnError ? false
 , ...
 } @ attrs:
@@ -22,11 +22,21 @@ let
     then head (match regex file)
     else file;
 
-  hasFile = pred: (lib.findFirst pred null files != null);
+  hasFile = pred: (lib.findFirst pred null (attrNames files) != null);
 
   canProduceInfo = hasFile (f: match ".+\\.(info|texi(nfo)?)" f != null);
+
+  copySourceCommand =
+    concatStringsSep "\n" (lib.mapAttrsToList
+      (origin: dest:
+        ''
+          mkdir -p $(dirname "build/${dest}")
+          cp -r "$src/${origin}" "build/${dest}"
+        ''
+      )
+      files);
 in
-stdenv.mkDerivation (rec {
+stdenv.mkDerivation {
   inherit src ename meta version;
 
   pname = concatStringsSep "-" [
@@ -41,37 +51,54 @@ stdenv.mkDerivation (rec {
     [ "out" ]
     ++ lib.optional canProduceInfo "info";
 
-  buildInputs = [ emacs texinfo ];
+  buildInputs = [ emacs texinfo gnumake ];
   # nativeBuildInputs = lib.optional nativeComp gcc;
 
-  EMACSLOADPATH = lib.concatStrings
-    (map (pkg: "${pkg.outPath}/share/emacs/site-lisp/:")
-      elispInputs);
+  # If the repository contains a Makefile, configurePhase can be problematic, so
+  # exclude it.
+  phases = [ "unpackPhase" "buildPhase" "installPhase" ];
+
+  renamePhase = lib.optionalString (attrs ? renames && attrs.renames != null) (
+    lib.pipe attrs.renames [
+      (lib.mapAttrsToList (origin: dest:
+        "mv ${
+          if lib.hasSuffix "/" origin
+          then origin + "*.*"
+          else lib.removeSuffix "/" origin
+        } ${
+          if dest == ""
+          then "."
+          else dest
+        }"
+      ))
+      (concatStringsSep "\n")
+    ]
+  );
+
+  preBuild = attrs.preBuild or "";
+
+  setSourceRoot =
+    if attrs.doTangle
+    then
+      ''
+        mkdir build
+        ${copySourceCommand}
+        sourceRoot="$PWD/build"
+      ''
+    else "";
 
   buildPhase = ''
     export EMACSLOADPATH
+    runHook renamePhase
 
     runHook preBuild
-
     runHook buildCmd
+    runHook postBuild
 
     if [[ " ''${outputs[*]} " = *" info "* ]]
     then
       runHook buildInfo
     fi
-
-    runHook postBuild
-  '';
-
-  buildCmd = ''
-    ls
-    emacs --batch -L . --eval "(setq debug-on-error ${if debugOnError then "t" else "nil"})" \
-      -f batch-byte-compile ${lib.escapeShellArgs (map stringBaseName lispFiles)}
-
-    rm -f "${ename}-autoloads.el"
-    emacs --batch -l autoload \
-        --eval "(setq generated-autoload-file \"${ename}-autoloads.el\")" \
-        -f batch-update-autoloads .
   '';
 
   buildInfo = ''
@@ -90,9 +117,23 @@ stdenv.mkDerivation (rec {
     cd $cwd
   '';
 
+  EMACSLOADPATH = lib.concatStrings
+    (map (pkg: "${pkg.outPath}/share/emacs/site-lisp/:")
+      elispInputs);
+
   EMACSNATIVELOADPATH = "${
     lib.makeSearchPath "share/emacs/native-lisp/" elispInputs
   }:";
+
+  buildCmd = ''
+    emacs --batch -L . --eval "(setq debug-on-error ${if debugOnError then "t" else "nil"})" \
+      -f batch-byte-compile ${lib.escapeShellArgs (map stringBaseName lispFiles)}
+
+    rm -f "${ename}-autoloads.el"
+    emacs --batch -l autoload \
+        --eval "(setq generated-autoload-file \"${ename}-autoloads.el\")" \
+        -f batch-update-autoloads .
+  '';
 
   # Because eln depends on the file name hash of the source file, native
   # compilation must be done after the elisp files are installed. For details,
@@ -108,6 +149,8 @@ stdenv.mkDerivation (rec {
         -f run-native-compile-sync $lispDir
   '';
 
+  doNativeComp = nativeComp && nativeCompileAhead;
+
   installPhase = ''
     runHook preInstall
 
@@ -121,7 +164,10 @@ stdenv.mkDerivation (rec {
       . \
       | (cd $lispDir && tar xf -)
 
-    ${lib.optionalString (nativeComp && nativeCompileAhead) buildAndInstallNativeLisp}
+    if [[ -n "$doNativeComp" ]]
+    then
+      runHook buildAndInstallNativeLisp
+    fi
 
     if [[ " ''${outputs[*]} " = *" info "* ]]
     then
@@ -134,21 +180,10 @@ stdenv.mkDerivation (rec {
   installInfo = ''
     mkdir -p $info/share
     install -d $info/share/info
-    # Exclude files that can conflict across multiple packages.
-    rm -f gpl.info contributors.info fdl.info
-    for i in *.info
+    for i in ${ename}*.info
     do
       install -t $info/share/info $i
     done
   '';
 
-} // lib.optionalAttrs attrs.customUnpackPhase {
-  # TODO: Handle :rename of ELPA packages
-  # See https://git.savannah.gnu.org/cgit/emacs/elpa.git/plain/README for details.
-  unpackPhase = ''
-    for file in ${lib.escapeShellArgs files}
-    do
-      cp -r $src/$file .
-    done
-  '';
-})
+}

@@ -3,11 +3,11 @@
     "elisp-helpers": {
       "flake": false,
       "locked": {
-        "lastModified": 1639125092,
-        "narHash": "sha256-jbkgsZEqmnoA37Hy8ET98DMdoPxPmwbPAUIQKVv0aBE=",
+        "lastModified": 1641996288,
+        "narHash": "sha256-0Fz5COcAvNc7Lfmwg+1LcmDiGJivRpHdAFx0SCpjixk=",
         "owner": "akirak",
         "repo": "nix-elisp-helpers",
-        "rev": "d8d0bc2de16f88c2dac93cec1e70df13668817da",
+        "rev": "ec7eaf0f1af9eda3f34d434a6ab4b852629289f4",
         "type": "github"
       },
       "original": {
