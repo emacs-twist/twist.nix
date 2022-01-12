@@ -128,9 +128,7 @@ stdenv.mkDerivation ({
   installInfo = ''
     mkdir -p $info/share
     install -d $info/share/info
-    # Exclude files that can conflict across multiple packages.
-    rm -f gpl.info contributors.info fdl.info
-    for i in *.info
+    for i in ${ename}*.info
     do
       install -t $info/share/info $i
     done
