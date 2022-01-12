@@ -22,33 +22,19 @@ let
     then head (match regex file)
     else file;
 
-  filesAsList =
-    if isAttrs files
-    then attrNames files
-    else files;
-
-  hasFile = pred: (lib.findFirst pred null filesAsList != null);
+  hasFile = pred: (lib.findFirst pred null (attrNames files) != null);
 
   canProduceInfo = hasFile (f: match ".+\\.(info|texi(nfo)?)" f != null);
 
   copySourceCommand =
-    if isList files
-    then
-      ''
-        for file in ${lib.escapeShellArgs files}
-        do
-          cp -r $src/$file build
-        done
-      ''
-    else
-      concatStringsSep "\n" (lib.mapAttrsToList
-        (origin: dest:
-          ''
-            mkdir -p $(dirname "build/${dest}")
-            cp -r "$src/${origin}" "build/${dest}"
-          ''
-        )
-        files);
+    concatStringsSep "\n" (lib.mapAttrsToList
+      (origin: dest:
+        ''
+          mkdir -p $(dirname "build/${dest}")
+          cp -r "$src/${origin}" "build/${dest}"
+        ''
+      )
+      files);
 in
 stdenv.mkDerivation {
   inherit src ename meta version;

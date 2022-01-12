@@ -12,6 +12,14 @@ let
     type = "elpa";
   };
 
+  fileListToAttrs = files: lib.pipe files [
+    (map (name: {
+      inherit name;
+      value = baseNameFromString name;
+    }))
+    listToAttrs    
+  ];
+
   corePackages =
     if args ? core-src
     then
@@ -23,9 +31,10 @@ let
             src = args.core-src;
             doTangle = true;
             files =
-              if isString core
-              then [ core ]
-              else core;
+              fileListToAttrs
+                (if isString core
+                 then [ core ]
+                 else core);
           }
         ))
       ]
@@ -47,6 +56,13 @@ let
       ];
 
   isElisp = lib.hasSuffix ".el";
+
+  baseNameRegexp = ".+/([^/]+)";
+
+  baseNameFromString = pathString:
+    if match baseNameRegexp pathString != null
+    then head (match baseNameRegexp pathString)
+    else pathString;
 
   makeExternal = ename: entry:
     let
@@ -84,7 +100,7 @@ let
         ) [
         (filter (file: ! (file == ".dir-locals.el" || match "(.+-)?tests?\.el" file != null)))
         (filter p)
-        lib.unique
+        fileListToAttrs
       ];
 
       preBuild =

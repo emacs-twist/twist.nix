@@ -50,9 +50,7 @@ lib.getAttrs
   files = attrs.files or (lib.expandMelpaRecipeFiles self.src null);
 
   lispFiles =
-    if isList self.files
-    then filter (file: match ".+\\.el" file != null) self.files
-    else lib.pipe self.files [
+    lib.pipe self.files [
       # Some packages contain contributing files in a subdirectory. See slime,
       # ESS, etc. They are usually not supposed to be byte-compiled.
       (lib.filterAttrs (_: file: match "[^/]+\\.el" file != null))
