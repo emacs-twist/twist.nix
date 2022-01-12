@@ -37,7 +37,7 @@ lib.getAttrs
     "entry"
     "renames"
     "origin"
-    "archives"
+    "archive"
     "preBuild"
   ])
   attrs
