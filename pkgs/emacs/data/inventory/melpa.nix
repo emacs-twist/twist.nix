@@ -9,7 +9,7 @@ let
         if hasAttr ename flakeLockData
         then fetchTree flakeLockData.${ename}
         else fetchTree self.origin;
-      customUnpackPhase = true;
+      doTangle = true;
       files = lib.expandMelpaRecipeFiles self.src (entry.files or null);
       origin = lib.flakeRefAttrsFromMelpaRecipe entry;
       inventory = inventory // { inherit entry; };

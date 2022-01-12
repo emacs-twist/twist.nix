@@ -38,7 +38,7 @@ lib.getAttrs (filter (name: hasAttr name attrs) [
 //
 {
   inherit ename;
-  inherit (attrs) inventory customUnpackPhase;
+  inherit (attrs) inventory doTangle;
   src = attrs.src;
 
   files = attrs.files or (lib.expandMelpaRecipeFiles self.src null);

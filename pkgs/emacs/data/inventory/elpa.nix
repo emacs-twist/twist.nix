@@ -21,7 +21,7 @@ let
           {
             inherit inventory;
             src = args.core-src;
-            customUnpackPhase = true;
+            doTangle = true;
             files =
               if isString core
               then [ core ]
@@ -59,7 +59,7 @@ let
     in
     self:
     {
-      customUnpackPhase = true;
+      doTangle = true;
       src =
         if hasAttr ename flakeLockData
         then fetchTree flakeLockData.${ename}

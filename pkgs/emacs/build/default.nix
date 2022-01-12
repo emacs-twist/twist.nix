@@ -66,24 +66,25 @@ stdenv.mkDerivation {
   );
 
   preBuild = attrs.preBuild or "";
-  inherit (attrs) customUnpackPhase;
+
+  setSourceRoot =
+    if attrs.doTangle
+    then
+    ''
+      mkdir build
+      for file in ${lib.escapeShellArgs files}
+      do
+        cp -r $src/$file build
+      done
+      sourceRoot="$PWD/build"
+    ''
+    else "";
 
   buildPhase = ''
     export EMACSLOADPATH
+    runHook renamePhase
+
     runHook preBuild
-
-    if [[ -n "$customUnpackPhase" ]]
-    then
-      mkdir _build
-      for file in ${lib.escapeShellArgs files}
-      do
-        cp -r $file _build
-      done
-      cd _build
-
-      runHook renamePhase
-    fi
-
     runHook buildCmd
     runHook postBuild
 
