@@ -26,7 +26,7 @@ let
 
   canProduceInfo = hasFile (f: match ".+\\.(info|texi(nfo)?)" f != null);
 in
-stdenv.mkDerivation ({
+stdenv.mkDerivation {
   inherit src ename meta version;
 
   pname = concatStringsSep "-" [
@@ -64,6 +64,50 @@ stdenv.mkDerivation ({
       (concatStringsSep "\n")
     ]
   );
+
+  preBuild = attrs.preBuild or "";
+  inherit (attrs) customUnpackPhase;
+
+  buildPhase = ''
+    export EMACSLOADPATH
+    runHook preBuild
+
+    if [[ -n "$customUnpackPhase" ]]
+    then
+      mkdir _build
+      for file in ${lib.escapeShellArgs files}
+      do
+        cp -r $file _build
+      done
+      cd _build
+
+      runHook renamePhase
+    fi
+
+    runHook buildCmd
+    runHook postBuild
+
+    if [[ " ''${outputs[*]} " = *" info "* ]]
+    then
+      runHook buildInfo
+    fi
+  '';
+
+  buildInfo = ''
+    cwd="$PWD"
+    cd $src
+    for d in $(find -name '*.texi' -o -name '*.texinfo')
+    do
+      local basename=$(basename $d)
+      local i=$cwd/''${basename%%.*}.info
+      if [[ ! -e "$i" ]]
+      then
+        cd $src/$(dirname $d)
+        makeinfo --no-split "$basename" -o "$i"
+      fi
+    done
+    cd $cwd
+  '';
 
   EMACSLOADPATH = lib.concatStrings
     (map (pkg: "${pkg.outPath}/share/emacs/site-lisp/:")
@@ -135,51 +179,3 @@ stdenv.mkDerivation ({
   '';
 
 }
-//
-{
-  inherit (attrs) customUnpackPhase;
-
-  preBuild = attrs.preBuild or "";
-
-  buildPhase = ''
-    export EMACSLOADPATH
-    runHook preBuild
-
-    if [[ -n "$customUnpackPhase" ]]
-    then
-      mkdir _build
-      for file in ${lib.escapeShellArgs files}
-      do
-        cp -r $file _build
-      done
-      cd _build
-
-      runHook renamePhase
-    fi
-
-    runHook buildCmd
-    runHook postBuild
-
-    if [[ " ''${outputs[*]} " = *" info "* ]]
-    then
-      runHook buildInfo
-    fi
-  '';
-
-  buildInfo = ''
-    cwd="$PWD"
-    cd $src
-    for d in $(find -name '*.texi' -o -name '*.texinfo')
-    do
-      local basename=$(basename $d)
-      local i=$cwd/''${basename%%.*}.info
-      if [[ ! -e "$i" ]]
-      then
-        cd $src/$(dirname $d)
-        makeinfo --no-split "$basename" -o "$i"
-      fi
-    done
-    cd $cwd
-  '';
-}
-)
