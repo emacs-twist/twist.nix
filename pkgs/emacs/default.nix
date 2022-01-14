@@ -37,7 +37,7 @@ lib.makeScope pkgs.newScope (self:
       ))
     ];
 
-    explicitPackages = userConfig.elispPackages ++ extraPackages;
+    explicitPackages = (userConfig.elispPackages or [ ]) ++ extraPackages;
 
     builtinLibraryList = self.callPackage ./builtins.nix { };
 
