@@ -124,19 +124,8 @@
     {
       packages = {
         inherit emacs;
+        admin = emacs.admin "lock";
       };
       defaultPackage = emacs;
-
-      apps.update-elpa = flake-utils.lib.mkApp {
-        drv = emacs.update.writeToDir "lock";
-      };
-
-      apps.lock = flake-utils.lib.mkApp {
-        drv = emacs.lock.writeToDir "lock";
-      };
-
-      # apps.sync = flake-utils.lib.mkApp {
-      #   drv = emacs.sync.writeToDir "lock";
-      # };
     });
 }

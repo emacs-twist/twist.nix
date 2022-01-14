@@ -128,26 +128,28 @@ lib.makeScope pkgs.newScope (self:
     # This makes the attrset a derivation for a shorthand.
     inherit (self.emacsWrapper) name type outputName outPath drvPath;
 
-    # Generate flake.nix and archive.lock with a complete package set. You
-    # have to run `nix flake lock`` in the target directory to update
-    # flake.lock.
-    lock = generateLockFiles {
-      packageInputs = enumerateConcretePackageSet "lock" explicitPackages;
-      flakeNix = true;
-      archiveLock = true;
-      postCommand = "nix flake lock";
-    };
+    admin = lockDirName: {
+      # Generate flake.nix and archive.lock with a complete package set. You
+      # have to run `nix flake lock`` in the target directory to update
+      # flake.lock.
+      lock = generateLockFiles {
+        packageInputs = enumerateConcretePackageSet "lock" explicitPackages;
+        flakeNix = true;
+        archiveLock = true;
+        postCommand = "nix flake lock";
+      } lockDirName;
 
-    # Generate flake.lock with the current revisions
-    #
-    # sync = generateLockFiles {
-    #   inherit packageInputs;
-    #   flakeLock = true;
-    # };
+      # Generate flake.lock with the current revisions
+      #
+      # sync = generateLockFiles {
+      #   inherit packageInputs;
+      #   flakeLock = true;
+      # };
 
-    # Generate archive.lock with latest packages from ELPA package archives
-    update = generateLockFiles {
-      packageInputs = enumerateConcretePackageSet "update" explicitPackages;
-      archiveLock = true;
+      # Generate archive.lock with latest packages from ELPA package archives
+      update = generateLockFiles {
+        packageInputs = enumerateConcretePackageSet "update" explicitPackages;
+        archiveLock = true;
+      } lockDirName;
     };
   })
