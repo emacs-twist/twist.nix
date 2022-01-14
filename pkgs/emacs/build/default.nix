@@ -131,7 +131,9 @@ stdenv.mkDerivation {
 
     rm -f "${ename}-autoloads.el"
     emacs --batch -l autoload \
-        --eval "(setq generated-autoload-file \"${ename}-autoloads.el\")" \
+        --eval "(setq backup-inhibited t)" \
+        --eval "(setq version-control 'never)" \
+        --eval "(setq generated-autoload-file \"$PWD/${ename}-autoloads.el\")" \
         -f batch-update-autoloads .
   '';
 

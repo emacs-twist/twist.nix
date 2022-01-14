@@ -14,6 +14,7 @@
 , archiveLock ? false
 , postCommand ? null
 }:
+outDir:
 assert (flakeNix || flakeLock || archiveLock);
 let
   inherit (builtins) toJSON attrNames mapAttrs;
@@ -66,7 +67,7 @@ let
     ${jq}/bin/jq . "$archiveLockPath" > "$out/archive.lock"
   '';
 
-  drv = runCommandLocal "emacs-twist-lock" ({
+  src = runCommandLocal "emacs-twist-lock" ({
     inherit passAsFile;
   } // lib.getAttrs passAsFile data)
   ''
@@ -77,7 +78,7 @@ let
     ${lib.optionalString archiveLock generateArchiveLock}
   '';
 
-  writeToDir = outDir: writeShellScriptBin "lock" ''
+  writeToDir =  writeShellScriptBin "lock" ''
     outDir="${outDir}"
 
     if [[ ! -d "$outDir" ]]
@@ -98,7 +99,7 @@ let
       fi
     done
 
-    install -m 644 -t "$outDir" ${drv}/*.*
+    install -m 644 -t "$outDir" ${src}/*.*
 
     ${lib.optionalString (postCommand != null) ''
       cd "$outDir"
@@ -107,9 +108,9 @@ let
   '';
 in
 lib.extendDerivation true {
-  writeToDir = outDir: lib.extendDerivation true {
-    # passthru.exePath is useful with flake-utils.lib.mkApp
-    # <https://github.com/numtide/flake-utils>
-    passthru.exePath = "/bin/lock";
-  } (writeToDir outDir);
-} drv
+  inherit src;
+
+  # passthru.exePath is useful with flake-utils.lib.mkApp
+  # <https://github.com/numtide/flake-utils>
+  passthru.exePath = "/bin/lock";
+} writeToDir

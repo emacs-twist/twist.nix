@@ -8,16 +8,12 @@ build:
 .PHONY: build
 
 lock:
-	$(NIX) run .#lock --impure -- $(NIX_OPTIONS)
+	$(NIX) run .#admin.lock --impure -- $(NIX_OPTIONS)
 .PHONY: lock
 
-sync:
-	$(NIX) run .#sync -- $(NIX_OPTIONS)
-.PHONY: sync
-
-update-elpa:
-	$(NIX) run .#update-elpa --impure -- $(NIX_OPTIONS)
-.PHONY: update-elpa
+update:
+	$(NIX) run .#admin.update --impure -- $(NIX_OPTIONS)
+.PHONY: update
 
 clean:
 	rm -f lock/flake.nix lock/flake.lock lock/archive.lock

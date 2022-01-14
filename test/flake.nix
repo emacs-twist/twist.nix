@@ -96,13 +96,6 @@
             type = "archive";
             url = "https://elpa.gnu.org/packages/";
           }
-          # Duplicate attribute set for the locked packages, but would be no
-          # problem in functionality.
-          {
-            name = "nongnu";
-            type = "archive";
-            url = "https://elpa.nongnu.org/nongnu/";
-          }
           {
             name = "emacsmirror";
             type = "gitmodules";
@@ -124,19 +117,8 @@
     {
       packages = {
         inherit emacs;
+        admin = emacs.admin "lock";
       };
       defaultPackage = emacs;
-
-      apps.update-elpa = flake-utils.lib.mkApp {
-        drv = emacs.update.writeToDir "lock";
-      };
-
-      apps.lock = flake-utils.lib.mkApp {
-        drv = emacs.lock.writeToDir "lock";
-      };
-
-      # apps.sync = flake-utils.lib.mkApp {
-      #   drv = emacs.sync.writeToDir "lock";
-      # };
     });
 }
