@@ -68,15 +68,17 @@ lib.makeScope pkgs.newScope (self:
               ++ concatLists (lib.attrVals explicitDeps self)))
         packageInputs);
 
-    depsCheck = self.callPackage ./tools/check-versions.nix {
-      emacsVersion = emacsPackage.version;
-      inherit lib builtinLibraries;
-    } packageInputs;
+    depsCheck = self.callPackage ./tools/check-versions.nix
+      {
+        emacsVersion = emacsPackage.version;
+        inherit lib builtinLibraries;
+      }
+      packageInputs;
 
     generateLockFiles = self.callPackage ./lock {
       inherit flakeLockFile;
     };
-in
+  in
   {
     inherit lib;
     emacs = emacsPackage;
