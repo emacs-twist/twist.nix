@@ -96,13 +96,6 @@
             type = "archive";
             url = "https://elpa.gnu.org/packages/";
           }
-          # Duplicate attribute set for the locked packages, but would be no
-          # problem in functionality.
-          {
-            name = "nongnu";
-            type = "archive";
-            url = "https://elpa.nongnu.org/nongnu/";
-          }
           {
             name = "emacsmirror";
             type = "gitmodules";
