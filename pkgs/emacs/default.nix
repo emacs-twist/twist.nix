@@ -128,7 +128,7 @@ lib.makeScope pkgs.newScope (self:
     # This makes the attrset a derivation for a shorthand.
     inherit (self.emacsWrapper) name type outputName outPath drvPath;
 
-    admin = lockDirName: {
+    admin = lockDirName: lib.extendDerivation true {
       # Generate flake.nix and archive.lock with a complete package set. You
       # have to run `nix flake lock`` in the target directory to update
       # flake.lock.
@@ -151,5 +151,8 @@ lib.makeScope pkgs.newScope (self:
         packageInputs = enumerateConcretePackageSet "update" explicitPackages;
         archiveLock = true;
       } lockDirName;
-    };
+    } (pkgs.writeShellScriptBin "admin" ''
+      echo >&2 "Run .#admin.lock or .#admin.update"
+      exit 1
+    '');
   })
