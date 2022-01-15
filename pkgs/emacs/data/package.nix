@@ -15,7 +15,10 @@ let
     else if isFunction mkAttrs
     then mkAttrs self
     else throw "Unsupported type: ${toJSON mkAttrs}";
-  pkgFiles = filter (file: baseNameOf file == ename + "-pkg.el") self.lispFiles;
+  pkgFiles = lib.pipe self.files [
+    attrNames
+    (filter (filename: baseNameOf filename == ename + "-pkg.el"))
+  ];
   pkgFile = head pkgFiles;
   hasPkgFile = length pkgFiles != 0;
   packageDesc =
@@ -55,6 +58,9 @@ lib.getAttrs
       # ESS, etc. They are usually not supposed to be byte-compiled.
       (lib.filterAttrs (_: file: match "[^/]+\\.el" file != null))
       attrNames
+      # *-pkg.el is not required unless you use package.el, and it makes
+      # *-byte-compile fail, so exclude them.
+      (filter (filename: match ".+-pkg\.el" filename == null))
     ];
 
   mainFile =

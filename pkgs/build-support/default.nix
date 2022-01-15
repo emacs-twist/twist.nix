@@ -38,14 +38,10 @@ lib
   inherit (elispHelpers)
     parsePkg
     parseElpaPackages
+    expandMelpaRecipeFiles
     flakeRefAttrsFromElpaAttrs
     parseMelpaRecipe
     flakeRefAttrsFromMelpaRecipe;
-
-  expandMelpaRecipeFiles = src: spec:
-    # Ignore *-pkg.el
-    lib.filterAttrs (name: _: match ".+-pkg\.el" name == null)
-      (elispHelpers.expandMelpaRecipeFiles src spec);
 
   makeSourceVersion = version: _src: version;
   toPName = replaceStrings [ "@" ] [ "at" ];

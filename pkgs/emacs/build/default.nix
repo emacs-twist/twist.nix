@@ -130,6 +130,9 @@ stdenv.mkDerivation {
   errorOnWarn = false;
 
   buildCmd = ''
+    # Don't make the package description of package.el available
+    rm -f *-pkg.el
+
     if [[ ! -n "$dontByteCompile" ]]
     then
       (
