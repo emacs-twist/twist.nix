@@ -123,9 +123,15 @@ stdenv.mkDerivation {
     lib.makeSearchPath "share/emacs/native-lisp/" elispInputs
   }:";
 
+  dontByteCompile = false;
+  errorOnWarn = false;
+
   buildCmd = ''
-    emacs --batch -L . \
-      -f batch-byte-compile ${lib.escapeShellArgs (map stringBaseName lispFiles)}
+    if [[ ! -n "$dontByteCompile" ]]
+    then
+      emacs --batch -L . \
+        -f batch-byte-compile ${lib.escapeShellArgs (map stringBaseName lispFiles)}
+    fi
 
     rm -f "${ename}-autoloads.el"
     emacs --batch -l autoload \
@@ -164,7 +170,7 @@ stdenv.mkDerivation {
       . \
       | (cd $lispDir && tar xf -)
 
-    if [[ -n "$doNativeComp" ]]
+    if ! [[ -n "$dontByteCompile" ]] && [[ -n "$doNativeComp" ]]
     then
       runHook buildAndInstallNativeLisp
     fi
