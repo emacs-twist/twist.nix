@@ -129,8 +129,17 @@ stdenv.mkDerivation {
   buildCmd = ''
     if [[ ! -n "$dontByteCompile" ]]
     then
-      emacs --batch -L . \
-        -f batch-byte-compile ${lib.escapeShellArgs (map stringBaseName lispFiles)}
+      (
+        if [[ -n "$errorOnWarn" ]]
+        then
+          byte_compile_error_on_warn=t
+        else
+          byte_compile_error_on_warn=nil
+        fi
+        emacs --batch -L . \
+          --eval "(setq byte-compile-error-on-warn ''${byte_compile_error_on_warn})" \
+          -f batch-byte-compile ${lib.escapeShellArgs (map stringBaseName lispFiles)}
+      )
     fi
 
     rm -f "${ename}-autoloads.el"
