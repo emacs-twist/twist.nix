@@ -140,6 +140,8 @@ stdenv.mkDerivation {
 
   dontByteCompile = false;
   errorOnWarn = false;
+  # Slower but more accurate if you publish the package
+  doByteCompileSeparately = false;
 
   buildCmd = ''
     # Don't make the package description of package.el available
@@ -148,16 +150,22 @@ stdenv.mkDerivation {
     if [[ ! -n "$dontByteCompile" ]]
     then
       (
+        emacs_opts=(--batch -L .)
         if [[ -n "$errorOnWarn" ]]
         then
-          byte_compile_error_on_warn=t
-        else
-          byte_compile_error_on_warn=nil
+          emacs_opts+=(--eval "(setq byte-compile-error-on-warn t)")
         fi
-        # TODO: Add support for byte-compiling files separately
-        emacs --batch -L . \
-          --eval "(setq byte-compile-error-on-warn ''${byte_compile_error_on_warn})" \
-          -f batch-byte-compile ${lib.escapeShellArgs (map stringBaseName lispFiles)}
+        emacs_opts+=(-f batch-byte-compile)
+
+        if [[ -n "$doByteCompileSeparately" ]]
+        then
+          for el in ${lib.escapeShellArgs (map stringBaseName lispFiles)}
+          do
+            emacs ''${emacs_opts[*]} "$el"
+          done
+        else
+          emacs ''${emacs_opts[*]} ${lib.escapeShellArgs (map stringBaseName lispFiles)}
+        fi
       )
     fi
 
