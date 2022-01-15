@@ -54,7 +54,19 @@ stdenv.mkDerivation {
 
   # If the repository contains a Makefile, configurePhase can be problematic, so
   # exclude it.
-  phases = [ "unpackPhase" "buildPhase" "checkPhase" "installPhase" ];
+  phases = [
+    "unpackPhase"
+    "lintPhase"
+    "buildPhase"
+    "checkPhase"
+    "installPhase"
+  ];
+
+  lintPhase = ''
+    runHook lint
+  '';
+
+  lint = "";
 
   # False by default; You can override this later
   doCheck = false;
