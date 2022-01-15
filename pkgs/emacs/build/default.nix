@@ -54,7 +54,10 @@ stdenv.mkDerivation {
 
   # If the repository contains a Makefile, configurePhase can be problematic, so
   # exclude it.
-  phases = [ "unpackPhase" "buildPhase" "installPhase" ];
+  phases = [ "unpackPhase" "buildPhase" "checkPhase" "installPhase" ];
+
+  # False by default; You can override this later
+  doCheck = false;
 
   renamePhase = lib.optionalString (attrs ? renames && attrs.renames != null) (
     lib.pipe attrs.renames [
