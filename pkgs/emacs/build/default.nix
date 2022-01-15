@@ -7,8 +7,6 @@
 , meta
 , nativeCompileAhead
 , elispInputs
-  # Whether to fail on byte-compile warnings
-, debugOnError ? false
 , ...
 } @ attrs:
 with builtins;
@@ -126,7 +124,7 @@ stdenv.mkDerivation {
   }:";
 
   buildCmd = ''
-    emacs --batch -L . --eval "(setq debug-on-error ${if debugOnError then "t" else "nil"})" \
+    emacs --batch -L . \
       -f batch-byte-compile ${lib.escapeShellArgs (map stringBaseName lispFiles)}
 
     rm -f "${ename}-autoloads.el"
