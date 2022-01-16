@@ -142,6 +142,7 @@ stdenv.mkDerivation {
         else
           byte_compile_error_on_warn=nil
         fi
+        # TODO: Add support for byte-compiling files separately
         emacs --batch -L . \
           --eval "(setq byte-compile-error-on-warn ''${byte_compile_error_on_warn})" \
           -f batch-byte-compile ${lib.escapeShellArgs (map stringBaseName lispFiles)}
