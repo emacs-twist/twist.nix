@@ -7,8 +7,6 @@
 , meta
 , nativeCompileAhead
 , elispInputs
-  # Whether to fail on byte-compile warnings
-, debugOnError ? false
 , ...
 } @ attrs:
 with builtins;
@@ -56,7 +54,10 @@ stdenv.mkDerivation {
 
   # If the repository contains a Makefile, configurePhase can be problematic, so
   # exclude it.
-  phases = [ "unpackPhase" "buildPhase" "installPhase" ];
+  phases = [ "unpackPhase" "buildPhase" "checkPhase" "installPhase" ];
+
+  # False by default; You can override this later
+  doCheck = false;
 
   renamePhase = lib.optionalString (attrs ? renames && attrs.renames != null) (
     lib.pipe attrs.renames [
@@ -125,9 +126,28 @@ stdenv.mkDerivation {
     lib.makeSearchPath "share/emacs/native-lisp/" elispInputs
   }:";
 
+  dontByteCompile = false;
+  errorOnWarn = false;
+
   buildCmd = ''
-    emacs --batch -L . --eval "(setq debug-on-error ${if debugOnError then "t" else "nil"})" \
-      -f batch-byte-compile ${lib.escapeShellArgs (map stringBaseName lispFiles)}
+    # Don't make the package description of package.el available
+    rm -f *-pkg.el
+
+    if [[ ! -n "$dontByteCompile" ]]
+    then
+      (
+        if [[ -n "$errorOnWarn" ]]
+        then
+          byte_compile_error_on_warn=t
+        else
+          byte_compile_error_on_warn=nil
+        fi
+        # TODO: Add support for byte-compiling files separately
+        emacs --batch -L . \
+          --eval "(setq byte-compile-error-on-warn ''${byte_compile_error_on_warn})" \
+          -f batch-byte-compile ${lib.escapeShellArgs (map stringBaseName lispFiles)}
+      )
+    fi
 
     rm -f "${ename}-autoloads.el"
     emacs --batch -l autoload \
@@ -166,7 +186,7 @@ stdenv.mkDerivation {
       . \
       | (cd $lispDir && tar xf -)
 
-    if [[ -n "$doNativeComp" ]]
+    if ! [[ -n "$dontByteCompile" ]] && [[ -n "$doNativeComp" ]]
     then
       runHook buildAndInstallNativeLisp
     fi
