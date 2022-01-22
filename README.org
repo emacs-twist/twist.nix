@@ -5,13 +5,16 @@ Emacs Twist is an alternative Emacs Lisp build machinery for Nix.
 
 The goal of this project is to support the following two use cases:
 
-- Let people manage their Emacs configurations using Nix, in a reproducible but more contributor-friendly way than the standard Emacs infrastructure of Nixpkgs.
-- Help with testing of Emacs Lisp packages that have difficult dependencies, such as dynamic libraries and Emacs Lisp packages that are not on any package registry.
+- Let people manage their Emacs configurations using Nix in a reproducible way.
+- Help with testing of Emacs Lisp packages that have difficult dependencies, such as dynamic modules and Emacs Lisp packages that are not on any package registry.
 
-I am currently working on the first use case to ensure that it can build existing live configurations.
-The documentation will become available at some point during the phase.
+While those use cases are already possible with the standard Emacs infrastructure of Nixpkgs, it was difficult for its users to contribute to packages they are using, compared to [[https://github.com/raxod502/straight.el][straight.el]].
+It is basically a Nix expression generator for packages on ELPA and MELPA, and it assumed that users always want latest packages.
+It was a tedious process to add manual packages or temporarily override sources.
 
-The latter use case is secondary, and I have not started working on it yet.
+The goal of this project is to create a Nix machinery that builds packages from sources.
+It should let the user have full control of package sources.
+Builds are pure when all packages are locked.
 
 It is still an alpha version, so there may be breaking changes.
 

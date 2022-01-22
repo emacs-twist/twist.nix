@@ -83,11 +83,11 @@ lib.makeScope pkgs.newScope (self:
     inherit lib;
     emacs = emacsPackage;
 
-    # Expose only for convenience.
+    # Exposed only for convenience.
     inherit initFiles;
 
-    # Expose for inspecting the configuration. Don't override this attribute
-    # using overrideScope', it doesn't affect anything.
+    # Exposed for inspecting the configuration. Don't override this attribute
+    # using overrideScope'. It won't affect anything.
     packageInputs = lib.pipe packageInputs [
       (mapAttrs (_: attrs:
         lib.filterAttrs (_: v: ! isFunction v)
@@ -99,9 +99,8 @@ lib.makeScope pkgs.newScope (self:
 
     inherit depsCheck;
 
-    # You cannot use callPackageWith because it will apply makeOverridable
-    # which will add extra attributes, e.g. overrideDerivation, to the result.
-    # It will make builtins.attrNames unusable to this attribute.
+    # An actual derivation set of Emacs Lisp packages. You can override this
+    # attribute set to change how they are built.
     elispPackages = lib.makeScope self.newScope (eself:
       mapAttrs
         (ename: attrs:
@@ -112,16 +111,18 @@ lib.makeScope pkgs.newScope (self:
             } // attrs))
         packageInputs);
 
+    executablePackages =
+      if addSystemPackages
+      then map (pathStr:
+        lib.getAttrFromPath
+          (filter isString (split "\\." pathStr))
+          final)
+        (userConfig.systemPackages or [ ])
+      else [ ];
+
     emacsWrapper = self.callPackage ./wrapper.nix
       {
         elispInputs = lib.attrVals (attrNames packageInputs) self.elispPackages;
-        # It may be better to use lib.attrByPath to access packages like
-        # gitAndTools.git-lfs, but I am not sure if a path can be safely
-        # split by ".".
-        executablePackages =
-          if addSystemPackages
-          then lib.attrVals (userConfig.systemPackages or [ ]) final
-          else [ ];
         inherit extraOutputsToInstall;
       };
 
