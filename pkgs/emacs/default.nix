@@ -111,16 +111,18 @@ lib.makeScope pkgs.newScope (self:
             } // attrs))
         packageInputs);
 
+    executablePackages =
+      if addSystemPackages
+      then map (pathStr:
+        lib.getAttrFromPath
+          (filter isString (split "\\." pathStr))
+          final)
+        (userConfig.systemPackages or [ ])
+      else [ ];
+
     emacsWrapper = self.callPackage ./wrapper.nix
       {
         elispInputs = lib.attrVals (attrNames packageInputs) self.elispPackages;
-        # It may be better to use lib.attrByPath to access packages like
-        # gitAndTools.git-lfs, but I am not sure if a path can be safely
-        # split by ".".
-        executablePackages =
-          if addSystemPackages
-          then lib.attrVals (userConfig.systemPackages or [ ]) final
-          else [ ];
         inherit extraOutputsToInstall;
       };
 
