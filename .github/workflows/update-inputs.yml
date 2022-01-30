@@ -1,0 +1,23 @@
+name: Update flake inputs
+
+on:
+  schedule:
+    - cron: '0 5 * * *'
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2.4.0
+    - uses: cachix/install-nix-action@v16
+    - run: nix flake update
+    - run: git diff-index --exit-code --name-status HEAD
+      id: diff
+    - uses: peter-evans/create-pull-request@v3
+      if: ${{ steps.diff.outcome == 'failure' }}
+      with:
+        commit-message: 'Update flake inputs'
+        base: master
+        title: 'chore: Update data'
+        branch: create-pull-request/update
+        labels: automation,update
