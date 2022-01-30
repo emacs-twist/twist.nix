@@ -1,5 +1,80 @@
 #+TITLE: Emacs Twist User Documentation
 #+TEXINFO_DIR_CATEGORY: Emacs
 #+TEXINFO_DIR_TITLE: Twist: (emacs-twist)
-#+TEXINFO_DIR_DESC: Source-based build machinery for Nix.
+#+TEXINFO_DIR_DESC: Build an Emacs configuration with Nix.
 * Introduction
+* System requirements
+Twist depends on the Nix package manager.
+Nix is currently supported on Linux and macOS.
+For details, refer to the manual of Nix: https://nixos.org/manual/nix/stable/installation/supported-platforms.html
+
+Also, the Nix package manager on your system must be version 2.4 or later.
+To check the version of Nix, run the following command on terminal:
+
+#+begin_src sh
+nix --version
+#+end_src
+
+The command should print an output as follows:
+
+#+begin_example
+nix (Nix) 2.6.0pre20211217_6e6e998
+#+end_example
+
+If you don't have Nix, you can download it from here: https://nixos.org/download.html
+* Installation
+Before you use Twist on your machine, you may need an addditional configuration.
+** Turn on Nix flakes
+Twist is designed to use in a Nix flake.
+Flakes are an experimental feature of Nix, and it is turned off by default.
+
+To turn on the feature, follow the instruction in the following article: https://nixos.wiki/wiki/Flakes#Installing_flakes
+** Add an access token to GitHub
+Twist is a source-based build machinery.
+It fetches package sources from upstream repositories with Nix.
+As most Emacs Lisp packages are hosted on [[https://github.com/][GitHub]] nowadays, and GitHub imposes a rather strict rate limit (60 per hour) on API access, you are likely to be blocked from =api.github.com= when you use Twist.
+
+To mitigate this issue, you can expand the rate limit by using authorized access to GitHub.
+This will increase the rate limit to 5000 per hour, which is sufficient for normal use.
+
+To enable authorized access to GitHub, you have to generate an access token on GitHub and add it to your =nix.conf=.
+You need a GitHub account.
+
+1. Log in to your GitHub account, go to [[https://github.com/settings/apps][Developer Settings]], and visit /Personal access tokens/.
+2. Press /Generate new token/ button.
+3. Set a note and expiration. Select =repo:status= and =public_repo=, and press /Generate token/ button.
+4. Copy the token and add it to your =nix.conf=.
+
+When you finish these steps, your =nix.conf= should contain a line as follows:
+
+#+begin_src conf
+  access-tokens = github.com=XXXXXX
+#+end_src
+
+For details on rate limiting on GitHub, refer to the following section in the GitHub Docs:
+https://docs.github.com/en/rest/overview/resources-in-the-rest-api#rate-limiting
+
+For details on scopes, refer to the following article in the GitHub Docs: [[https://docs.github.com/en/developers/apps/building-oauth-apps/scopes-for-oauth-apps]]
+* Building an Emacs configuration
+** Initializing from a template
+** Inventory Configuration
+*** Prefer building from sources
+It is recommended to build a package from an upstream whenever possible.
+
+This is because an archive can be deleted from its server when the package creates a new release:
+
+#+begin_example
+error: unable to download 'https://elpa.gnu.org/packages/vertico-0.18.tar': HTTP error 404 ('Not Found')
+
+       response body:
+
+       <!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">
+       <html><head>
+       <title>404 Not Found</title>
+       </head><body>
+       <h1>Not Found</h1>
+       <p>The requested URL was not found on this server.</p>
+       <hr>
+       <address>Apache/2.4.51 (Debian) Server at elpa.gnu.org Port 443</address>
+       </body></html>
+#+end_example
