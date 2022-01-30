@@ -2,7 +2,7 @@
   description = "Source-based Emacs Lisp build machinery";
 
   inputs.elisp-helpers = {
-    url = "github:akirak/nix-elisp-helpers";
+    url = "github:emacs-twist/elisp-helpers";
     flake = false;
   };
   inputs.fromElisp = {

@@ -5,14 +5,14 @@
       "locked": {
         "lastModified": 1643495017,
         "narHash": "sha256-luC3T14fhP8F//e3aevmfPzcqTeasLBchxQTYJfLRh4=",
-        "owner": "akirak",
-        "repo": "nix-elisp-helpers",
+        "owner": "emacs-twist",
+        "repo": "elisp-helpers",
         "rev": "8c47de635ef831f52db433da6b6a852a534c3dfd",
         "type": "github"
       },
       "original": {
-        "owner": "akirak",
-        "repo": "nix-elisp-helpers",
+        "owner": "emacs-twist",
+        "repo": "elisp-helpers",
         "type": "github"
       }
     },
