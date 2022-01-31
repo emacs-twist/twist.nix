@@ -55,8 +55,19 @@ For details on rate limiting on GitHub, refer to the following section in the Gi
 https://docs.github.com/en/rest/overview/resources-in-the-rest-api#rate-limiting
 
 For details on scopes, refer to the following article in the GitHub Docs: [[https://docs.github.com/en/developers/apps/building-oauth-apps/scopes-for-oauth-apps]]
-* Building an Emacs configuration
+* Initializing a configuration
 ** Initializing from a template
+To create a new configuration from scratch, you can use a template.
+First, create an empty directory.
+Then, run the following command in the directory:
+
+#+begin_src sh
+nix flake init -t github:emacs-twist/twist.nix
+#+end_src
+** Migrating from emacs-overlay
+Alternatively, if you already have an Emacs configuration built with Nix, you can migrate your configuration to Twist by tweaking your configuration.
+
+This subsection assumes you have a flake for your Emacs configuration.
 ** Inventory Configuration
 *** Prefer building from sources
 It is recommended to build a package from an upstream whenever possible.
@@ -78,3 +89,4 @@ error: unable to download 'https://elpa.gnu.org/packages/vertico-0.18.tar': HTTP
        <address>Apache/2.4.51 (Debian) Server at elpa.gnu.org Port 443</address>
        </body></html>
 #+end_example
+* Developing the configuration
