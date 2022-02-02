@@ -15,7 +15,7 @@
 }:
 let
   inherit (builtins) readFile attrNames attrValues concatLists isFunction
-    split filter isString mapAttrs match isList;
+    split filter isString mapAttrs match isList isAttrs;
 in
 lib.makeScope pkgs.newScope (self:
   let
@@ -91,8 +91,8 @@ lib.makeScope pkgs.newScope (self:
     packageInputs = lib.pipe packageInputs [
       (mapAttrs (_: attrs:
         lib.filterAttrs (_: v: ! isFunction v)
-          (attrs // lib.optionalAttrs (attrs.src ? lastModified) {
-            inherit (attrs.src) lastModified;
+          (attrs // lib.optionalAttrs (isAttrs attrs.src) {
+            sourceInfo = removeAttrs attrs.src [ "outPath" ];
           })
       ))
     ];
@@ -113,11 +113,13 @@ lib.makeScope pkgs.newScope (self:
 
     executablePackages =
       if addSystemPackages
-      then map (pathStr:
-        lib.getAttrFromPath
-          (filter isString (split "\\." pathStr))
-          final)
-        (userConfig.systemPackages or [ ])
+      then
+        map
+          (pathStr:
+            lib.getAttrFromPath
+              (filter isString (split "\\." pathStr))
+              final)
+          (userConfig.systemPackages or [ ])
       else [ ];
 
     emacsWrapper = self.callPackage ./wrapper.nix
@@ -129,31 +131,37 @@ lib.makeScope pkgs.newScope (self:
     # This makes the attrset a derivation for a shorthand.
     inherit (self.emacsWrapper) name type outputName outPath drvPath;
 
-    admin = lockDirName: lib.extendDerivation true {
-      # Generate flake.nix and archive.lock with a complete package set. You
-      # have to run `nix flake lock`` in the target directory to update
-      # flake.lock.
-      lock = generateLockFiles {
-        packageInputs = enumerateConcretePackageSet "lock" explicitPackages;
-        flakeNix = true;
-        archiveLock = true;
-        postCommand = "nix flake lock";
-      } lockDirName;
+    admin = lockDirName: lib.extendDerivation true
+      {
+        # Generate flake.nix and archive.lock with a complete package set. You
+        # have to run `nix flake lock`` in the target directory to update
+        # flake.lock.
+        lock = generateLockFiles
+          {
+            packageInputs = enumerateConcretePackageSet "lock" explicitPackages;
+            flakeNix = true;
+            archiveLock = true;
+            postCommand = "nix flake lock";
+          }
+          lockDirName;
 
-      # Generate flake.lock with the current revisions
-      #
-      # sync = generateLockFiles {
-      #   inherit packageInputs;
-      #   flakeLock = true;
-      # };
+        # Generate flake.lock with the current revisions
+        #
+        # sync = generateLockFiles {
+        #   inherit packageInputs;
+        #   flakeLock = true;
+        # };
 
-      # Generate archive.lock with latest packages from ELPA package archives
-      update = generateLockFiles {
-        packageInputs = enumerateConcretePackageSet "update" explicitPackages;
-        archiveLock = true;
-      } lockDirName;
-    } (pkgs.writeShellScriptBin "admin" ''
-      echo >&2 "Run .#admin.lock or .#admin.update"
-      exit 1
-    '');
+        # Generate archive.lock with latest packages from ELPA package archives
+        update = generateLockFiles
+          {
+            packageInputs = enumerateConcretePackageSet "update" explicitPackages;
+            archiveLock = true;
+          }
+          lockDirName;
+      }
+      (pkgs.writeShellScriptBin "admin" ''
+        echo >&2 "Run .#admin.lock or .#admin.update"
+        exit 1
+      '');
   })
