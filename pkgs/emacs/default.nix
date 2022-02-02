@@ -15,7 +15,7 @@
 }:
 let
   inherit (builtins) readFile attrNames attrValues concatLists isFunction
-    split filter isString mapAttrs match isList;
+    split filter isString mapAttrs match isList isAttrs;
 in
 lib.makeScope pkgs.newScope (self:
   let
@@ -91,8 +91,8 @@ lib.makeScope pkgs.newScope (self:
     packageInputs = lib.pipe packageInputs [
       (mapAttrs (_: attrs:
         lib.filterAttrs (_: v: ! isFunction v)
-          (attrs // lib.optionalAttrs (attrs.src ? lastModified) {
-            inherit (attrs.src) lastModified;
+          (attrs // lib.optionalAttrs (isAttrs attrs.src) {
+            sourceInfo = removeAttrs attrs.src [ "outPath" ];
           })
       ))
     ];
