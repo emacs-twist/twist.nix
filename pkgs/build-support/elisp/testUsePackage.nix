@@ -13,7 +13,7 @@ let
 in
 pkgs.lib.runTests {
   testDirect = {
-    expr = validateConfig (parseUsePackages ''
+    expr = validateConfig (parseUsePackages { } ''
       (use-package hello)
 
       (use-package bye :ensure t)
@@ -26,7 +26,7 @@ pkgs.lib.runTests {
   };
 
   testEnsureAnother = {
-    expr = parseUsePackages ''
+    expr = parseUsePackages { } ''
       (use-package zaijian :ensure bye)
     '';
     expected = {
@@ -37,7 +37,7 @@ pkgs.lib.runTests {
   };
 
   testPin = {
-    expr = parseUsePackages ''
+    expr = parseUsePackages { } ''
       (use-package hello
         :ensure t
         :pin american)

@@ -1,7 +1,7 @@
 /* An incomplete implementation of Nix serialization. */
 { lib }:
 let
-  inherit (builtins) isList isAttrs isFunction toJSON concatStringsSep;
+  inherit (builtins) isList isAttrs isFunction toJSON concatStringsSep match;
 
   isPrimitive = v: ! (isList v || isAttrs v || isFunction v);
 
@@ -11,9 +11,12 @@ let
     wrap "[ " " ]"
       (lib.concatMapStringsSep " " go v);
 
-  printAttr = name: value:
-    (if lib ? escapeNixIdentifier then lib.escapeNixIdentifier name else name)
-    + " = " + go value + ";";
+  escapeAttrName = str:
+    if match "[a-zA-Z_][-a-zA-Z0-9_']+" str != null
+    then str
+    else "\"${str}\"";
+
+  printAttr = name: value: escapeAttrName name + " = " + go value + ";";
 
   printAttrs = v:
     wrap "{ " " }"
