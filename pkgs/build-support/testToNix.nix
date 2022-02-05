@@ -15,10 +15,16 @@ pkgs.lib.runTests {
           repo = "use-package";
           type = "github";
         };
+        "bind-key+" = {
+          flake = false;
+          owner = "jwiegley";
+          repo = "use-package";
+          type = "github";
+        };
       };
       outputs = { ... }: { };
     };
     expected = ''
-      { description = "description"; inputs = { bind-key = { flake = false; owner = "jwiegley"; repo = "use-package"; type = "github"; }; }; outputs = <LAMBDA>; } '';
+      { description = "description"; inputs = { bind-key = { flake = false; owner = "jwiegley"; repo = "use-package"; type = "github"; }; "bind-key+" = { flake = false; owner = "jwiegley"; repo = "use-package"; type = "github"; }; }; outputs = <LAMBDA>; }'';
   };
 }
