@@ -6,7 +6,7 @@
 , lockDir
 , inventories
 , initFiles
-, initParser ? lib.parseUsePackages
+, initParser ? lib.parseUsePackages { }
 , extraPackages ? [ "use-package" ]
 , addSystemPackages ? true
 , inputOverrides ? { }

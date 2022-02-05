@@ -1,6 +1,8 @@
 { lib
 , fromElisp
 }:
+{ alwaysEnsure ? false
+}:
 string:
 with builtins;
 let
@@ -11,7 +13,7 @@ let
     else if head xs == key
     then elemAt xs 1
     else plistGet (tail xs) key;
-  isEnsured = form: plistGet form ":ensure" == true;
+  isEnsured = form: alwaysEnsure || plistGet form ":ensure" == true;
   isEnabled = form: plistGet form ":disabled" != true;
   ensuredPackageName = form: plistGet form ":ensure";
   findPin = form: plistGet form ":pin";
