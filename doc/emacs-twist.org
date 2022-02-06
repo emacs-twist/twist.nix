@@ -99,3 +99,23 @@ error: unable to download 'https://elpa.gnu.org/packages/vertico-0.18.tar': HTTP
        </body></html>
 #+end_example
 * Developing the configuration
+* Limitations
+** use-package-always-ensure option
+[[https://github.com/jwiegley/use-package][use-package]] provides =use-package-always-ensure= option, which makes =package.el= install packages that have no =:ensure= option set:
+
+#+begin_src emacs-lisp
+  (require 'use-package-ensure)
+  (setq use-package-always-ensure t)
+#+end_src
+
+Unfortunately, Twist cannot handle this option well at the time of writing.
+
+I have created an example configuration wrapping [[https://github.com/jkitchin/scimax][scimax]] with Twist:
+https://github.com/emacs-twist/examples/blob/master/profiles/scimax/default.nix
+Scimax enables the option and also have a number of custom packages.
+Rather than pass init files to Twist, it relies on functions from the experimental =lib= output from Twist, to parse init files and get a list of built-in libraries.
+Due to how the configuration is organized, the Twist profile requires a myriad of workarounds.
+
+A better way is to *not* use =use-package-always-ensure= option.
+Add =:ensure t= option explicitly to each declaration of a package you want to install.
+This way, you can simply pass the init file to Twist and also have a choice of explicitly installing some GNU ELPA Core libraries (which are also part of built-in libraries) from the upstream.
