@@ -55,7 +55,7 @@ For details on rate limiting on GitHub, refer to the following section in the Gi
 https://docs.github.com/en/rest/overview/resources-in-the-rest-api#rate-limiting
 
 For details on scopes, refer to the following article in the GitHub Docs: [[https://docs.github.com/en/developers/apps/building-oauth-apps/scopes-for-oauth-apps]]
-* Initializing a configuration
+* Initial configuration of a project
 ** Initializing from a template
 To create a new configuration from scratch, you can use a template.
 First, create an empty directory.
@@ -64,7 +64,16 @@ Then, run the following command in the directory:
 #+begin_src sh
 nix flake init -t github:emacs-twist/twist.nix
 #+end_src
-** Migrating from emacs-overlay
+
+Now you can work on your configuration by adding =use-package= blocks to =init.el= in the repository.
+
+Twist also provides some extra flexibility on configuration:
+
+- Manage your configuration in an Org file
+- Use an alternative utility other than =use-package=, like =setup.el=
+
+Otherwise, you can skip the following subsections to start developing your configuration.
+** Manual creation of a project boilerplate
 Alternatively, if you already have an Emacs configuration built with Nix, you can migrate your configuration to Twist by tweaking your configuration.
 
 This subsection assumes you have a flake for your Emacs configuration.
