@@ -31,8 +31,7 @@ let
   # the file using `head` command and read its output.
   headers = lib.parseElispHeaders
     (if self.isNonAsciiSource or false
-      # magit.el has a relatively long header, so other libraries would be shorter.
-     then lib.readFirstBytes 1500 (self.src + "/${self.mainFile}")
+     then lib.readElispHeaders (self.src + "/${self.mainFile}")
      else readFile (self.src + "/${self.mainFile}"));
 in
 lib.getAttrs
