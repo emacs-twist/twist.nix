@@ -91,7 +91,7 @@ lib.makeScope pkgs.newScope (self:
     packageInputs = lib.pipe packageInputs [
       (mapAttrs (_: attrs:
         lib.filterAttrs (_: v: ! isFunction v)
-          (attrs // lib.optionalAttrs (isAttrs attrs.src) {
+          (attrs // lib.optionalAttrs (isAttrs attrs.src && attrs.src ? rev) {
             sourceInfo = removeAttrs attrs.src [ "outPath" ];
           })
       ))
