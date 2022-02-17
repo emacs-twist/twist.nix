@@ -107,7 +107,7 @@ let
         # There are not so many packages that have :make attribute.
         # Only in GNU, and not in non-GNU.
         lib.optionalString (entry ? make) ''
-          make ${lib.escapeShellArgs entry.make}
+          make ${lib.escapeShellArgs (toList entry.make)}
         '';
     }
     //
