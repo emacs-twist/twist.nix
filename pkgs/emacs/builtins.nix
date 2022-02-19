@@ -23,7 +23,7 @@ stdenv.mkDerivation {
       echo "  Actual:   $version"
       if [[ $version != ${version} ]]
       then
-        "ERROR: The version mismatched. Please fix the version."
+        echo "ERROR: The version mismatched. Please fix the version."
         exit 1
       fi
     else
