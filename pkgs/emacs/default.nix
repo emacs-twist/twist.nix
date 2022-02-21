@@ -11,7 +11,8 @@
 , addSystemPackages ? true
 , inputOverrides ? { }
 , nativeCompileAheadDefault ? true
-, extraOutputsToInstall ? [ "info" ]
+, wantExtraOutputs ? true
+, extraOutputsToInstall ? if wantExtraOutputs then [ "info" ] else [ ]
 }:
 let
   inherit (builtins) readFile attrNames attrValues concatLists isFunction
@@ -108,6 +109,7 @@ lib.makeScope pkgs.newScope (self:
             ({
               nativeCompileAhead = nativeCompileAheadDefault;
               elispInputs = lib.attrVals allDependencies.${ename} eself;
+              inherit wantExtraOutputs;
             } // attrs))
         packageInputs);
 
