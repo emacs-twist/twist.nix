@@ -6,6 +6,7 @@
 , lispFiles
 , meta
 , nativeCompileAhead
+, wantExtraOutputs
 , elispInputs
 , ...
 } @ attrs:
@@ -47,9 +48,9 @@ stdenv.mkDerivation {
 
   outputs =
     [ "out" ]
-    ++ lib.optional canProduceInfo "info";
+    ++ lib.optional (wantExtraOutputs && canProduceInfo) "info";
 
-  buildInputs = [ emacs texinfo gnumake ];
+  buildInputs = [ emacs gnumake ] ++ lib.optional wantExtraOutputs "texinfo";
   # nativeBuildInputs = lib.optional nativeComp gcc;
 
   # If the repository contains a Makefile, configurePhase can be problematic, so
