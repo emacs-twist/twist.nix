@@ -2,39 +2,37 @@
 [[https://github.com/emacs-twist/twist.nix/actions/workflows/test.yml][https://github.com/emacs-twist/twist.nix/actions/workflows/test.yml/badge.svg]]
 
 Twist.nix is a Nix library for building Emacs configurations with packages.
-It is an infrastructure for configuration and package development.
+It is an infrastructure for configuration (solely with this library) and package development (with [[https://github.com/emacs-twist/nomake][nomake]]).
 
-It is the integral component of [[https://github.com/emacs-twist][emacs-twist]] project.
+This repository is an integral component of [[https://github.com/emacs-twist][emacs-twist]] project.
 The goal of the project is to provide an alternative Emacs ecosystem that uses Nix.
 It is experimental, but also aims to be useful.
 
 There are several other components under development.
-See the following table for comparison with corresponding to options:
+See the following table for comparison with corresponding options:
 
-| Component             | Description           | An alternative to       |
+| Twist component       | Description           | Correspond to           |
 |-----------------------+-----------------------+-------------------------|
 | twist.nix (this repo) | Build machinery       | [[https://github.com/melpa/package-build/][package-build]]           |
 | [[https://github.com/emacs-twist/twist.el][twist.el]]              | Emacs package manager | [[https://github.com/raxod502/straight.el][straight.el]], [[https://github.com/emacscollective/borg][borg]], etc. |
 | [[https://github.com/emacs-twist/nomake][nomake]]                | Package development   | [[https://github.com/cask/cask][cask]]                    |
 
-Twist.nix is also an alternative to [[https://nixos.org/manual/nixos/stable/index.html#module-services-emacs][the Emacs infrastructure]] for NixOS.
+As a Nix library, Twist.nix is also an alternative to [[https://nixos.org/manual/nixos/stable/index.html#module-services-emacs][the Emacs infrastructure]] for NixOS.
 Twist.nix depends on Nix utility libraries but does not depend on the standard Emacs wrapper itself in Nixpkgs.
 The difference between twist and the standard wrapper is that twist is capable of building packages from upstream source repositories.
 On the other contrary, the standard wrapper fetches pre-built package archives for most packages, which means it indirectly depends on package-build for MELPA packages.
 With twist, it is easier to lock and update individual packages, because package versions are tracked in flake.lock.
 Twist.el, the package management frontend for Twist, should provide an experience on par with that of straight.el.
 
-Twist can discover packages from the following package databases:
+Twist can discover and build packages from the following sources:
 
-- [[https://melpa.org/][MELPA]] packages (built from sources)
-- ELPA external packages (built from sources, only tarballs)
-- ELPA core packages
-- ELPA archives (GNU, non-GNU, and MELPA)
-- [[https://github.com/emacsmirror/][EmacsMirror]]
+- [[https://melpa.org/][MELPA]] recipes (Git)
+- ELPA external/core packages (Git)
+- ELPA archive tarballs
+- [[https://github.com/emacsmirror/][EmacsMirror]] (Git)
 
-To add custom packages to your configuration, you only have to define MELPA recipes.
-It can already build configurations with hundreds of packages.
-See [[https://github.com/emacs-twist/examples][examples]] for example configurations.
+To add custom packages to your configuration, you only have to define MELPA recipes and commit them to your repository.
+It can already build configurations with a few hundreds of packages from various registries (see [[https://github.com/emacs-twist/examples][examples]]).
 ** Documentation
 The user manual is currently a work in progress.
 ** Credits
