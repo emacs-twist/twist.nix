@@ -17,12 +17,18 @@ See the following table for comparison with corresponding options:
 | [[https://github.com/emacs-twist/twist.el][twist.el]]              | Emacs package manager | [[https://github.com/raxod502/straight.el][straight.el]], [[https://github.com/emacscollective/borg][borg]], etc. |
 | [[https://github.com/emacs-twist/nomake][nomake]]                | Package development   | [[https://github.com/cask/cask][cask]]                    |
 
-As a Nix library, Twist.nix is also an alternative to [[https://nixos.org/manual/nixos/stable/index.html#module-services-emacs][the Emacs infrastructure]] for NixOS.
-Twist.nix depends on Nix utility libraries but does not depend on the standard Emacs wrapper itself in Nixpkgs.
-The difference between twist and the standard wrapper is that twist is capable of building packages from upstream source repositories.
-On the other contrary, the standard wrapper fetches pre-built package archives for most packages, which means it indirectly depends on package-build for MELPA packages.
-With twist, it is easier to lock and update individual packages, because package versions are tracked in flake.lock.
-Twist.el, the package management frontend for Twist, should provide an experience on par with that of straight.el.
+As a Nix library, Twist.nix is also an alternative to [[https://nixos.org/manual/nixos/stable/index.html#module-services-emacs][the Emacs wrapper]] (i.e. =emacsWithPackages=) on NixOS.
+Twist.nix depends on Nix utility libraries, but it does not depend on the wrapper.
+
+The biggest difference betweeen twist and the wrapper is that twist is capable of building packages from upstream source repositories.
+On the contrary, the wrapper fetches pre-built package archives from for most ELPA and MELPA packages, which means it indirectly depends on package-build for MELPA packages.
+
+Here building a package means mapping files into a flat directory, which takes little time.
+By being smarter in building packages from sources, twist has an advantage in working around existing packages and adding custom packages, like straight.el.
+It also allows usage for package development, which is what package-build does to cask.
+
+With twist, it is easier to lock and update individual packages, because it tracks package versions in flake.lock.
+Twist.el, the package management frontend for Twist, should hopefully provide an experience on par with that of straight.el.
 
 Twist can discover and build packages from the following sources:
 
