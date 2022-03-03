@@ -50,7 +50,7 @@ stdenv.mkDerivation {
     [ "out" ]
     ++ lib.optional (wantExtraOutputs && canProduceInfo) "info";
 
-  buildInputs = [ emacs gnumake ] ++ lib.optional wantExtraOutputs "texinfo";
+  buildInputs = [ emacs gnumake ] ++ lib.optional wantExtraOutputs texinfo;
   # nativeBuildInputs = lib.optional nativeComp gcc;
 
   # If the repository contains a Makefile, configurePhase can be problematic, so
