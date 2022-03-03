@@ -28,7 +28,7 @@ By being smarter in building packages from sources, twist has an advantage in wo
 It also allows usage for package development, which is what package-build does to cask.
 
 With twist, it is easier to lock and update individual packages, because it tracks package versions in flake.lock.
-Twist.el, the package management frontend for Twist, should hopefully provide an experience on par with that of straight.el.
+Twist.el, the package management frontend for Twist, should hopefully provide an experience on par with straight.el.
 
 Twist can discover and build packages from the following sources:
 
