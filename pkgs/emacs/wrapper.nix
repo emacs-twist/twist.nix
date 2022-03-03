@@ -69,7 +69,7 @@ runCommandLocal "emacs"
   siteStartExtra = ''
     (when init-file-user
       ${lib.concatMapStrings (pkg: ''
-          (load "${pkg}/share/emacs/site-lisp/${pkg.ename}-autoloads.el" nil t)
+          (load "${pkg}/share/emacs/site-lisp/${pkg.ename}-autoloads.el" t t)
       '') elispInputs
     })
   '';
