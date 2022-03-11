@@ -11,7 +11,7 @@ It is experimental, but also aims to be useful.
 There are several other components under development.
 See the following table for comparison with corresponding options:
 
-| Twist component       | Description           | Correspond to           |
+| Twist component       | Description           | Counterpart             |
 |-----------------------+-----------------------+-------------------------|
 | twist.nix (this repo) | Build machinery       | [[https://github.com/melpa/package-build/][package-build]]           |
 | [[https://github.com/emacs-twist/twist.el][twist.el]]              | Emacs package manager | [[https://github.com/raxod502/straight.el][straight.el]], [[https://github.com/emacscollective/borg][borg]], etc. |
