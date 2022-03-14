@@ -19,11 +19,17 @@ let
     attrNames
     (filter (filename: baseNameOf filename == ename + "-pkg.el"))
   ];
-  pkgFile = head pkgFiles;
-  hasPkgFile = length pkgFiles != 0;
+  pkgFile =
+    if length pkgFiles != 0
+    then self.src + "/${head pkgFiles}"
+    else self.src + "/${ename}-pkg.el";
+  #  OPTIMIZE: Reduce filesystem access
+  hasPkgFile =
+    length pkgFiles != 0
+    || pathExists pkgFile;
   packageDesc =
     if hasPkgFile
-    then lib.parsePkg (readFile (self.src + "/${pkgFile}"))
+    then lib.parsePkg (readFile pkgFile)
     else { };
 
   # builtins.readFile fails when the source file contains control characters.

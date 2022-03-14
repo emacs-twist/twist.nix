@@ -80,6 +80,22 @@
         "type": "github"
       }
     },
+    "forge": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1646939848,
+        "narHash": "sha256-zvbhwgcaFC3yVfC7kXT1wZKOBaib6gcMnJk0MhvYijQ=",
+        "owner": "magit",
+        "repo": "forge",
+        "rev": "bc99603b5a0cd5b3a5f209772b7f818d205b8a3f",
+        "type": "github"
+      },
+      "original": {
+        "owner": "magit",
+        "repo": "forge",
+        "type": "github"
+      }
+    },
     "git-commit": {
       "flake": false,
       "locked": {
@@ -167,6 +183,7 @@
         "consult": "consult",
         "dash": "dash",
         "doom-themes": "doom-themes",
+        "forge": "forge",
         "git-commit": "git-commit",
         "magit": "magit",
         "magit-section": "magit-section",
@@ -218,15 +235,15 @@
       "locked": {
         "lastModified": 1616545491,
         "narHash": "sha256-Lrp9ooVtDQWUE0/xEjfdJmE7tA7WJyJCbQhIJdeIkEQ=",
-        "owner": "emacsmirror",
-        "repo": "undo-tree",
+        "ref": "master",
         "rev": "2bf5e230f1d11df7bbd9d8c722749e34482bc458",
-        "type": "github"
+        "revCount": 201,
+        "type": "git",
+        "url": "https://gitlab.com/tsc25/undo-tree"
       },
       "original": {
-        "owner": "emacsmirror",
-        "repo": "undo-tree",
-        "type": "github"
+        "type": "git",
+        "url": "https://gitlab.com/tsc25/undo-tree"
       }
     },
     "use-package": {

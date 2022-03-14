@@ -5,9 +5,7 @@
   inputs.flake-utils.url = "github:numtide/flake-utils";
 
   inputs.twist = {
-    url = "github:akirak/emacs-twist";
-    inputs.nixpkgs.follows = "nixpkgs";
-    inputs.flake-utils.follows = "flake-utils";
+    url = "github:emacs-twist/twist.nix";
   };
 
   inputs.melpa = {
