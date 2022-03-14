@@ -32,6 +32,12 @@
       repo = "themes";
       type = "github";
     };
+    forge = {
+      flake = false;
+      owner = "magit";
+      repo = "forge";
+      type = "github";
+    };
     git-commit = {
       flake = false;
       owner = "magit";
@@ -76,9 +82,8 @@
     };
     undo-tree = {
       flake = false;
-      owner = "emacsmirror";
-      repo = "undo-tree";
-      type = "github";
+      type = "git";
+      url = "https://gitlab.com/tsc25/undo-tree";
     };
     use-package = {
       flake = false;
