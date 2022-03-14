@@ -39,8 +39,14 @@ Twist can discover and build packages from the following sources:
 
 To add custom packages to your configuration, you only have to define MELPA recipes and commit them to your repository.
 It can already build configurations with a few hundreds of packages from various registries (see [[https://github.com/emacs-twist/examples][examples]]).
-** Documentation
-The user manual is currently a work in progress.
+** Status
+- Functionalities: *Good*. The author builds his own [[https://github.com/akirak/nix-config][config]] with twist, and the config is already almost as capable as the previous version which depends on straight.el. [[https://github.com/emacs-twist/nomake][NoMake]] is used in some packages.
+- API: *Unstable*. It is mostly stable, but options may undergo changes in the future.
+- Documentation: *Poor*. The author wants to work on his own problems first, and he is not motivated enough to work on the documentation. All the information is currently kept in his mind.
+
+I am the author.
+Maybe I will further work on documentation and finalizing the API after [[https://github.com/akirak/org-dog][org-dog]] has got basic features.
+For now, I will continue minor updates needed for my own use.
 ** Credits
 Twist is a Nix re-implementation of [[https://github.com/melpa/package-build][package-build]] and replicates its build logic.
 It is also heavily influenced by the Emacs wrapper in [[https://github.com/NixOS/nixpkgs/][nixpkgs]], though twist was written from scratch and different in implementation.
