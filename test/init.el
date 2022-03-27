@@ -54,3 +54,6 @@
 (use-package bbdb
   :pin gnu
   :ensure t)
+
+(use-package google-translate
+  :ensure t)
