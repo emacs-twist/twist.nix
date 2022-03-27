@@ -25,8 +25,9 @@ let
     else self.src + "/${ename}-pkg.el";
   #  OPTIMIZE: Reduce filesystem access
   hasPkgFile =
-    length pkgFiles != 0
-    || pathExists pkgFile;
+    ! (self.ignorePkgFile or false)
+    && (length pkgFiles != 0
+    || pathExists pkgFile);
   packageDesc =
     if hasPkgFile
     then lib.parsePkg (readFile pkgFile)
