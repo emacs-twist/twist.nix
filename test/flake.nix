@@ -1,7 +1,6 @@
 {
   description = "";
 
-  inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
   inputs.flake-utils.url = "github:numtide/flake-utils";
 
   inputs.twist = {
@@ -44,7 +43,6 @@
 
   outputs =
     { flake-utils
-    , nixpkgs
     , emacs-ci
       # , emacs-unstable
     , ...
@@ -52,6 +50,9 @@
     flake-utils.lib.eachDefaultSystem (system:
     let
       inherit (builtins) filter match elem;
+
+      # Access niv sources of nix-emacs-ci
+      inherit (import (inputs.emacs-ci + "/nix/sources.nix")) nixpkgs;
 
       pkgs = import nixpkgs {
         inherit system;
