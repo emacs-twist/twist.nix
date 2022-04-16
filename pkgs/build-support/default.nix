@@ -84,12 +84,15 @@ lib
       { }));
 
   readFirstBytes = limit: file:
-    readFile (pkgs.callPackage
-      ({ runCommandLocal }:
-        runCommandLocal (baseNameOf file) { } ''
-          head -c ${toString limit} ${file} > $out
-        '')
-      { });
+    lib.warn "You would probably want to use readElispHeaders instead"
+      (readFile (pkgs.callPackage
+        ({ runCommandLocal }:
+          runCommandLocal (baseNameOf file) { } ''
+            head -c ${toString limit} ${file} > $out
+          '')
+        { }));
+
+  readElispHeaders = pkgs.callPackage ./elisp/beforeCode.nix { };
 
   # Just a shorthand for overriding a nested attribute.
   # I am looking for a better syntax for overriding multiple packages.
