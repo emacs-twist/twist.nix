@@ -13,6 +13,7 @@ jobs:
     - run: nix flake update
     - run: git diff-index --exit-code --name-status HEAD
       id: diff
+      continue-on-error: true
     - uses: peter-evans/create-pull-request@v4
       if: ${{ steps.diff.outcome == 'failure' }}
       with:
