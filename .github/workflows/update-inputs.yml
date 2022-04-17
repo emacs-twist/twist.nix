@@ -19,6 +19,6 @@ jobs:
       with:
         commit-message: 'Update flake inputs'
         base: master
-        title: 'chore: Update data'
+        title: 'chore: Update dependencies'
         branch: create-pull-request/update
         labels: automation,update
