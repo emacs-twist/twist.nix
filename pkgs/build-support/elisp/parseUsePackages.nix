@@ -1,11 +1,8 @@
-{ lib
-, fromElisp
-}:
-{ alwaysEnsure ? false
-}:
-string:
-with builtins;
-let
+{
+  lib,
+  fromElisp,
+}: {alwaysEnsure ? false}: string:
+with builtins; let
   blocks = fromElisp.fromElisp string;
   plistGet = xs: key:
     if length xs == 0
@@ -30,9 +27,9 @@ let
     else tail x;
   toSystemPackages = x:
     if x == null
-    then [ ]
+    then []
     else if isString x
-    then [ x ]
+    then [x]
     else if isList x
     then listToSystemPackages x
     else trace x (throw ":ensure-system-package must be either a list or a string");
@@ -40,8 +37,7 @@ let
     toSystemPackages (plistGet form ":ensure-system-package");
   directPackages = map enameFromUsePackage (filter isEnsured usePackageForms);
   indirectPackages = filter isString (map ensuredPackageName usePackageForms);
-in
-{
+in {
   elispPackages = lib.unique (directPackages ++ indirectPackages);
   elispPackagePins = lib.pipe usePackageForms [
     (map (form: {
@@ -49,7 +45,7 @@ in
       name = enameFromUsePackage form;
       value = findPin form;
     }))
-    (filter ({ value, ... }: value != null))
+    (filter ({value, ...}: value != null))
     listToAttrs
   ];
   systemPackages = lib.concatMap ensuredSystemPackages usePackageForms;

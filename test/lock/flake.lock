@@ -80,22 +80,6 @@
         "type": "github"
       }
     },
-    "forge": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1646939848,
-        "narHash": "sha256-zvbhwgcaFC3yVfC7kXT1wZKOBaib6gcMnJk0MhvYijQ=",
-        "owner": "magit",
-        "repo": "forge",
-        "rev": "bc99603b5a0cd5b3a5f209772b7f818d205b8a3f",
-        "type": "github"
-      },
-      "original": {
-        "owner": "magit",
-        "repo": "forge",
-        "type": "github"
-      }
-    },
     "git-commit": {
       "flake": false,
       "locked": {
@@ -109,6 +93,22 @@
       "original": {
         "owner": "magit",
         "repo": "magit",
+        "type": "github"
+      }
+    },
+    "google-translate": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1617709095,
+        "narHash": "sha256-rvviaqVoigix3jd4ys2KN8nst//14tXn2/iz+46zP44=",
+        "owner": "atykhonov",
+        "repo": "google-translate",
+        "rev": "0f7f48a09bca064999ecea03102a7c96f52cbd1b",
+        "type": "github"
+      },
+      "original": {
+        "owner": "atykhonov",
+        "repo": "google-translate",
         "type": "github"
       }
     },
@@ -160,6 +160,22 @@
         "type": "github"
       }
     },
+    "popup": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1650468262,
+        "narHash": "sha256-nGoaA+EQ04oiOnygzA13AUWqAwJaqlZ1Ctkx+UbavdE=",
+        "owner": "auto-complete",
+        "repo": "popup-el",
+        "rev": "3bf430270c74dad830ab9d776aab23cbf3ea3953",
+        "type": "github"
+      },
+      "original": {
+        "owner": "auto-complete",
+        "repo": "popup-el",
+        "type": "github"
+      }
+    },
     "queue": {
       "flake": false,
       "locked": {
@@ -183,11 +199,12 @@
         "consult": "consult",
         "dash": "dash",
         "doom-themes": "doom-themes",
-        "forge": "forge",
         "git-commit": "git-commit",
+        "google-translate": "google-translate",
         "magit": "magit",
         "magit-section": "magit-section",
         "org-transclusion": "org-transclusion",
+        "popup": "popup",
         "queue": "queue",
         "tramp": "tramp",
         "undo-browse": "undo-browse",

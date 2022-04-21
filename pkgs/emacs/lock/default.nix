@@ -1,32 +1,32 @@
-{ lib
-, nix
-, nixfmt
-, jq
-, runCommandLocal
-, writeTextFile
-, writeShellScriptBin
-# Current version
-, flakeLockFile ? null
-}:
-{ packageInputs
-, flakeNix ? false
-, flakeLock ? false
-, archiveLock ? false
-, postCommand ? null
-}:
-outDir:
-assert (flakeNix || flakeLock || archiveLock);
-let
+{
+  lib,
+  nix,
+  nixfmt,
+  jq,
+  runCommandLocal,
+  writeTextFile,
+  writeShellScript,
+  # Current version
+  flakeLockFile ? null,
+}: {
+  packageInputs,
+  flakeNix ? false,
+  flakeLock ? false,
+  archiveLock ? false,
+  postCommand ? null,
+}: outDir:
+assert (flakeNix || flakeLock || archiveLock); let
   inherit (builtins) toJSON attrNames mapAttrs;
 
   archiveLockData = lib.pipe packageInputs [
     (lib.filterAttrs (_: attrs: attrs ? archive))
-    (mapAttrs (_: lib.getAttrs [
-      "version"
-      "archive"
-      "packageRequires"
-      "inventory"
-    ]))
+    (mapAttrs (_:
+      lib.getAttrs [
+        "version"
+        "archive"
+        "packageRequires"
+        "inventory"
+      ]))
   ];
 
   data = {
@@ -34,9 +34,9 @@ let
       description = "THIS IS AN AUTO-GENERATED FILE. PLEASE DON'T EDIT IT MANUALLY.";
       inputs = lib.pipe packageInputs [
         (lib.filterAttrs (_: attrs: attrs ? origin))
-        (lib.mapAttrs (_: { origin, ... }: origin // { flake = false; }))
+        (lib.mapAttrs (_: {origin, ...}: origin // {flake = false;}))
       ];
-      outputs = { ... }: { };
+      outputs = {...}: {};
     };
     flakeLock = toJSON (import ./flake-lock.nix {
       inherit lib flakeLockFile packageInputs;
@@ -46,8 +46,8 @@ let
 
   passAsFile =
     lib.optional flakeNix "flakeNix"
-      ++ lib.optional flakeLock "flakeLock"
-      ++ lib.optional archiveLock "archiveLock";
+    ++ lib.optional flakeLock "flakeLock"
+    ++ lib.optional archiveLock "archiveLock";
 
   # HACK: Use sed to convert JSON to Nix
   #
@@ -67,18 +67,20 @@ let
     ${jq}/bin/jq . "$archiveLockPath" > "$out/archive.lock"
   '';
 
-  src = runCommandLocal "emacs-twist-lock" ({
-    inherit passAsFile;
-  } // lib.getAttrs passAsFile data)
-  ''
-    mkdir -p $out
-  
-    ${lib.optionalString flakeNix generateFlakeNix}
-    ${lib.optionalString flakeLock generateFlakeLock}
-    ${lib.optionalString archiveLock generateArchiveLock}
-  '';
+  src =
+    runCommandLocal "emacs-twist-lock" ({
+        inherit passAsFile;
+      }
+      // lib.getAttrs passAsFile data)
+    ''
+      mkdir -p $out
 
-  writeToDir =  writeShellScriptBin "lock" ''
+      ${lib.optionalString flakeNix generateFlakeNix}
+      ${lib.optionalString flakeLock generateFlakeLock}
+      ${lib.optionalString archiveLock generateArchiveLock}
+    '';
+
+  writeToDir = writeShellScript "lock" ''
     outDir="${outDir}"
 
     if [[ ! -d "$outDir" ]]
@@ -107,10 +109,9 @@ let
     ''}
   '';
 in
-lib.extendDerivation true {
-  inherit src;
-
-  # passthru.exePath is useful with flake-utils.lib.mkApp
-  # <https://github.com/numtide/flake-utils>
-  passthru.exePath = "/bin/lock";
-} writeToDir
+  # This is an app, and not a derivation. See
+  # https://nixos.org/manual/nix/stable/command-ref/new-cli/nix3-run.html#apps
+  {
+    type = "app";
+    program = writeToDir.outPath;
+  }

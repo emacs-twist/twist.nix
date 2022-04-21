@@ -1,5 +1,4 @@
-inputs:
-[
+inputs: [
   {
     type = "melpa";
     path = ./recipes;

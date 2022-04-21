@@ -1,8 +1,8 @@
-{ lib
-, flakeLockFile
-, packageInputs
-}:
-let
+{
+  lib,
+  flakeLockFile,
+  packageInputs,
+}: let
   inherit (builtins) intersectAttrs mapAttrs hasAttr throw;
 
   # It would be possible to generate an entirely new lock file, but I prefer not
@@ -11,17 +11,15 @@ let
 
   newNodeAttrs = attrs: value:
     if attrs ? origin && attrs.origin != null
-    then
-      rec {
-        original = attrs.origin;
-        locked = original // intersectAttrs value.locked attrs.src;
-      }
+    then rec {
+      original = attrs.origin;
+      locked = original // intersectAttrs value.locked attrs.src;
+    }
     else null;
 
   version7 =
     prev
-    //
-    {
+    // {
       nodes = lib.pipe prev.nodes [
         (mapAttrs
           (ename: value:
@@ -31,6 +29,6 @@ let
       ];
     };
 in
-if prev.version == 7
-then version7
-else throw "Unsupported flake.lock version ${prev.version}"
+  if prev.version == 7
+  then version7
+  else throw "Unsupported flake.lock version ${prev.version}"

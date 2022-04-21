@@ -30,15 +30,15 @@
     };
   };
 
-  outputs =
-    { self
-    , nixpkgs
-    , nixpkgs-emacs
-    , flake-utils
-    , ...
-    } @ inputs:
-    flake-utils.lib.eachDefaultSystem (system:
-      let
+  outputs = {
+    self,
+    nixpkgs,
+    nixpkgs-emacs,
+    flake-utils,
+    ...
+  } @ inputs:
+    flake-utils.lib.eachDefaultSystem (
+      system: let
         pkgs = import nixpkgs {
           inherit system;
           overlays = [
@@ -54,7 +54,7 @@
           ];
         };
 
-        emacs = (pkgs.emacsTwist {
+        emacs = pkgs.emacsTwist {
           emacsPackage = pkgsForEmacs.emacsUnstable.overrideAttrs (_: {
             version = "28.0.91";
           });
@@ -64,13 +64,15 @@
             ./init.el
           ];
           # inputOverrides = { };
-        });
-
+        };
       in rec {
-        packages = flake-utils.lib.flattenTree ({
+        packages = flake-utils.lib.flattenTree {
           inherit emacs;
-        } // nixpkgs.lib.getAttrs [ "lock" "update" ] (emacs.admin "lock"));
+        };
+        apps = emacs.makeApps {
+          lockDirName = "lock";
+        };
         defaultPackage = packages.emacs;
       }
     );
-  }
+}

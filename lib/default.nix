@@ -1,14 +1,10 @@
-inputs:
-{ lib
-}:
-let
+inputs: {lib}: let
   fromElisp = import inputs.fromElisp {
-    pkgs = { inherit lib; };
+    pkgs = {inherit lib;};
   };
 
   inherit (builtins) readFile split filter isString;
-in
-{
+in {
   parseSetup = import ../pkgs/build-support/elisp/parseSetup.nix {
     inherit lib fromElisp;
   };
@@ -17,7 +13,11 @@ in
     inherit lib fromElisp;
   };
 
-  emacsBuiltinLibraries = { stdenv, ripgrep, emacs } @ args:
+  emacsBuiltinLibraries = {
+    stdenv,
+    ripgrep,
+    emacs,
+  } @ args:
     lib.pipe (readFile (import ../pkgs/emacs/builtins.nix args)) [
       (split "\n")
       (filter (s: isString s && s != ""))

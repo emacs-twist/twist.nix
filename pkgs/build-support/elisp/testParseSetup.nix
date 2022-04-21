@@ -1,78 +1,73 @@
-with builtins;
-let
-  pkgs = import <nixpkgs> { };
+with builtins; let
+  pkgs = import <nixpkgs> {};
   fromElisp = import (fetchTree (fromJSON (readFile ../../../flake.lock)).nodes.fromElisp.locked) {
     inherit pkgs;
   };
   parseSetup = import ./parseSetup.nix {
     inherit (pkgs) lib;
     inherit fromElisp;
-  } { };
+  } {};
 in
-pkgs.lib.runTests {
-  testFlat = {
+  pkgs.lib.runTests {
+    testFlat = {
+      expr = parseSetup ''
 
-    expr = parseSetup ''
+        (setup (:package dash))
 
-      (setup (:package dash))
+        (setup magit
+          (:package magit)
+          (:nixpkgs git))
 
-      (setup magit
-        (:package magit)
-        (:nixpkgs git))
+        (setup (:package aftermath afterlife))
 
-      (setup (:package aftermath afterlife))
+      '';
 
-    '';
-
-    expected = {
-      elispPackages = [
-        "dash"
-        "magit"
-        "aftermath"
-        "afterlife"
-      ];
-      systemPackages = [
-        "git"
-      ];
+      expected = {
+        elispPackages = [
+          "dash"
+          "magit"
+          "aftermath"
+          "afterlife"
+        ];
+        systemPackages = [
+          "git"
+        ];
+      };
     };
 
-  };
+    testNested = {
+      expr = parseSetup ''
 
-  testNested = {
+        (setup (:package university)
+          (:load-after good-scores
+            (:package master-degree)
+          (:load-after master-degree
+            (:load-after job-experience
+              (:package work-visa))
+            (:load-after ph-d
+              (:package work-visa)))))
 
-    expr = parseSetup ''
+        (setup t
+          (:load-after million-dollars
+            (:package retirement)))
 
-      (setup (:package university)
-        (:load-after good-scores
-          (:package master-degree)
-        (:load-after master-degree
-          (:load-after job-experience
-            (:package work-visa))
-          (:load-after ph-d
-            (:package work-visa)))))
+        (setup (:package china)
+          (:load-after car
+            (:load-after house
+              (:package marriage))))
 
-      (setup t
-        (:load-after million-dollars
-          (:package retirement)))
+      '';
 
-      (setup (:package china)
-        (:load-after car
-          (:load-after house
-            (:package marriage))))
-
-    '';
-
-    expected = {
-      elispPackages = [
-        "university"
-        "china"
-        "retirement"
-        "master-degree"
-        "marriage"
-        "work-visa"
-      ];
-      systemPackages = [ ];
+      expected = {
+        elispPackages = [
+          "university"
+          "china"
+          "retirement"
+          "master-degree"
+          "marriage"
+          "work-visa"
+        ];
+        systemPackages = [];
+      };
     };
-
-  };
-}
+  }

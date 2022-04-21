@@ -1,3 +1,3 @@
 s:
 with builtins;
-head (match "[[:space:]]*(.*)" s)
+  head (match "[[:space:]]*(.*)" s)
