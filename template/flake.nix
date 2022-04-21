@@ -66,10 +66,12 @@
           # inputOverrides = { };
         };
       in rec {
-        packages = flake-utils.lib.flattenTree ({
-            inherit emacs;
-          }
-          // nixpkgs.lib.getAttrs ["lock" "update"] (emacs.admin "lock"));
+        packages = flake-utils.lib.flattenTree {
+          inherit emacs;
+        };
+        apps = emacs.makeApps {
+          lockDirName = "lock";
+        };
         defaultPackage = packages.emacs;
       }
     );
