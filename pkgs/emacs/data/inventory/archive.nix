@@ -1,14 +1,14 @@
-{ lib, archiveLockData }:
-with builtins;
-{ url
+{
+  lib,
+  archiveLockData,
 }:
-let
-  versionString = numbers: concatStringsSep "." (map toString numbers);
+with builtins;
+  {url}: let
+    versionString = numbers: concatStringsSep "." (map toString numbers);
 
-  doTangle = false;
+    doTangle = false;
 
-  tarballEntry = ename: value:
-    rec {
+    tarballEntry = ename: value: rec {
       version = versionString (elemAt value 0);
       packageRequires = lib.pipe (elemAt value 1) [
         (map (ys: {
@@ -17,19 +17,22 @@ let
         }))
         listToAttrs
       ];
-      src = fetchTree (builtins.removeAttrs archive [ "narHash" ]);
-      archive = {
-        type = "tarball";
-        url = lib.concatStrings [
-          url
-          ename
-          "-"
-          version
-          ".tar"
-        ];
-      } // lib.getAttrs [
-        "narHash"
-      ] src;
+      src = fetchTree (builtins.removeAttrs archive ["narHash"]);
+      archive =
+        {
+          type = "tarball";
+          url = lib.concatStrings [
+            url
+            ename
+            "-"
+            version
+            ".tar"
+          ];
+        }
+        // lib.getAttrs [
+          "narHash"
+        ]
+        src;
       inventory = {
         type = "archive";
         inherit url;
@@ -37,27 +40,27 @@ let
       inherit doTangle;
     };
 
-  latest = lib.pipe (lib.readPackageArchiveContents url) [
-    (lib.filterAttrs (_: value: elemAt value 3 == "tar"))
-    (mapAttrs tarballEntry)
-  ];
+    latest = lib.pipe (lib.readPackageArchiveContents url) [
+      (lib.filterAttrs (_: value: elemAt value 3 == "tar"))
+      (mapAttrs tarballEntry)
+    ];
 
-  pinned = mapAttrs
-    (_: locked: {
-      src = builtins.fetchTree locked.archive;
-      inherit doTangle;
-      inherit (locked) version packageRequires archive inventory;
-    })
-    archiveLockData;
-in
-mode:
-if mode == "update"
-then latest
-else if mode == "lock"
-then pinned // latest
-else
-  pinned
-    //
-  {
-    _impure = latest;
-  }
+    pinned =
+      mapAttrs
+      (_: locked: {
+        src = builtins.fetchTree locked.archive;
+        inherit doTangle;
+        inherit (locked) version packageRequires archive inventory;
+      })
+      archiveLockData;
+  in
+    mode:
+      if mode == "update"
+      then latest
+      else if mode == "lock"
+      then pinned // latest
+      else
+        pinned
+        // {
+          _impure = latest;
+        }

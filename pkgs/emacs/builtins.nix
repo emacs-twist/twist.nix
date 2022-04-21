@@ -1,43 +1,46 @@
-{ stdenv, emacs, ripgrep }:
-let
+{
+  stdenv,
+  emacs,
+  ripgrep,
+}: let
   inherit (emacs) version;
 in
-stdenv.mkDerivation {
-  name = "${emacs.name}-libraries";
-  inherit (emacs) src;
+  stdenv.mkDerivation {
+    name = "${emacs.name}-libraries";
+    inherit (emacs) src;
 
-  preferLocalBuild = true;
-  allowSubstitutes = false;
+    preferLocalBuild = true;
+    allowSubstitutes = false;
 
-  buildInputs = [ ripgrep ];
+    buildInputs = [ripgrep];
 
-  phases = [ "unpackPhase" "buildPhase" ];
+    phases = ["unpackPhase" "buildPhase"];
 
-  buildPhase = ''
-    echo "Comparing Emacs versions..."
-    decl=$(grep -oP "This directory tree holds version \d[.\d]+\d of GNU Emacs" README)
-    if [[ "$decl" =~ [1-9][.0-9]+[0-9] ]]
-    then
-      version=''${BASH_REMATCH[0]}
-      echo "  Expected: ${version}"
-      echo "  Actual:   $version"
-      if [[ $version != ${version} ]]
+    buildPhase = ''
+      echo "Comparing Emacs versions..."
+      decl=$(grep -oP "This directory tree holds version \d[.\d]+\d of GNU Emacs" README)
+      if [[ "$decl" =~ [1-9][.0-9]+[0-9] ]]
       then
-        echo "ERROR: The version mismatched. Please fix the version."
+        version=''${BASH_REMATCH[0]}
+        echo "  Expected: ${version}"
+        echo "  Actual:   $version"
+        if [[ $version != ${version} ]]
+        then
+          echo "ERROR: The version mismatched. Please fix the version."
+          exit 1
+        fi
+      else
+        echo "Did not find a version from the README." >&2
         exit 1
       fi
-    else
-      echo "Did not find a version from the README." >&2
-      exit 1
-    fi
 
-    cd lisp
-    rg --maxdepth 2 --files-with-matches -g '*.el' \
-      'This file is part of GNU Emacs.' \
-      | grep -o -E '([^/]+)\.el' \
-      | sed -e 's/\.el$//' \
-      | sort \
-      | uniq \
-      > $out
-  '';
-}
+      cd lisp
+      rg --maxdepth 2 --files-with-matches -g '*.el' \
+        'This file is part of GNU Emacs.' \
+        | grep -o -E '([^/]+)\.el' \
+        | sed -e 's/\.el$//' \
+        | sort \
+        | uniq \
+        > $out
+    '';
+  }

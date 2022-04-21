@@ -1,13 +1,26 @@
-{ lib
-, emacsVersion
-, builtinLibraries
-, emptyFile
-, runCommandLocal
-}:
-packageInputs:
-let
-  inherit (builtins) mapAttrs all hasAttr elem length match head
-    substring lessThan concatLists sort concatStringsSep attrNames;
+{
+  lib,
+  emacsVersion,
+  builtinLibraries,
+  emptyFile,
+  runCommandLocal,
+}: packageInputs: let
+  inherit
+    (builtins)
+    mapAttrs
+    all
+    hasAttr
+    elem
+    length
+    match
+    head
+    substring
+    lessThan
+    concatLists
+    sort
+    concatStringsSep
+    attrNames
+    ;
 
   srcDateString = src: substring 0 8 src.lastModifiedDate;
 
@@ -22,12 +35,14 @@ let
     else lib.versionAtLeast actual required;
 
   # Some packages (e.g. magit) contain dates as dependency versions in *-pkg.el.
-  dependencyStatus = ename: required: removeAttrs
-    (rec {
+  dependencyStatus = ename: required:
+    removeAttrs
+    rec {
       isDateVersion =
-        required != null
+        required
+        != null
         && length (lib.splitVersion required) == 1
-        && match "[0-9]{8}" (head ((lib.splitVersion required))) != null;
+        && match "[0-9]{8}" (head (lib.splitVersion required)) != null;
       inherit required;
       actual =
         if ename == "emacs"
@@ -38,21 +53,25 @@ let
         then "builtin"
         else throw "Package ${ename} is missing from packageInputs";
       satisfied =
-        required == null
+        required
+        == null
         || actual == "builtin"
         || compareVersions isDateVersion actual required;
-    }) [ "isDateVersion" ];
+    } ["isDateVersion"];
 
-  filterErrors = lib.filterAttrs (_: { satisfied, ... }: !satisfied);
+  filterErrors = lib.filterAttrs (_: {satisfied, ...}: !satisfied);
 
   status = rec {
     summary = lib.pipe errors [
-      (lib.mapAttrsToList (requiredBy: lib.mapAttrsToList
-        (ename: status: {
-          inherit ename requiredBy;
-        } // status)))
+      (lib.mapAttrsToList (requiredBy:
+        lib.mapAttrsToList
+        (ename: status:
+          {
+            inherit ename requiredBy;
+          }
+          // status)))
       concatLists
-      (lib.groupBy ({ ename, ... }: ename))
+      (lib.groupBy ({ename, ...}: ename))
       (mapAttrs (ename: statuses: {
         current = (head statuses).actual;
         # Showing the source date may be useful, but maybe later.
@@ -67,26 +86,27 @@ let
           lib.last
         ];
         details =
-          map (status: removeAttrs status [ "actual" "ename" "satisfied" ]) statuses;
+          map (status: removeAttrs status ["actual" "ename" "satisfied"]) statuses;
       }))
     ];
     errors = lib.pipe packages [
       (mapAttrs (_: filterErrors))
-      (lib.filterAttrs (_: attrs: attrs != { }))
+      (lib.filterAttrs (_: attrs: attrs != {}))
     ];
     packages = lib.pipe packageInputs [
-      (mapAttrs (_: { packageRequires, ... }:
-        mapAttrs dependencyStatus packageRequires))
+      (mapAttrs (_: {packageRequires, ...}:
+          mapAttrs dependencyStatus packageRequires))
     ];
   };
 in
-if status.errors == { }
-then emptyFile
-else runCommandLocal "emacs-deps-error" {
-  passthru = status;
-} ''
-  echo >&2 "ERROR: Some packages require updates: ${
-    concatStringsSep " " (attrNames status.summary)
-  }"
-  exit 1
-''
+  if status.errors == {}
+  then emptyFile
+  else
+    runCommandLocal "emacs-deps-error" {
+      passthru = status;
+    } ''
+      echo >&2 "ERROR: Some packages require updates: ${
+        concatStringsSep " " (attrNames status.summary)
+      }"
+      exit 1
+    ''

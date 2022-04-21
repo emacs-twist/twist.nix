@@ -1,15 +1,15 @@
-{ lib
-, runCommandLocal
-, makeWrapper
-, buildEnv
-, emacs
-, lndir
-, texinfo
-, elispInputs
-, executablePackages
-, extraOutputsToInstall
-}:
-let
+{
+  lib,
+  runCommandLocal,
+  makeWrapper,
+  buildEnv,
+  emacs,
+  lndir,
+  texinfo,
+  elispInputs,
+  executablePackages,
+  extraOutputsToInstall,
+}: let
   inherit (builtins) length;
 
   nativeComp = emacs.nativeComp or false;
@@ -18,9 +18,11 @@ let
   packageEnv = buildEnv {
     name = "elisp-packages";
     paths = elispInputs;
-    pathsToLink = [
-      "/share/info"
-    ] ++ lib.optional nativeComp "/share/emacs/native-lisp";
+    pathsToLink =
+      [
+        "/share/info"
+      ]
+      ++ lib.optional nativeComp "/share/emacs/native-lisp";
     inherit extraOutputsToInstall;
     buildInputs = [
       texinfo
@@ -45,35 +47,36 @@ let
 
   lispList = strings:
     wrap "'(" ")"
-      (lib.concatMapStringsSep " " (wrap "\"" "\"") strings);
+    (lib.concatMapStringsSep " " (wrap "\"" "\"") strings);
 in
-runCommandLocal "emacs"
-{
-  buildInputs = [ lndir texinfo ];
-  propagatedBuildInputs = [ emacs packageEnv ] ++ executablePackages;
-  nativeBuildInputs = [ makeWrapper ];
-  # Useful for use with flake-utils.lib.mkApp
-  passthru.exePath = "/bin/emacs";
+  runCommandLocal "emacs"
+  {
+    buildInputs = [lndir texinfo];
+    propagatedBuildInputs = [emacs packageEnv] ++ executablePackages;
+    nativeBuildInputs = [makeWrapper];
+    # Useful for use with flake-utils.lib.mkApp
+    passthru.exePath = "/bin/emacs";
 
-  passAsFile = [ "subdirs" "siteStartExtra" ];
+    passAsFile = ["subdirs" "siteStartExtra"];
 
-  nativeLoadPath =
-    "${packageEnv}/share/emacs/native-lisp/:${emacs}/share/emacs/native-lisp/:";
+    nativeLoadPath = "${packageEnv}/share/emacs/native-lisp/:${emacs}/share/emacs/native-lisp/:";
 
-  subdirs = ''
-    (setq load-path (append ${
-      lispList (map (path: "${path}/share/emacs/site-lisp/") elispInputs)
-    } load-path))
-  '';
+    subdirs = ''
+      (setq load-path (append ${
+        lispList (map (path: "${path}/share/emacs/site-lisp/") elispInputs)
+      } load-path))
+    '';
 
-  siteStartExtra = ''
-    (when init-file-user
-      ${lib.concatMapStrings (pkg: ''
+    siteStartExtra = ''
+      (when init-file-user
+        ${
+        lib.concatMapStrings (pkg: ''
           (load "${pkg}/share/emacs/site-lisp/${pkg.ename}-autoloads.el" t t)
-      '') elispInputs
-    })
-  '';
-}
+        '')
+        elispInputs
+      })
+    '';
+  }
   ''
     for dir in bin share/applications share/icons
     do
@@ -124,12 +127,11 @@ runCommandLocal "emacs"
       if [[ $(basename $bin) = emacs-* ]]
       then
       wrapProgram $bin \
-        ${lib.optionalString (length executablePackages > 0) (
-          "--prefix PATH : ${lib.escapeShellArg (lib.makeBinPath executablePackages)}"
-        )} \
+        ${lib.optionalString (length executablePackages > 0) "--prefix PATH : ${lib.escapeShellArg (lib.makeBinPath executablePackages)}"} \
         --prefix INFOPATH : ${emacs}/share/info:$out/share/info:${packageEnv}/share/info \
-        ${lib.optionalString nativeComp "--set EMACSNATIVELOADPATH $nativeLisp:$nativeLoadPath"
-        } \
+        ${
+      lib.optionalString nativeComp "--set EMACSNATIVELOADPATH $nativeLisp:$nativeLoadPath"
+    } \
         --set EMACSLOADPATH "$siteLisp:"
       fi
     done

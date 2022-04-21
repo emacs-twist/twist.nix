@@ -41,14 +41,13 @@
   #   url = "github:nix-community/emacs-overlay";
   # };
 
-  outputs =
-    { flake-utils
-    , emacs-ci
-      # , emacs-unstable
-    , ...
-    } @ inputs:
-    flake-utils.lib.eachDefaultSystem (system:
-    let
+  outputs = {
+    flake-utils,
+    emacs-ci,
+    # , emacs-unstable
+    ...
+  } @ inputs:
+    flake-utils.lib.eachDefaultSystem (system: let
       inherit (builtins) filter match elem;
 
       # Access niv sources of nix-emacs-ci
@@ -118,8 +117,7 @@
       };
 
       inherit (flake-utils.lib) mkApp;
-    in
-    {
+    in {
       packages = {
         inherit emacs;
         admin = emacs.admin "lock";

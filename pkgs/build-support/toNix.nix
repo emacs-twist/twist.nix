@@ -1,6 +1,7 @@
-/* An incomplete implementation of Nix serialization. */
-{ lib }:
-let
+/*
+ An incomplete implementation of Nix serialization.
+ */
+{lib}: let
   inherit (builtins) isList isAttrs isFunction toJSON concatStringsSep match;
 
   isPrimitive = v: ! (isList v || isAttrs v || isFunction v);
@@ -9,7 +10,7 @@ let
 
   printList = v:
     wrap "[ " " ]"
-      (lib.concatMapStringsSep " " go v);
+    (lib.concatMapStringsSep " " go v);
 
   escapeAttrName = str:
     if match "[a-zA-Z_][-a-zA-Z0-9_']+" str != null
@@ -20,7 +21,7 @@ let
 
   printAttrs = v:
     wrap "{ " " }"
-      (concatStringsSep " " (lib.mapAttrsToList printAttr v));
+    (concatStringsSep " " (lib.mapAttrsToList printAttr v));
 
   go = v:
     if isList v
@@ -31,4 +32,4 @@ let
     then "<LAMBDA>"
     else toJSON v;
 in
-go
+  go

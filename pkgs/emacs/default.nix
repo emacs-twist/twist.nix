@@ -1,25 +1,40 @@
-{ lib
-, pkgs
-, final
-}:
-{ emacsPackage ? pkgs.emacs
-, lockDir
-, inventories
-, initFiles
-, initParser ? lib.parseUsePackages { }
-, extraPackages ? [ "use-package" ]
-, addSystemPackages ? true
-, inputOverrides ? { }
-, nativeCompileAheadDefault ? true
-, wantExtraOutputs ? true
-, extraOutputsToInstall ? if wantExtraOutputs then [ "info" ] else [ ]
-}:
-let
-  inherit (builtins) readFile attrNames attrValues concatLists isFunction
-    split filter isString mapAttrs match isList isAttrs;
+{
+  lib,
+  pkgs,
+  final,
+}: {
+  emacsPackage ? pkgs.emacs,
+  lockDir,
+  inventories,
+  initFiles,
+  initParser ? lib.parseUsePackages {},
+  extraPackages ? ["use-package"],
+  addSystemPackages ? true,
+  inputOverrides ? {},
+  nativeCompileAheadDefault ? true,
+  wantExtraOutputs ? true,
+  extraOutputsToInstall ?
+    if wantExtraOutputs
+    then ["info"]
+    else [],
+}: let
+  inherit
+    (builtins)
+    readFile
+    attrNames
+    attrValues
+    concatLists
+    isFunction
+    split
+    filter
+    isString
+    mapAttrs
+    match
+    isList
+    isAttrs
+    ;
 in
-lib.makeScope pkgs.newScope (self:
-  let
+  lib.makeScope pkgs.newScope (self: let
     flakeLockFile = lockDir + "/flake.lock";
 
     archiveLockFile = lockDir + "/archive.lock";
@@ -27,20 +42,21 @@ lib.makeScope pkgs.newScope (self:
     userConfig = lib.pipe self.initFiles [
       (map (file: initParser (readFile file)))
       lib.zipAttrs
-      (lib.mapAttrs (name: values:
-        if name == "elispPackages"
-        then concatLists values
-        else if name == "elispPackagePins"
-        then lib.foldl' (acc: x: acc // x) { } values
-        else if name == "systemPackages"
-        then concatLists values
-        else throw "${name} is an unknown attribute"
+      (lib.mapAttrs (
+        name: values:
+          if name == "elispPackages"
+          then concatLists values
+          else if name == "elispPackagePins"
+          then lib.foldl' (acc: x: acc // x) {} values
+          else if name == "systemPackages"
+          then concatLists values
+          else throw "${name} is an unknown attribute"
       ))
     ];
 
-    explicitPackages = (userConfig.elispPackages or [ ]) ++ extraPackages;
+    explicitPackages = (userConfig.elispPackages or []) ++ extraPackages;
 
-    builtinLibraryList = self.callPackage ./builtins.nix { };
+    builtinLibraryList = self.callPackage ./builtins.nix {};
 
     builtinLibraries = lib.pipe (readFile builtinLibraryList) [
       (split "\n")
@@ -48,9 +64,15 @@ lib.makeScope pkgs.newScope (self:
     ];
 
     enumerateConcretePackageSet = import ./data {
-      inherit lib flakeLockFile archiveLockFile
-        builtinLibraries inventories inputOverrides;
-      elispPackagePins = userConfig.elispPackagePins or { };
+      inherit
+        lib
+        flakeLockFile
+        archiveLockFile
+        builtinLibraries
+        inventories
+        inputOverrides
+        ;
+      elispPackagePins = userConfig.elispPackagePins or {};
     };
 
     packageInputs = enumerateConcretePackageSet "build" explicitPackages;
@@ -59,17 +81,18 @@ lib.makeScope pkgs.newScope (self:
 
     allDependencies = lib.fix (self:
       mapAttrs
-        (_ename: { packageRequires, ... }:
-          let
-            explicitDeps = lib.subtractLists visibleBuiltinLibraries
-              (lib.packageRequiresToLibraryNames packageRequires);
-          in
-          lib.unique
-            (explicitDeps
-              ++ concatLists (lib.attrVals explicitDeps self)))
-        packageInputs);
+      (_ename: {packageRequires, ...}: let
+        explicitDeps =
+          lib.subtractLists visibleBuiltinLibraries
+          (lib.packageRequiresToLibraryNames packageRequires);
+      in
+        lib.unique
+        (explicitDeps
+          ++ concatLists (lib.attrVals explicitDeps self)))
+      packageInputs);
 
-    depsCheck = self.callPackage ./tools/check-versions.nix
+    depsCheck =
+      self.callPackage ./tools/check-versions.nix
       {
         emacsVersion = emacsPackage.version;
         inherit lib builtinLibraries;
@@ -79,8 +102,7 @@ lib.makeScope pkgs.newScope (self:
     generateLockFiles = self.callPackage ./lock {
       inherit flakeLockFile;
     };
-  in
-  {
+  in {
     inherit lib;
     emacs = emacsPackage;
 
@@ -90,11 +112,13 @@ lib.makeScope pkgs.newScope (self:
     # Exposed for inspecting the configuration. Don't override this attribute
     # using overrideScope'. It won't affect anything.
     packageInputs = lib.pipe packageInputs [
-      (mapAttrs (_: attrs:
-        lib.filterAttrs (_: v: ! isFunction v)
-          (attrs // lib.optionalAttrs (isAttrs attrs.src && attrs.src ? rev) {
-            sourceInfo = removeAttrs attrs.src [ "outPath" ];
-          })
+      (mapAttrs (
+        _: attrs:
+          lib.filterAttrs (_: v: ! isFunction v)
+          (attrs
+            // lib.optionalAttrs (isAttrs attrs.src && attrs.src ? rev) {
+              sourceInfo = removeAttrs attrs.src ["outPath"];
+            })
       ))
     ];
 
@@ -104,27 +128,29 @@ lib.makeScope pkgs.newScope (self:
     # attribute set to change how they are built.
     elispPackages = lib.makeScope self.newScope (eself:
       mapAttrs
-        (ename: attrs:
-          self.callPackage ./build { }
-            ({
-              nativeCompileAhead = nativeCompileAheadDefault;
-              elispInputs = lib.attrVals allDependencies.${ename} eself;
-              inherit wantExtraOutputs;
-            } // attrs))
-        packageInputs);
+      (ename: attrs:
+        self.callPackage ./build {}
+        ({
+            nativeCompileAhead = nativeCompileAheadDefault;
+            elispInputs = lib.attrVals allDependencies.${ename} eself;
+            inherit wantExtraOutputs;
+          }
+          // attrs))
+      packageInputs);
 
     executablePackages =
       if addSystemPackages
       then
         map
-          (pathStr:
-            lib.getAttrFromPath
-              (filter isString (split "\\." pathStr))
-              final)
-          (userConfig.systemPackages or [ ])
-      else [ ];
+        (pathStr:
+          lib.getAttrFromPath
+          (filter isString (split "\\." pathStr))
+          final)
+        (userConfig.systemPackages or [])
+      else [];
 
-    emacsWrapper = self.callPackage ./wrapper.nix
+    emacsWrapper =
+      self.callPackage ./wrapper.nix
       {
         elispInputs = lib.attrVals (attrNames packageInputs) self.elispPackages;
         inherit extraOutputsToInstall;
@@ -133,12 +159,14 @@ lib.makeScope pkgs.newScope (self:
     # This makes the attrset a derivation for a shorthand.
     inherit (self.emacsWrapper) name type outputName outPath drvPath;
 
-    admin = lockDirName: lib.extendDerivation true
+    admin = lockDirName:
+      lib.extendDerivation true
       {
         # Generate flake.nix and archive.lock with a complete package set. You
         # have to run `nix flake lock`` in the target directory to update
         # flake.lock.
-        lock = generateLockFiles
+        lock =
+          generateLockFiles
           {
             packageInputs = enumerateConcretePackageSet "lock" explicitPackages;
             flakeNix = true;
@@ -155,7 +183,8 @@ lib.makeScope pkgs.newScope (self:
         # };
 
         # Generate archive.lock with latest packages from ELPA package archives
-        update = generateLockFiles
+        update =
+          generateLockFiles
           {
             packageInputs = enumerateConcretePackageSet "update" explicitPackages;
             archiveLock = true;
