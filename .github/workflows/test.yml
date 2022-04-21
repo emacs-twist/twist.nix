@@ -79,11 +79,11 @@ jobs:
 
     - name: Lock the ELPA packages
       working-directory: test
-      run: nix run .#admin.update --impure
+      run: nix run .#update --impure
 
     - name: Generate the lock file for MELPA packages
       working-directory: test
-      run: nix run .#admin.lock --impure
+      run: nix run .#lock --impure
 
     - name: The lock file exists
       working-directory: test
