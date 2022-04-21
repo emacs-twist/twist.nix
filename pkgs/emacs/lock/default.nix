@@ -5,7 +5,7 @@
   jq,
   runCommandLocal,
   writeTextFile,
-  writeShellScriptBin,
+  writeShellScript,
   # Current version
   flakeLockFile ? null,
 }: {
@@ -80,7 +80,7 @@ assert (flakeNix || flakeLock || archiveLock); let
       ${lib.optionalString archiveLock generateArchiveLock}
     '';
 
-  writeToDir = writeShellScriptBin "lock" ''
+  writeToDir = writeShellScript "lock" ''
     outDir="${outDir}"
 
     if [[ ! -d "$outDir" ]]
@@ -109,11 +109,9 @@ assert (flakeNix || flakeLock || archiveLock); let
     ''}
   '';
 in
-  lib.extendDerivation true {
-    inherit src;
-
-    # passthru.exePath is useful with flake-utils.lib.mkApp
-    # <https://github.com/numtide/flake-utils>
-    passthru.exePath = "/bin/lock";
+  # This is an app, and not a derivation. See
+  # https://nixos.org/manual/nix/stable/command-ref/new-cli/nix3-run.html#apps
+  {
+    type = "app";
+    program = writeToDir.outPath;
   }
-  writeToDir
