@@ -1,5 +1,6 @@
 {
-  description = "THIS IS AN AUTO-GENERATED FILE. PLEASE DON'T EDIT IT MANUALLY.";
+  description =
+    "THIS IS AN AUTO-GENERATED FILE. PLEASE DON'T EDIT IT MANUALLY.";
   inputs = {
     async = {
       flake = false;
@@ -31,16 +32,16 @@
       repo = "themes";
       type = "github";
     };
-    forge = {
-      flake = false;
-      owner = "magit";
-      repo = "forge";
-      type = "github";
-    };
     git-commit = {
       flake = false;
       owner = "magit";
       repo = "magit";
+      type = "github";
+    };
+    google-translate = {
+      flake = false;
+      owner = "atykhonov";
+      repo = "google-translate";
       type = "github";
     };
     magit = {
@@ -59,6 +60,12 @@
       flake = false;
       owner = "nobiot";
       repo = "org-transclusion";
+      type = "github";
+    };
+    popup = {
+      flake = false;
+      owner = "auto-complete";
+      repo = "popup-el";
       type = "github";
     };
     queue = {
@@ -103,5 +110,5 @@
       type = "github";
     };
   };
-  outputs = {...}: {};
+  outputs = { ... }: { };
 }
