@@ -8,11 +8,11 @@ build:
 .PHONY: build
 
 lock:
-	$(NIX) run .#admin.lock --impure -- $(NIX_OPTIONS)
+	$(NIX) run .#lock --impure $(NIX_OPTIONS)
 .PHONY: lock
 
 update:
-	$(NIX) run .#admin.update --impure -- $(NIX_OPTIONS)
+	$(NIX) run .#update --impure $(NIX_OPTIONS)
 .PHONY: update
 
 clean:

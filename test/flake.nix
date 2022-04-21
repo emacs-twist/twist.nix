@@ -120,7 +120,9 @@
     in {
       packages = {
         inherit emacs;
-        admin = emacs.admin "lock";
+      };
+      apps = emacs.makeApps {
+        lockDirName = "lock";
       };
       defaultPackage = emacs;
     });
