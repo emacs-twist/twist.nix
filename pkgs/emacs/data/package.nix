@@ -39,13 +39,19 @@ in
       else self.src + "/${ename}-pkg.el";
     #  OPTIMIZE: Reduce filesystem access
     hasPkgFile =
-      ! (self.ignorePkgFile or false)
-      && (length pkgFiles
-        != 0
-        || pathExists pkgFile);
+      length pkgFiles
+      != 0
+      || pathExists pkgFile;
     packageDesc =
+      # If the package description does not specify dependencies,
+      # packageRequires attribute will be null, so remove the attribute.
       if hasPkgFile
-      then lib.parsePkg (readFile pkgFile)
+      then
+        lib.warnIf (self ? ignorePkgFile) "ignorePkgFile is obsolete and does not take effect."
+        (
+          lib.filterAttrs (_: v: v != null)
+          (lib.parsePkg (readFile pkgFile))
+        )
       else {};
 
     # builtins.readFile fails when the source file contains control characters.
@@ -108,21 +114,21 @@ in
       # TODO: Check https://github.com/melpa/melpa/issues/2955 on the right versioning scheme
       version =
         attrs.version
-        or packageDesc.version
         or headers.Version
         or headers.Package-Version
+        or packageDesc.version
         # There are packages that lack a version header, so fallback to zero.
         or "0.0.0";
 
       author = headers.Author or null;
 
       meta =
-        (import ./headers-to-meta.nix {
+        (lib.optionalAttrs hasPkgFile {
+          description = packageDesc.summary;
+        })
+        // (import ./headers-to-meta.nix {
           inherit lib;
           inherit (self) headers;
-        })
-        // (lib.optionalAttrs hasPkgFile {
-          description = packageDesc.summary;
         });
 
       packageRequires =

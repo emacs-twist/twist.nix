@@ -107,12 +107,6 @@
               "bbdb-vm-aux.el"
             ];
           };
-          # google-translate currently contains an invalid pkg file, but it may
-          # be fixed later. See
-          # https://github.com/atykhonov/google-translate/pull/148
-          google-translate = _: _: {
-            ignorePkgFile = true;
-          };
         };
       };
 
