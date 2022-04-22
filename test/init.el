@@ -57,3 +57,6 @@
 
 (use-package google-translate
   :ensure t)
+
+(use-package drag-stuff
+  :ensure t)

@@ -113,6 +113,10 @@
           google-translate = _: _: {
             ignorePkgFile = true;
           };
+          # This package contains a pkg file without the dependencies field
+          drag-stuff = _: _: {
+            ignorePkgFile = true;
+          };
         };
       };
 
