@@ -39,15 +39,19 @@ in
       else self.src + "/${ename}-pkg.el";
     #  OPTIMIZE: Reduce filesystem access
     hasPkgFile =
-      ! (self.ignorePkgFile or false)
-      && (length pkgFiles
-        != 0
-        || pathExists pkgFile);
+      length pkgFiles
+      != 0
+      || pathExists pkgFile;
     packageDesc =
       # If the package description does not specify dependencies,
       # packageRequires attribute will be null, so remove the attribute.
       if hasPkgFile
-      then lib.filterAttrs (_: v: v != null) (lib.parsePkg (readFile pkgFile))
+      then
+        lib.warnIf (self ? ignorePkgFile) "ignorePkgFile is obsolete and does not take effect."
+        (
+          lib.filterAttrs (_: v: v != null)
+          (lib.parsePkg (readFile pkgFile))
+        )
       else {};
 
     # builtins.readFile fails when the source file contains control characters.
