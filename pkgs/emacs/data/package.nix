@@ -44,8 +44,10 @@ in
         != 0
         || pathExists pkgFile);
     packageDesc =
+      # If the package description does not specify dependencies,
+      # packageRequires attribute will be null, so remove the attribute.
       if hasPkgFile
-      then lib.parsePkg (readFile pkgFile)
+      then lib.filterAttrs (_: v: v != null) (lib.parsePkg (readFile pkgFile))
       else {};
 
     # builtins.readFile fails when the source file contains control characters.
