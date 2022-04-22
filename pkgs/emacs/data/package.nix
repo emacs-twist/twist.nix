@@ -108,21 +108,21 @@ in
       # TODO: Check https://github.com/melpa/melpa/issues/2955 on the right versioning scheme
       version =
         attrs.version
-        or packageDesc.version
         or headers.Version
         or headers.Package-Version
+        or packageDesc.version
         # There are packages that lack a version header, so fallback to zero.
         or "0.0.0";
 
       author = headers.Author or null;
 
       meta =
-        (import ./headers-to-meta.nix {
+        (lib.optionalAttrs hasPkgFile {
+          description = packageDesc.summary;
+        })
+        // (import ./headers-to-meta.nix {
           inherit lib;
           inherit (self) headers;
-        })
-        // (lib.optionalAttrs hasPkgFile {
-          description = packageDesc.summary;
         });
 
       packageRequires =
