@@ -54,8 +54,8 @@ in
     buildInputs = [lndir texinfo];
     propagatedBuildInputs = [emacs packageEnv] ++ executablePackages;
     nativeBuildInputs = [makeWrapper];
-    # Useful for use with flake-utils.lib.mkApp
-    passthru.exePath = "/bin/emacs";
+    # Support for nix run
+    meta.mainProgram = "emacs";
 
     passAsFile = ["subdirs" "siteStartExtra"];
 
