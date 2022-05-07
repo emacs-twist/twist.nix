@@ -3,6 +3,14 @@
 #+TEXINFO_DIR_TITLE: Twist: (emacs-twist)
 #+TEXINFO_DIR_DESC: Build an Emacs configuration with Nix.
 * Introduction
+** Building in Nix
+** An alternative, but not a replacement
+** Lock individual packages
+** Support various package repositories
+** Pure builds vs. impure builds
+** Build subset profiles with minimal extra time
+** nix eval-friendly APIs
+** Creating a self-contained environment with required executables
 * System requirements
 Twist depends on the Nix package manager.
 Nix is currently supported on Linux and macOS.
