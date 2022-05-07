@@ -265,7 +265,17 @@ Every time the user adds a new package, he/she must perform the lock operation.
 *** Options
 **** name: Inventory name for pinning
 **** exclude: Ignore particular packages
+** Customization
+*** Org-babel configuration
+*** Using a non-stable version of GNU Emacs
+*** Using a configuration syntax other than use-package
+** How to run the configuration
+*** Normal installation
+*** Bubblewrap
 * Developing the configuration
+** Basic workflow
+** Working around sources
+** Custom build processes
 * Troubleshooting
 This section describes how to deal with common errors in building configurations.
 * Tips
