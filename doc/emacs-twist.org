@@ -77,8 +77,188 @@ Otherwise, you can skip the following subsections to start developing your confi
 Alternatively, if you already have an Emacs configuration built with Nix, you can migrate your configuration to Twist by tweaking your configuration.
 
 This subsection assumes you have a flake for your Emacs configuration.
+*** Create flake.nix
+You must track your configuration in a Git repository, and the root directory of the repository must contain =flake.nix=.
+It must follow the format of [[https://nixos.wiki/wiki/Flakes][Nix flakes]] as recognized by Nix.
+You can run the following command to create a =flake.nix=:
+
+#+begin_src sh
+  nix flake init
+#+end_src
+*** Add flake inputs
+To use Twist, you have to add =github:emacs-twist/twist.nix= to the inputs:
+
+#+begin_src nix
+  inputs.twist.url = "github:emacs-twist/twist.nix";
+#+end_src
+
+You will probably have to add the source repository of GNU Emacs.
+This can be a mirror, so you can use the following:
+
+#+begin_src nix
+  inputs.emacs = {
+    url = "github:emacs-mirror/emacs";
+    flake = false;
+  };
+#+end_src
+
+You also have to add flake inputs for inventories you use.
+See [[#inventory-configuration][Inventory Configuration]] for details.
+*** Create a lock directory
+You have to create a directory for lock files.
+The directory can be anywhere inside the repository, but not the root directory of the repository.
+
+For example, if the directory is named =lock=, you can use the following commands:
+
+#+begin_src sh
+  mkdir -p lock
+  touch lock/.keep
+  git add lock/.keep
+#+end_src
+
+Note that the directory must not be empty.
+It must be considered non-empty by Nix, so you have to create an empty file (e.g. =.keep=) in the directory and add it to the Git index.
+*** Define flake outputs
+With [[https://github.com/numtide/flake-utils][flake-utils]], the user can define flake outputs in the following boilerplate:
+
+#+begin_src nix
+  # Root of flake.nix
+  {
+    outputs = { self, nixpkgs, flake-utils, twist, ... } @ inputs:
+      flake-utils.lib.eachDefaultSystem (
+        system:
+        let
+          # Define variables here
+          ...
+        in rec {
+          # Define packages and apps here
+          packages = ...;
+        };
+      )
+  }
+#+end_src
+
+It is also possible to use other libraries for the boilerplate.
+If you want to track the Emacs configuration in the same repository as a NixOS/home-manager configuration, [[https://github.com/gytis-ivaskevicius/flake-utils-plus][flake-utils-plus]] is recommended, but it is not described in this manual.
+**** Define a package
+You can define a derivation for an Emacs configuration is as follows:
+
+#+begin_src nix
+  system: let
+    pkgs = import nixpkgs {
+      inherit system;
+      overlays = [
+        # Import an overlay from twist.nix
+        twist.overlay
+      ];
+    };
+
+    emacs = pkgs.emacsTwist {
+      # Define your inventories here
+      inventories = ...;
+      # The path to the lock directory
+      lockDir = ./lock;
+      initFiles = [
+        # Your Emacs initialization file.
+        # For Org support, you will need an extra configuration
+        ./init.el
+      ];
+    };
+  in
+    {
+      # Define individual outputs here
+      packages = ...;
+      apps = ...;
+    }
+#+end_src
+
+The package is a Nix derivation, so you can add it to the flake outputs:
+
+#+begin_src nix
+  packages = flake-utils.lib.flattenTree {
+    inherit emacs;
+    # Optional. Supported since Nix 2.7
+    default = emacs;
+  };
+#+end_src
+**** Derive apps for administration
+You will also need apps to lock and update (ELPA) packages.
+You can add these outputs as follows:
+
+#+begin_src nix
+  apps = emacs.makeApps {
+    lockDirName = "lock";
+  };
+#+end_src
+
+You have to set =lockDirName= to the path to the lock directory in string.
+=makeApps= in the package defines all apps needed for maintenance, which can be run using =nix run= command.
 ** Inventory Configuration
-*** Prefer building from sources
+:PROPERTIES:
+:CUSTOM_ID: inventory-configuration
+:END:
+/Inventories/ are repositories from which Twist can discover information on Emacs Lisp packages.
+
+In GNU Emacs, the user can install packages from package archives such as GNU ELPA, NonGNU ELPA, and MELPA.
+Those archives serve pre-build files and tarballs which can be installed using =package.el=.
+
+While Twist supports package archives, it is primarily intended for building packages from sources.
+Twist somehow needs to discover the source repositories of packages the user wants to install, and those meta-repositories are called inventories.
+
+Inventories must be passed to =pkgs.emacsTwist= function as =inventories= attribute.
+The attribute is a list of attributes which corresponds to individual inventories:
+
+#+begin_src nix
+  emacs = pkgs.emacsTwist {
+    inventories = [
+      {
+        type = "melpa";
+        path = inputs.melpa.outPath + "/recipes";
+        exclude = [
+          "bbdb"
+        ];
+      }
+      {
+        type = "elpa";
+        path = inputs.gnu-elpa.outPath + "/elpa-packages";
+        core-src = inputs.emacs.outPath;
+        auto-sync-only = true;
+      }
+      # More inventory definitions
+    ];
+    # More arguments passed to emacsTwist
+  };
+#+end_src
+*** Supported inventories
+The following types of inventories are supported:
+
+- [[https://github.com/melpa/melpa][MELPA repository]] and its forks: The =recipes= directory which contains MELPA-style recipes.
+- ELPA repository: The =elpa-packages= file of [[https://git.savannah.gnu.org/cgit/emacs/elpa.git/][GNU ELPA]] or [[https://git.savannah.gnu.org/cgit/emacs/nongnu.git/][NonGNU ELPA]] which defines a list of packages.
+- Emacsmirror repository: The Git submodule list (=.gitmodules=) of [[https://github.com/emacsmirror/epkgs][emacsmirror/epkgs]].
+- Remote package archive: The url of a pre-built package archive as supported by package.el.
+
+Remote package archives are /impure/ inventories.
+Nix needs to make a network connection to access those repositories, and the user has to run Nix with =--impure= flag when he/she perform the lock operation.
+
+The other types of inventories are considered /pure/.
+They are tracked as Nix flake inputs and locked to particular revisions themselves.
+Twist can discover packages from those inventories without =--impure= flag, if the user's configuration doesn't involve impure inventories.
+
+Once all packages in a configuration are locked, the user can build the configuration without =--impure= flag, which means the entire configuration is pure.
+Every time the user adds a new package, he/she must perform the lock operation.
+*** MELPA (pure)
+*** ELPA (pure)
+**** A recommended configuration for GNU ELPA
+**** A recommended configuration for NonGNU ELPA
+**** Core ELPA
+*** Emacsmirror (pure)
+*** Package archives (impure)
+*** Options
+**** name: Inventory name for pinning
+**** exclude: Ignore particular packages
+* Developing the configuration
+* Tips
+** Prefer building from sources
 It is recommended to build a package from an upstream whenever possible.
 
 This is because an archive can be deleted from its server when the package creates a new release:
@@ -98,7 +278,6 @@ error: unable to download 'https://elpa.gnu.org/packages/vertico-0.18.tar': HTTP
        <address>Apache/2.4.51 (Debian) Server at elpa.gnu.org Port 443</address>
        </body></html>
 #+end_example
-* Developing the configuration
 * Limitations
 ** use-package-always-ensure option
 [[https://github.com/jwiegley/use-package][use-package]] provides =use-package-always-ensure= option, which makes =package.el= install packages that have no =:ensure= option set:
