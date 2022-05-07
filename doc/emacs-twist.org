@@ -258,6 +258,14 @@ Every time the user adds a new package, he/she must perform the lock operation.
 **** exclude: Ignore particular packages
 * Developing the configuration
 * Tips
+** --dry-run is your friend
+To quickly examine sanity of your configuration, a recommended way is to build the configuration with =--dry-run= flag:
+
+#+begin_src sh
+  nix build .#emacs --dry-run
+#+end_src
+
+If the command fails with non-zero exit code, it is likely that there is something wrong with your configuration, not an individual Emacs Lisp package.
 ** Prefer building from sources
 It is recommended to build a package from an upstream whenever possible.
 
