@@ -1,12 +1,27 @@
 name: Convert the document
 
 on:
-  pull_request:
-    paths:
-      - 'doc/*.org'
+  push:
+    branches:
+      - master
 
 jobs:
+  changes:
+    runs-on: ubuntu-latest
+    outputs: ${{ steps.changes.outputs.doc }}
+    steps:
+    - uses: actions/checkout@v3
+    - uses: dorny/paths-filter@v2
+      id: changes
+      with:
+        filters: |
+          doc:
+            - 'doc/*.org'
+
   build:
+    needs: changes
+    if: ${{ needs.changes.outputs == 'true' }}
+
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
@@ -25,10 +40,13 @@ jobs:
       id: diff
       continue-on-error: true
 
-    - name: Commit the new data
+    - name: Create a pull request
+      uses: peter-evans/create-pull-request@v4.0.1
       if: ${{ steps.diff.outcome == 'failure' }}
-      run: |
-        git config --local user.email 6270544+github-actions[bot]@users.noreply.github.com
-        git config --local user.name github-actions[bot]
-        git commit -m 'Re-generate extra documentation formats' -- doc
-        git push
+      with:
+        commit-message: 'Re-generate info documentation'
+        base: master
+        title: 'Re-generate the info version of the manual'
+        branch: create-pull-request/doc
+        delete-branch: true
+        labels: automation
