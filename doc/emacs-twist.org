@@ -4,14 +4,59 @@
 #+TEXINFO_DIR_TITLE: Twist: (emacs-twist)
 #+TEXINFO_DIR_DESC: Build an Emacs configuration with Nix.
 * Introduction
-** Building in Nix
-** An alternative, but not a replacement
+** Building with Nix
+Twist build packages with the [[https://nixos.org/][Nix]] package manager, a purely functional package manager for Linux and macOS.
+Rather than running a build process inside a running session of Emacs, it builds packages in a sandboxed Nix session.
+This ensures that your entire configuration is reproducible.
+
+Twist avoids systems programming in Emacs Lisp, which is hard to get right.
+Nix handles most of the heavy lifting in package management, which makes the build process reliable and performant.
 ** Lock individual packages
+Twist lets you lock individual package versions.
+This is different from =emacsWithPackages= in Nixpkgs, which basically updates all packages to the latest version at once.
+In Twist, you can select which packages to update, and the remaining packages won't be updated, even if their upstream repositories have newer revisions.
+This is a recommended practice for security.
+
+The format of a lock file is =flake.nix= + =flake.lock=, so you can use Nix to update packages.
+You don't need a separate command for maintenance.
 ** Support various package repositories
+Twist can build most Emacs Lisp packages available from Git repositories.
+It is capable of building quite a few packages on GNU/NonGNU ELPA and MELPA from sources.
+Some packages from GNU ELPA cannot be built from sources, but Twist can also take advantage of pre-built package archives and Emacsmirror.
+
+For Core ELPA packages, it can build them from a specific revision of the source repository of GNU Emacs.
+
+With Twist, it is also easy to add packages from the wild.
+Perhaps this is the biggest advantage of Twist over =emacsWithPackages=.
+Rather than writing a Nix expression (with a revision hash and checksum) for every package you want to add, you can simply create a MELPA recipe and run a lock command.
+Those custom packages are tracked in =flake.lock=, so it is also easy to update them.
 ** Pure builds vs. impure builds
+With Twist, there is a clear distinction between pure and impure builds of configuration.
+If there is any package that is not tracked in the lock file, building the configuration will be impure.
+Otherwise, all packages are locked, and the build is pure.
+Impure build requires =--impure= flag of Nix.
+It still allows impure builds, for ease of development, but you will know whether your configuration will be reproducible on other machines.
 ** Build subset profiles with minimal extra time
+Typical package managers for Emacs store packages in =user-emacs-directory=.
+If the user has multiple configuration profiles using a tool like [[https://github.com/plexus/chemacs2][chemacs2]], the installation time will be approximately proportional to the number of profiles.
+
+On the contrary, Twist is based on Nix, so it stores all sources and artifacts in the centralized Nix store.
+If the user has multiple configuration profiles with the same revision set of packages, it requires almost no extra time for installing multiple profiles.
+The total time will be almost the same as the build time for their master profile.
+This saves your time, if you have such use cases.
+
+[[https://github.com/emacs-twist/org-babel][org-babel]] library for Nix allows you to define subprofiles from a single Org file according to tags.
 ** nix eval-friendly APIs
+Twist exposes an API that is accessible via =nix eval= command.
+You can inspect metadata of a specific package or all packages without running the configuration.
+This shouldn't be necessary, but it helps troubleshooting once the build process fails.
+It is also possible to export an entire package set to JSON, which can be used to script around your configuration.
 ** Creating a self-contained environment with required executables
+Twist provides an option for feeding packages from Nixpkgs to =exec-path= of Emacs.
+This is equivalent to =use-package-ensure-system-package=, but it doesn't rely on imperative usage of a package manager.
+** Almost no runtime
+Twist builds packages outside of a live Emacs session, and it requires no runtime, except for loading pre-generated autoloads.
+The startup time of Twist-based Emacs is as fast as that of =package.el=, or maybe even slightly faster.
 * System requirements
 Twist depends on the Nix package manager.
 Nix is currently supported on Linux and macOS.
