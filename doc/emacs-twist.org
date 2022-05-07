@@ -257,6 +257,8 @@ Every time the user adds a new package, he/she must perform the lock operation.
 **** name: Inventory name for pinning
 **** exclude: Ignore particular packages
 * Developing the configuration
+* Troubleshooting
+This section describes how to deal with common errors in building configurations.
 * Tips
 ** --dry-run is your friend
 To quickly examine sanity of your configuration, a recommended way is to build the configuration with =--dry-run= flag:
