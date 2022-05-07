@@ -308,3 +308,13 @@ Due to how the configuration is organized, the Twist profile requires a myriad o
 A better way is to *not* use =use-package-always-ensure= option.
 Add =:ensure t= option explicitly to each declaration of a package you want to install.
 This way, you can simply pass the init file to Twist and also have a choice of explicitly installing some GNU ELPA Core libraries (which are also part of built-in libraries) from the upstream.
+** Emacs Lisp packages that cannot be built with Twist
+It is known that Twist cannot build the following packages:
+
+- =pdf-tools=
+
+Twist simply cannot build these packages for some technical reasons.
+It would be better for Twist to support all packages on GNU/NonGNU ELPA and MELPA, but it is not the case.
+
+For the latest information, see [[https://github.com/emacs-twist/twist.nix/issues][Issues]] of Twist.
+If you have found any other packages that cannot be built using Twist, please file an issue.
