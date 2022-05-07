@@ -18,7 +18,7 @@ nix --version
 The command should print an output as follows:
 
 #+begin_example
-nix (Nix) 2.6.0pre20211217_6e6e998
+nix (Nix) 2.8.0pre20220411_f7276bc
 #+end_example
 
 If you don't have Nix, you can download it from here: https://nixos.org/download.html
