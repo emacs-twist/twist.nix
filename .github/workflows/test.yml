@@ -17,6 +17,8 @@ jobs:
       id: changes
       with:
         filters: |
+          lock:
+            - 'flake.lock'
           pkgs:
             - 'pkgs/**'
           lib:
@@ -27,7 +29,7 @@ jobs:
 
   unit-tests:
     needs: changes
-    if: ${{ needs.changes.outputs.lib == 'true' }}
+    if: ${{ needs.changes.outputs.lib == 'true' || needs.changes.outputs.lock == 'true' }}
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
@@ -43,7 +45,7 @@ jobs:
 
   smoke-tests:
     needs: changes
-    if: ${{ needs.changes.outputs.pkgs == 'true' || needs.changes.outputs.test == 'true' }}
+    if: ${{ needs.changes.outputs.pkgs == 'true' || needs.changes.outputs.test == 'true' || needs.changes.outputs.lock == 'true' }}
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
