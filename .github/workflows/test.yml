@@ -58,8 +58,8 @@ jobs:
         extraPullNames: emacs-ci
         skipPush: true
 
-    - name: Use the local repository as the input
-      run: nix flake lock --override-input twist $PWD/..
+    - name: Update the flake inputs for the test
+      run: nix flake update --inputs-from $PWD/.. --override-input twist $PWD/..
       working-directory: test
 
     - name: Check the precondition
