@@ -32,6 +32,12 @@
       repo = "themes";
       type = "github";
     };
+    drag-stuff = {
+      flake = false;
+      owner = "rejeep";
+      repo = "drag-stuff.el";
+      type = "github";
+    };
     git-commit = {
       flake = false;
       owner = "magit";
