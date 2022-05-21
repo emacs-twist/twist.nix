@@ -51,7 +51,9 @@
       inherit (builtins) filter match elem;
 
       # Access niv sources of nix-emacs-ci
-      inherit (import (inputs.emacs-ci + "/nix/sources.nix")) nixpkgs;
+      inherit (import (inputs.emacs-ci + "/nix/sources.nix") {
+        inherit system;
+      }) nixpkgs;
 
       pkgs = import nixpkgs {
         inherit system;

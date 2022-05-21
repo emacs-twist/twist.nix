@@ -80,6 +80,22 @@
         "type": "github"
       }
     },
+    "drag-stuff": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1502911178,
+        "narHash": "sha256-jeGQIL/on2++Wo9HFPUYbmupcv9wCtO/7AwUGSxCUrs=",
+        "owner": "rejeep",
+        "repo": "drag-stuff.el",
+        "rev": "6d06d846cd37c052d79acd0f372c13006aa7e7c8",
+        "type": "github"
+      },
+      "original": {
+        "owner": "rejeep",
+        "repo": "drag-stuff.el",
+        "type": "github"
+      }
+    },
     "git-commit": {
       "flake": false,
       "locked": {
@@ -199,6 +215,7 @@
         "consult": "consult",
         "dash": "dash",
         "doom-themes": "doom-themes",
+        "drag-stuff": "drag-stuff",
         "git-commit": "git-commit",
         "google-translate": "google-translate",
         "magit": "magit",
