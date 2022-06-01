@@ -6,16 +6,24 @@ on:
   workflow_dispatch:
 
 jobs:
-  check:
+  update:
     runs-on: ubuntu-latest
+    outputs:
+      updated: ${{ steps.pr.conclusion == 'success' }}
     steps:
     - uses: actions/checkout@v3
     - uses: cachix/install-nix-action@v17
     - run: nix flake update
     - uses: peter-evans/create-pull-request@v4
+      id: pr
       with:
         commit-message: 'Update flake inputs'
         base: master
         title: 'chore: Update dependencies'
         branch: create-pull-request/update
         labels: automation,update
+
+  test:
+    needs: ['update']
+    if: ${{ needs.update.outputs.updated == 'true' }}
+    uses: ./.github/workflows/test.yml
