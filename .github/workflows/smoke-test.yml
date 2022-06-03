@@ -1,52 +1,17 @@
-name: Test
+name: Smoke test
 
 on:
   push:
+    paths:
+    - 'flake.lock'
+    - 'pkgs/**'
+    - 'test/**'
+    - '.github/workflows/smoke-test.yml'
   workflow_dispatch:
   workflow_call:
 
 jobs:
-  changes:
-    runs-on: ubuntu-latest
-    outputs:
-      pkgs: ${{ steps.changes.outputs.pkgs }}
-      lib: ${{ steps.changes.outputs.lib }}
-      test: ${{ steps.changes.outputs.test }}
-    steps:
-    - uses: actions/checkout@v3
-    - uses: dorny/paths-filter@v2
-      id: changes
-      with:
-        filters: |
-          lock:
-            - 'flake.lock'
-          pkgs:
-            - 'pkgs/**'
-          lib:
-            - 'pkgs/build-support/**'
-          test:
-            - 'test/**'
-            - '.github/workflows/test.yml'
-
-  unit-tests:
-    needs: changes
-    if: ${{ needs.changes.outputs.lib == 'true' || needs.changes.outputs.lock == 'true' }}
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v3
-    - uses: cachix/install-nix-action@v17
-      with:
-        nix_path: nixpkgs=channel:nixos-unstable
-
-    - name: Run unit tests
-      run: |
-        set -euo pipefail
-        nix-instantiate --strict --eval --json pkgs/build-support/**/test*.nix \
-        | jq
-
-  smoke-tests:
-    needs: changes
-    if: ${{ needs.changes.outputs.pkgs == 'true' || needs.changes.outputs.test == 'true' || needs.changes.outputs.lock == 'true' }}
+  test:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
