@@ -26,4 +26,4 @@ jobs:
   test:
     needs: ['update']
     if: ${{ needs.update.outputs.updated == 'true' }}
-    uses: ./.github/workflows/test.yml
+    uses: ./.github/workflows/smoke-test.yml
