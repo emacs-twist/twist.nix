@@ -1,3 +1,5 @@
+# Parse URLs like https://elpa.gnu.org/packages/archive-contents
+# and extract URLs
 {
   lib,
   archiveLockData,
@@ -8,7 +10,7 @@ with builtins;
 
     doTangle = false;
 
-    tarballEntry = ename: value: rec {
+    toLockEntry = elpaType: ename: value: rec {
       version = versionString (elemAt value 0);
       packageRequires = lib.pipe (elemAt value 1) [
         (map (ys: {
@@ -20,13 +22,23 @@ with builtins;
       src = fetchTree (builtins.removeAttrs archive ["narHash"]);
       archive =
         {
-          type = "tarball";
+          type =
+            if elpaType == "tar"
+            then "tarball"
+            else if elpaType == "single"
+            then "file"
+            else throw "Unsupported type: ${elpaType}";
+
           url = lib.concatStrings [
             url
             ename
             "-"
             version
-            ".tar"
+            (if elpaType == "tar"
+             then ".tar"
+             else if elpaType == "single"
+             then ".el"
+             else throw "Unsupported type: ${elpaType}")
           ];
         }
         // lib.getAttrs [
@@ -34,15 +46,15 @@ with builtins;
         ]
         src;
       inventory = {
-        type = "archive";
         inherit url;
+        type = "archive";
       };
       inherit doTangle;
     };
 
     latest = lib.pipe (lib.readPackageArchiveContents url) [
-      (lib.filterAttrs (_: value: elemAt value 3 == "tar"))
-      (mapAttrs tarballEntry)
+      (mapAttrs (ename: value:
+        toLockEntry (elemAt value 3) ename value))
     ];
 
     pinned =
