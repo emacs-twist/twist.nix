@@ -64,6 +64,7 @@ in
     ];
 
     enumerateConcretePackageSet = import ./data {
+      inherit (pkgs) linkFarm;
       inherit
         lib
         flakeLockFile

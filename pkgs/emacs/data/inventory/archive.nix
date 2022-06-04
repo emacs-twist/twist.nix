@@ -1,3 +1,5 @@
+# Parse URLs like https://elpa.gnu.org/packages/archive-contents
+# and extract URLs
 {
   lib,
   archiveLockData,
@@ -8,7 +10,11 @@ with builtins;
 
     doTangle = false;
 
-    tarballEntry = ename: value: rec {
+    # builtins.break is combined with --debugger, which is only available since
+    # 2.9. This can be used to check the version of Nix.
+    isNix29 = builtins ? break;
+
+    toLockEntry = elpaType: ename: value: rec {
       version = versionString (elemAt value 0);
       packageRequires = lib.pipe (elemAt value 1) [
         (map (ys: {
@@ -20,13 +26,23 @@ with builtins;
       src = fetchTree (builtins.removeAttrs archive ["narHash"]);
       archive =
         {
-          type = "tarball";
+          type =
+            if elpaType == "tar"
+            then "tarball"
+            else if elpaType == "single"
+            then "file"
+            else throw "Unsupported type: ${elpaType}";
+
           url = lib.concatStrings [
             url
             ename
             "-"
             version
-            ".tar"
+            (if elpaType == "tar"
+             then ".tar"
+             else if elpaType == "single"
+             then ".el"
+             else throw "Unsupported type: ${elpaType}")
           ];
         }
         // lib.getAttrs [
@@ -34,15 +50,21 @@ with builtins;
         ]
         src;
       inventory = {
-        type = "archive";
         inherit url;
+        type = "archive";
       };
       inherit doTangle;
     };
 
     latest = lib.pipe (lib.readPackageArchiveContents url) [
-      (lib.filterAttrs (_: value: elemAt value 3 == "tar"))
-      (mapAttrs tarballEntry)
+      # Before Nix 2.9, builtins.fetchTree didn't support single files,
+      # so single file archives should be excluded from the list.
+      (lib.filterAttrs (_: value:
+        if isNix29
+        then true
+        else elemAt value 3 != "single"))
+      (mapAttrs (ename: value:
+        toLockEntry (elemAt value 3) ename value))
     ];
 
     pinned =

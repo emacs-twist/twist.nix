@@ -20,6 +20,7 @@ let
 in
   {
     lib,
+    linkFarm,
     builtinLibraries,
     inventories,
     flakeLockFile,
@@ -86,7 +87,7 @@ in
         );
 
     getPackageData = ename:
-      lib.makeExtensible (import ./package.nix {inherit lib;}
+      lib.makeExtensible (import ./package.nix {inherit lib linkFarm;}
         ename
         # It would be nice if it were possible to set the pin from inside
         # overrideInputs, but it causes infinite recursion unfortunately :(

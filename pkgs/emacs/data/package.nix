@@ -22,7 +22,7 @@ let
     isFunction
     ;
 in
-  {lib}: ename: mkAttrs: self: let
+  {lib, linkFarm}: ename: mkAttrs: self: let
     attrs =
       if isAttrs mkAttrs
       then mkAttrs
@@ -76,7 +76,17 @@ in
     // {
       inherit ename;
       inherit (attrs) inventory doTangle;
-      src = attrs.src;
+      src =
+        # If the source if a single-file archive from ELPA or MELPA, src will be
+        # a file, and not a directory, so the file should be put in a directory.
+        if attrs.inventory.type == "archive" && attrs.archive.type == "file"
+        then linkFarm (ename + ".el") [
+          {
+            name = ename + ".el";
+            path = attrs.src;
+          }
+        ]
+        else attrs.src;
 
       files = attrs.files or (lib.expandMelpaRecipeFiles self.src null);
 
