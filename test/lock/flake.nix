@@ -74,12 +74,6 @@
       repo = "popup-el";
       type = "github";
     };
-    queue = {
-      flake = false;
-      owner = "emacsmirror";
-      repo = "queue";
-      type = "github";
-    };
     tramp = {
       flake = false;
       ref = "externals/tramp";

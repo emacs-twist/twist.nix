@@ -192,22 +192,6 @@
         "type": "github"
       }
     },
-    "queue": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1615070229,
-        "narHash": "sha256-rTyRxR5LnXIQStjs6CPgkLe7RUrFu/SwjjGB6ZB+Yl0=",
-        "owner": "emacsmirror",
-        "repo": "queue",
-        "rev": "f986fb68e75bdae951efb9e11a3012ab6bd408ee",
-        "type": "github"
-      },
-      "original": {
-        "owner": "emacsmirror",
-        "repo": "queue",
-        "type": "github"
-      }
-    },
     "root": {
       "inputs": {
         "async": "async",
@@ -222,7 +206,6 @@
         "magit-section": "magit-section",
         "org-transclusion": "org-transclusion",
         "popup": "popup",
-        "queue": "queue",
         "tramp": "tramp",
         "undo-browse": "undo-browse",
         "undo-tree": "undo-tree",
