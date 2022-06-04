@@ -10,6 +10,10 @@ with builtins;
 
     doTangle = false;
 
+    # builtins.break is combined with --debugger, which is only available since
+    # 2.9. This can be used to check the version of Nix.
+    isNix29 = builtins ? break;
+
     toLockEntry = elpaType: ename: value: rec {
       version = versionString (elemAt value 0);
       packageRequires = lib.pipe (elemAt value 1) [
@@ -53,6 +57,12 @@ with builtins;
     };
 
     latest = lib.pipe (lib.readPackageArchiveContents url) [
+      # Before Nix 2.9, builtins.fetchTree didn't support single files,
+      # so single file archives should be excluded from the list.
+      (lib.filterAttrs (_: value:
+        if isNix29
+        then true
+        else elemAt value 3 != "single"))
       (mapAttrs (ename: value:
         toLockEntry (elemAt value 3) ename value))
     ];
