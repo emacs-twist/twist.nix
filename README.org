@@ -34,7 +34,7 @@ Twist can discover and build packages from the following sources:
 
 - [[https://melpa.org/][MELPA]] recipes (Git)
 - ELPA external/core packages (Git)
-- ELPA archive tarballs
+- ELPA/MELPA archives (single elisp files and tarballs)
 - [[https://github.com/emacsmirror/][EmacsMirror]] (Git)
 
 To add custom packages to your configuration, you only have to define MELPA recipes and commit them to your repository.
