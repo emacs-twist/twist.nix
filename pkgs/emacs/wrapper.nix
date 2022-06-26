@@ -87,6 +87,9 @@ in
       ln -s ${emacs}/share/$dir $out/share/$dir
     done
 
+    mkdir -p $out/share/emacs
+    ln -s ${emacs}/share/emacs/${emacs.version} $out/share/emacs/${emacs.version}
+
     siteLisp=$out/share/emacs/site-lisp
     mkdir -p $siteLisp
     if [[ -e $subdirsPath ]]
