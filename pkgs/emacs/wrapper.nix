@@ -78,11 +78,17 @@ in
     '';
   }
   ''
-    for dir in bin share/applications share/icons
+    mkdir -p $out/bin
+    lndir -silent ${emacs}/bin $out/bin
+
+    mkdir -p $out/share
+    for dir in applications icons
     do
-      mkdir -p $out/$dir
-      lndir -silent ${emacs}/$dir $out/$dir
+      ln -s ${emacs}/share/$dir $out/share/$dir
     done
+
+    mkdir -p $out/share/emacs
+    ln -s ${emacs}/share/emacs/${emacs.version} $out/share/emacs/${emacs.version}
 
     siteLisp=$out/share/emacs/site-lisp
     mkdir -p $siteLisp
