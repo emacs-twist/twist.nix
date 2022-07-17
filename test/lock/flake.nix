@@ -14,6 +14,11 @@
       repo = "use-package";
       type = "github";
     };
+    compat = {
+      flake = false;
+      type = "git";
+      url = "https://git.sr.ht/~pkal/compat";
+    };
     consult = {
       flake = false;
       owner = "minad";
