@@ -114,9 +114,13 @@ in
         (lib.filterAttrs (_: v: v != null))
       ];
 
-    go = acc: enames: ename: data:
+    go = acc: revDeps: enames: ename: data:
       accumPackage
       (acc // {${ename} = data;})
+        (revDeps // lib.pipe (lib.packageRequiresToLibraryNames data.packageRequires) [
+          (map (name: { inherit name; value = ename; }))
+          listToAttrs
+        ])
       (enames
         ++
         # Reduce the list as much as possible to keep the stack trace sane.
@@ -127,11 +131,11 @@ in
     # This recursion produces a deep stack trace. The more packages you have, the
     # more traces it will produce. I want to avoid it, but I don't know how,
     # because Nix doesn't support mutable data structures.
-    accumPackage = acc: enames:
+    accumPackage = acc: revDeps: enames:
       if length enames == 0
       then acc
       else if hasAttr (head enames) acc
-      then accumPackage acc (tail enames)
-      else go acc enames (head enames) (getPackageData' (head enames));
+      then accumPackage acc revDeps (tail enames)
+      else go acc revDeps enames (head enames) (getPackageData' (head enames));
   in
-    accumPackage {}
+    accumPackage {} {}
