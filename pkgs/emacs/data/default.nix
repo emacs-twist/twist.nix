@@ -66,46 +66,46 @@ in
 
     packageData = foldl' (acc: {value, ...}: value // acc) {} inventoryPackageSets;
 
-    findPrescription = ename:
-      packageData.${ename} or (throw "Package ${ename} is not found");
+    findPrescription = revDep: ename:
+      packageData.${ename} or (throw "Package ${ename} required by ${revDep} is not found");
 
-    findFromPinned = ename: inventory:
+    findFromPinned = revDep: ename: inventory:
       if hasAttr ename inventory
       then inventory.${ename}
       else if inventory ? _impure
       then inventory._impure.${ename}
-      else throw "Package ${ename} does not exist in the pinned inventory";
+      else throw "Package ${ename} required by ${revDep} does not exist in the pinned inventory";
 
-    findPrescription' = ename: pin:
+    findPrescription' = revDep: ename: pin:
       if pin == null
-      then findPrescription ename
+      then findPrescription revDep ename
       else
-        findFromPinned ename
+        findFromPinned revDep ename
         (
           namedInventories.${pin}
           or (throw "Inventory named ${pin} does not exist")
         );
 
-    getPackageData = ename:
+    getPackageData = revDep: ename:
       lib.makeExtensible (import ./package.nix {inherit lib linkFarm;}
         ename
         # It would be nice if it were possible to set the pin from inside
         # overrideInputs, but it causes infinite recursion unfortunately :(
-        (findPrescription' ename (elispPackagePins.${ename} or null)));
+        (findPrescription' revDep ename (elispPackagePins.${ename} or null)));
 
     toOverrideFn = overrides:
       if isFunction overrides
       then overrides
       else _: _: overrides;
 
-    getPackageData' = ename:
+    getPackageData' = revDep: ename:
       lib.pipe
       # Because this extending operation affects which packages are included in the
       # output, it must be done before the entire package set is calculated.
       (
         if hasAttr ename inputOverrides
-        then (getPackageData ename).extend (toOverrideFn inputOverrides.${ename})
-        else getPackageData ename
+        then (getPackageData revDep ename).extend (toOverrideFn inputOverrides.${ename})
+        else getPackageData revDep ename
       )
       [
         # The user should not call extend after the package set is calculated, so
@@ -114,9 +114,17 @@ in
         (lib.filterAttrs (_: v: v != null))
       ];
 
-    go = acc: enames: ename: data:
+    go = acc: revDeps: enames: ename: data:
       accumPackage
       (acc // {${ename} = data;})
+      (revDeps
+        // lib.pipe (lib.packageRequiresToLibraryNames data.packageRequires) [
+          (map (name: {
+            inherit name;
+            value = ename;
+          }))
+          listToAttrs
+        ])
       (enames
         ++
         # Reduce the list as much as possible to keep the stack trace sane.
@@ -127,11 +135,19 @@ in
     # This recursion produces a deep stack trace. The more packages you have, the
     # more traces it will produce. I want to avoid it, but I don't know how,
     # because Nix doesn't support mutable data structures.
-    accumPackage = acc: enames:
+    accumPackage = acc: revDeps: enames:
       if length enames == 0
       then acc
       else if hasAttr (head enames) acc
-      then accumPackage acc (tail enames)
-      else go acc enames (head enames) (getPackageData' (head enames));
+      then accumPackage acc revDeps (tail enames)
+      else
+        go acc revDeps enames (head enames)
+        # It would be better if builtins.addErrorContext worked without --show-trace
+        # option, but that is not the case. For now, we pass down the reverse
+        # dependency context to every call of getPackageData, getPackageData,
+        # findPrescription, and findPrescription'.
+        (getPackageData'
+          (revDeps.${head enames} or null)
+          (head enames));
   in
-    accumPackage {}
+    accumPackage {} {}
