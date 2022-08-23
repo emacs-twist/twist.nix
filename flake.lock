@@ -3,11 +3,11 @@
     "elisp-helpers": {
       "flake": false,
       "locked": {
-        "lastModified": 1653582233,
-        "narHash": "sha256-AKfLXQeu97IgCp6GXLZoG85cqIoeK/36y/AnJeLq87Y=",
+        "lastModified": 1661224981,
+        "narHash": "sha256-G1XBRk671lB/8mkRTInBwGQDzcYduBHGi5kD2XjhO6c=",
         "owner": "emacs-twist",
         "repo": "elisp-helpers",
-        "rev": "e10097d2666af196664e12d62dd5c355f9e736e7",
+        "rev": "84b333a04f38eb2c0e235a0268c4d78e66732ed3",
         "type": "github"
       },
       "original": {
