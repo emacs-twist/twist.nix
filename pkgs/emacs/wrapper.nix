@@ -117,6 +117,9 @@ in
     cd $siteLisp
     ${emacs}/bin/emacs --batch -f batch-byte-compile site-start.el
     ${lib.optionalString nativeComp ''
+      # Work around preloaded native lisp.
+      ln -t $out -s ${emacs}/lib/emacs/${emacs.version}/native-lisp
+
       nativeLisp=$out/share/emacs/native-lisp
       emacs --batch \
         --eval "(push \"$nativeLisp/\" native-comp-eln-load-path)" \
