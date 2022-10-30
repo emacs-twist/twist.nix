@@ -67,7 +67,12 @@ in
     packageData = foldl' (acc: {value, ...}: value // acc) {} inventoryPackageSets;
 
     findPrescription = revDep: ename:
-      packageData.${ename} or (throw "Package ${ename} required by ${revDep} is not found");
+      packageData.${ename}
+      or (
+        if revDep == null
+        then throw "Package ${ename} is not found"
+        else throw "Package ${ename} required by ${revDep} is not found"
+      );
 
     findFromPinned = revDep: ename: inventory:
       if hasAttr ename inventory
