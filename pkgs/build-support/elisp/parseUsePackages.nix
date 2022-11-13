@@ -1,8 +1,9 @@
 {
   lib,
   fromElisp,
-}: {alwaysEnsure ? false}: string:
+}: {alwaysEnsure ? false}: file:
 with builtins; let
+  string = readFile file;
   blocks = fromElisp.fromElisp string;
   plistGet = xs: key:
     if length xs == 0
