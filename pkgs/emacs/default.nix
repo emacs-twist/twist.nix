@@ -8,6 +8,7 @@
   inventories,
   initFiles,
   initParser ? lib.parseUsePackages {},
+  initReader ? file: initParser (builtins.readFile file),
   extraPackages ? ["use-package"],
   addSystemPackages ? true,
   inputOverrides ? {},
@@ -40,7 +41,7 @@ in
     archiveLockFile = lockDir + "/archive.lock";
 
     userConfig = lib.pipe self.initFiles [
-      (map (file: initParser (readFile file)))
+      (map initReader)
       lib.zipAttrs
       (lib.mapAttrs (
         name: values:
