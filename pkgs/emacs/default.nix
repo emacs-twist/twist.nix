@@ -40,7 +40,7 @@ in
     archiveLockFile = lockDir + "/archive.lock";
 
     userConfig = lib.pipe self.initFiles [
-      (map (file: initParser file))
+      (map (file: initParser (readFile file)))
       lib.zipAttrs
       (lib.mapAttrs (
         name: values:

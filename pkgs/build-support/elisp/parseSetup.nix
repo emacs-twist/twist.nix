@@ -7,8 +7,7 @@
   nixpkgsKeyword ? ":nixpkgs",
 }:
 with builtins;
-  file: let
-    string = readFile file;
+  string: let
     setups = lib.pipe (fromElisp.fromElisp string) [
       (filter (block: head block == "setup"))
       (map tail)
