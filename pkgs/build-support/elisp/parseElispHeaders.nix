@@ -14,7 +14,18 @@ with builtins; let
   magicHeaderRegex = "(.+)-\\*-.+-\\*-[[:space:]]*";
   headerRegex = ";;[[:space:]]*(.*[^[:space:]]):([[:space:]]*.*)?";
 
-  makeHeaderRegex = key: ";;[[:space:]]*${lib.escapeRegex key}[[:space:]]*:([[:space:]]*.*)?";
+  inherit (lib) lowerChars upperChars;
+
+  alphaRegexes =
+    lib.zipListsWith (fst: snd: "[${fst}${snd}]")
+    upperChars
+    lowerChars;
+
+  makeCaseFoldRegexp =
+    replaceStrings (upperChars ++ lowerChars)
+    (alphaRegexes ++ alphaRegexes);
+
+  makeHeaderRegex = key: ";;[[:space:]]*${makeCaseFoldRegexp key}[[:space:]]*:([[:space:]]*.*)?";
 
   headLine = head lines;
 
