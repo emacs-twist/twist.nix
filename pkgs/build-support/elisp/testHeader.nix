@@ -14,6 +14,15 @@ in
       };
     };
 
+    testCaseInsensitive = {
+      expr = parseElispHeaders (readFile ./testdata/header-case-insensitive.el);
+      expected = {
+        summary = "A basic configuration framework for org mode";
+        Author = "Akira Komamura <akira.komamura@gmail.com>";
+        Package-Requires = "((emacs \"25.1\") (dash \"2.18\"))";
+      };
+    };
+
     testLicense = {
       expr = parseElispHeaders (readFile ./testdata/header-license.el);
       expected = {
