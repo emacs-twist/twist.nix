@@ -7,7 +7,9 @@ with builtins; let
     src =
       if hasAttr ename flakeLockData
       then fetchTree flakeLockData.${ename}
-      else fetchTree self.origin;
+      else
+        trace "Impure input for package ${ename} (in melpa.nix): ${toJSON self.origin}"
+        (fetchTree self.origin);
     doTangle = true;
     files = lib.expandMelpaRecipeFiles self.src (entry.files or null);
     origin = lib.flakeRefAttrsFromMelpaRecipe entry;

@@ -9,7 +9,9 @@ with builtins;
         src =
           if hasAttr ename flakeLockData
           then fetchTree flakeLockData.${ename}
-          else fetchTree self.origin;
+          else
+            trace "Impure input for package ${ename} (in gitmodules.nix): ${toJSON self.origin}"
+            (fetchTree self.origin);
         doTangle = false;
         files = lib.expandMelpaRecipeFiles self.src null;
         inherit origin;

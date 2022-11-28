@@ -85,7 +85,9 @@ with builtins;
           src =
             if hasAttr ename flakeLockData
             then fetchTree flakeLockData.${ename}
-            else fetchTree self.origin;
+            else
+              trace "Impure input for package ${ename} (in elpa.nix): ${toJSON self.origin}"
+              (fetchTree self.origin);
           origin = lib.flakeRefAttrsFromElpaAttrs {preferReleaseBranch = true;} entry;
           inventory = inventory // {inherit entry;};
 
