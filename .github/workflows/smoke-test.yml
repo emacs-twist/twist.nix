@@ -69,7 +69,7 @@ jobs:
       id: system
       run: |
         system=$(nix eval --impure --expr builtins.currentSystem)
-        echo "::set-output name=emacs::packages.$system.emacs"
+        echo "emacs=packages.$system.emacs" >> $GITHUB_OUTPUT
 
     - run: |
         nix eval --json .#${{ steps.system.outputs.emacs }}.initFiles \
