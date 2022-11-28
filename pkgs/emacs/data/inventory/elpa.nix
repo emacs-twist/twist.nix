@@ -3,7 +3,7 @@
   flakeLockData,
 }:
 with builtins;
-  {path, ...} @ args: let
+  {path, ...} @ args: mode: let
     elpaEntries = lib.parseElpaPackages (readFile path);
 
     inventory =
@@ -86,7 +86,12 @@ with builtins;
             if hasAttr ename flakeLockData
             then fetchTree flakeLockData.${ename}
             else
-              trace "Impure input for package ${ename} (in elpa.nix): ${toJSON self.origin}"
+              (
+                if mode == "build"
+                then trace
+                else traceVerbose
+              )
+              "Impure input for package ${ename} (in elpa.nix): ${toJSON self.origin}"
               (fetchTree self.origin);
           origin = lib.flakeRefAttrsFromElpaAttrs {preferReleaseBranch = true;} entry;
           inventory = inventory // {inherit entry;};
@@ -160,5 +165,4 @@ with builtins;
       (lib.mapAttrs makeExternal)
     ];
   in
-    _mode:
-      corePackages // externalPackages
+    corePackages // externalPackages
