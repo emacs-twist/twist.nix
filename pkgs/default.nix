@@ -1,9 +1,11 @@
-inputs: final: pkgs: let
+inputs: final: prev: let
   lib = import ./build-support {
-    inherit inputs pkgs;
+    inherit inputs;
+    pkgs = prev;
   };
 in {
   emacsTwist = lib.makeOverridable (import ./emacs {
-    inherit final pkgs lib;
+    inherit final lib;
+    pkgs = prev;
   });
 }
