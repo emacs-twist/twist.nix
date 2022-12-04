@@ -13,11 +13,14 @@
   outputs = {...} @ inputs: {
     # lib is experimental at present, so it may be removed in the future.
     lib = import ./lib inputs;
-    overlay = import ./pkgs inputs;
-
-    defaultTemplate = {
-      description = "A basic configuration for use-package";
-      path = ./template;
+    overlays = {
+      default = import ./pkgs inputs;
+    };
+    templates = {
+      default = {
+        description = "A basic configuration for use-package";
+        path = ./template;
+      };
     };
   };
 }
