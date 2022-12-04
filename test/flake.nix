@@ -60,7 +60,7 @@
         overlays = [
           (import (emacs-ci.outPath + "/overlay.nix"))
           # emacs-unstable.overlay
-          inputs.twist.overlay
+          inputs.twist.overlays.default
         ];
       };
 
