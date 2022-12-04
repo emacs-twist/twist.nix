@@ -1,6 +1,6 @@
 s:
 with builtins; let
-  githubMatch = match "git@github.com:(.+)/(.+)\.git" s;
+  githubMatch = match "https://github.com/(.+)/(.+?)" s;
 in
   if githubMatch != null
   then {
