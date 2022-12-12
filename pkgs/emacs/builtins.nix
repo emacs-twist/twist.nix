@@ -9,9 +9,6 @@ in
     name = "${emacs.name}-libraries";
     inherit (emacs) src;
 
-    preferLocalBuild = true;
-    allowSubstitutes = false;
-
     buildInputs = [ripgrep];
 
     phases = ["unpackPhase" "buildPhase"];
