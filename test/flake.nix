@@ -24,11 +24,6 @@
     flake = false;
   };
 
-  inputs.emacs = {
-    url = "github:emacs-mirror/emacs";
-    flake = false;
-  };
-
   inputs.emacs-ci = {
     url = "github:purcell/nix-emacs-ci";
     flake = false;
@@ -79,7 +74,7 @@
           {
             type = "elpa";
             path = inputs.gnu-elpa.outPath + "/elpa-packages";
-            core-src = inputs.emacs.outPath;
+            core-src = pkgs.emacs-snapshot.src;
             auto-sync-only = true;
           }
           {

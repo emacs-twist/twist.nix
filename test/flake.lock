@@ -16,22 +16,6 @@
         "type": "github"
       }
     },
-    "emacs": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1670072772,
-        "narHash": "sha256-mxheQF+yXfEDz9G6y1jjuDnXpZIMTvGeA30Dp68qimA=",
-        "owner": "emacs-mirror",
-        "repo": "emacs",
-        "rev": "1c9013865183f0ea21218602917b5c16ecef465d",
-        "type": "github"
-      },
-      "original": {
-        "owner": "emacs-mirror",
-        "repo": "emacs",
-        "type": "github"
-      }
-    },
     "emacs-ci": {
       "flake": false,
       "locked": {
@@ -147,7 +131,6 @@
     },
     "root": {
       "inputs": {
-        "emacs": "emacs",
         "emacs-ci": "emacs-ci",
         "epkgs": "epkgs",
         "flake-utils": "flake-utils",
