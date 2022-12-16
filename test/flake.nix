@@ -107,10 +107,18 @@
         };
       };
 
+      # Another test path to build the whole derivation (not with --dry-run).
+      emacs-wrapper = pkgs.emacsTwist {
+        emacsPackage = pkgs.emacs-28-2.overrideAttrs (_: {version = "20221201.0";});
+        initFiles = [];
+        lockDir = ./lock;
+        inventories = [];
+      };
+
       inherit (flake-utils.lib) mkApp;
     in {
       packages = {
-        inherit emacs;
+        inherit emacs emacs-wrapper;
       };
       apps = emacs.makeApps {
         lockDirName = "lock";
