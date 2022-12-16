@@ -1,6 +1,9 @@
 {
   description = "";
 
+  nixConfig.extra-substituters = "https://emacs-ci.cachix.org";
+  nixConfig.extra-trusted-public-keys = "emacs-ci.cachix.org-1:B5FVOrxhXXrOL0S+tQ7USrhjMT5iOPH+QN9q0NItom4=";
+
   inputs.flake-utils.url = "github:numtide/flake-utils";
 
   inputs.twist = {
@@ -107,14 +110,41 @@
         };
       };
 
+      # Another test path to build the whole derivation (not with --dry-run).
+      emacs-wrapper = pkgs.emacsTwist {
+        emacsPackage = pkgs.emacs-28-2.overrideAttrs (_: {version = "20221201.0";});
+        initFiles = [];
+        lockDir = ./lock;
+        inventories = [];
+      };
+
       inherit (flake-utils.lib) mkApp;
     in {
       packages = {
-        inherit emacs;
+        inherit emacs emacs-wrapper;
       };
       apps = emacs.makeApps {
         lockDirName = "lock";
       };
       defaultPackage = emacs;
+      checks = {
+        symlink = pkgs.stdenv.mkDerivation {
+          name = "emacs-twist-wrapper-test";
+          src = emacs-wrapper;
+          doCheck = true;
+          checkPhase = ''
+            cd $src
+            tmp=$(mktemp)
+            echo "Checking missing symlinks"
+            find -L -type l | tee $tmp
+            [[ ! -s $tmp ]]
+            success=1
+          '';
+          installPhase = ''
+            [[ $success -eq 1 ]]
+            touch $out
+          '';
+        };
+      };
     });
 }
