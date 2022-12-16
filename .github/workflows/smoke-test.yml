@@ -69,6 +69,7 @@ jobs:
       id: system
       run: |
         system=$(nix eval --impure --expr builtins.currentSystem)
+        echo "system=$system" >> $GITHUB_OUTPUT
         echo "emacs=packages.$system.emacs" >> $GITHUB_OUTPUT
 
     - run: |
@@ -89,6 +90,17 @@ jobs:
     - run: |
         nix eval --json .#${{ steps.system.outputs.emacs }}.elispPackages.magit \
         | jq
+      working-directory: test
+
+    - name: Perform a complete build of a wrapper with an empty config
+      run: |
+        nix build .#emacs-wrapper
+        nix run .#emacs-wrapper -- --version
+      working-directory: test
+
+    - name: Check the build output of the wrapper
+      run: |
+        nix build .#checks.${{ steps.system.outputs.system }}.symlink
       working-directory: test
 
     - run: nix flake show
