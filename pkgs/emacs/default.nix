@@ -9,7 +9,10 @@
   initFiles,
   initParser ? lib.parseUsePackages {},
   initReader ? file: initParser (builtins.readFile file),
-  extraPackages ? ["use-package"],
+  extraPackages ?
+    if builtins.compareVersions emacsPackage.version "29" > 0
+    then []
+    else ["use-package"],
   addSystemPackages ? true,
   inputOverrides ? {},
   nativeCompileAheadDefault ? true,
