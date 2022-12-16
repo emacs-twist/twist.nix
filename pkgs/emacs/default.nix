@@ -104,6 +104,13 @@ in
       }
       packageInputs;
 
+    revDeps =
+      self.callPackage ./tools/reverse.nix
+      {
+        inherit lib;
+      }
+      packageInputs;
+
     generateLockFiles = self.callPackage ./lock {
       inherit flakeLockFile;
     };
@@ -127,7 +134,7 @@ in
       ))
     ];
 
-    inherit depsCheck;
+    inherit depsCheck revDeps;
 
     # An actual derivation set of Emacs Lisp packages. You can override this
     # attribute set to change how they are built.
