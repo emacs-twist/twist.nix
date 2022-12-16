@@ -2,12 +2,9 @@
   stdenv,
   emacs,
   ripgrep,
-}: let
-  inherit (emacs) version;
-in
-  stdenv.mkDerivation {
-    name = "${emacs.name}-libraries";
-    inherit (emacs) src;
+}: stdenv.mkDerivation {
+    pname = "emacs-builtins-list";
+    inherit (emacs) src version;
 
     buildInputs = [ripgrep];
 
