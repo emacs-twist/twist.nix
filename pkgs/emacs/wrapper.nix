@@ -87,8 +87,17 @@ in
       ln -s ${emacs}/share/$dir $out/share/$dir
     done
 
+    if [[ $(${emacs}/bin/emacs --version) =~ GNU\ Emacs\ ([[:digit:]]+((\.[[:digit:]]+)+)) ]]
+    then
+      version=''${BASH_REMATCH[1]}
+    else
+      echo "Error: Failed to parse the version of Emacs. See the output below"
+      emacs --version
+      exit 1
+    fi
+
     mkdir -p $out/share/emacs
-    ln -s ${emacs}/share/emacs/${emacs.version} $out/share/emacs/${emacs.version}
+    ln -s ${emacs}/share/emacs/$version $out/share/emacs/$version
 
     siteLisp=$out/share/emacs/site-lisp
     mkdir -p $siteLisp
@@ -118,7 +127,7 @@ in
     ${emacs}/bin/emacs --batch -f batch-byte-compile site-start.el
     ${lib.optionalString nativeComp ''
       # Work around preloaded native lisp.
-      ln -t $out -s ${emacs}/lib/emacs/${emacs.version}/native-lisp
+      ln -t $out -s ${emacs}/lib/emacs/$version/native-lisp
 
       nativeLisp=$out/share/emacs/native-lisp
       emacs --batch \
