@@ -22,7 +22,6 @@ jobs:
         name: akirak
         signingKey: '${{ secrets.CACHIX_SIGNING_KEY }}'
         extraPullNames: emacs-ci
-        skipPush: true
 
     - name: Update the flake inputs for the test
       run: nix flake update --inputs-from $PWD/.. --override-input twist $PWD/..
