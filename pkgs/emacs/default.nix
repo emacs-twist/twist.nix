@@ -134,6 +134,7 @@ in
       ))
     ];
 
+    inherit builtinLibraryList;
     inherit depsCheck revDeps;
 
     # An actual derivation set of Emacs Lisp packages. You can override this
