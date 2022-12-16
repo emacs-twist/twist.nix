@@ -127,5 +127,24 @@
         lockDirName = "lock";
       };
       defaultPackage = emacs;
+      checks = {
+        symlink = pkgs.stdenv.mkDerivation {
+          name = "emacs-twist-wrapper-test";
+          src = emacs-wrapper;
+          doCheck = true;
+          checkPhase = ''
+            cd $src
+            tmp=$(mktemp)
+            echo "Checking missing symlinks"
+            find -L -type l | tee $tmp
+            [[ ! -s $tmp ]]
+            success=1
+          '';
+          installPhase = ''
+            [[ $success -eq 1 ]]
+            touch $out
+          '';
+        };
+      };
     });
 }
