@@ -91,8 +91,8 @@ in
     then
       version=''${BASH_REMATCH[1]}
     else
-      echo "Error: Failed to parse the version of Emacs. See the output below"
-      emacs --version
+      echo "Error: Failed to parse the version of Emacs. See the output below" >&2
+      ${emacs}/bin/emacs --version
       exit 1
     fi
 
