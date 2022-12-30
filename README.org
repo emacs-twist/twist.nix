@@ -1,3 +1,4 @@
+# -*- org-id-link-to-org-use-id: nil; -*-
 * Twist Nix Library
 [[https://github.com/emacs-twist/twist.nix/actions/workflows/test.yml][https://github.com/emacs-twist/twist.nix/actions/workflows/test.yml/badge.svg]]
 
