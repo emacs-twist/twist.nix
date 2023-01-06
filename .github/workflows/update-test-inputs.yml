@@ -1,4 +1,4 @@
-name: Update flake inputs
+name: Update inputs for the test
 
 on:
   schedule:
