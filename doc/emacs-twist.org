@@ -321,6 +321,28 @@ Every time the user adds a new package, he/she must perform the lock operation.
 ** Basic workflow
 ** Working around sources
 ** Custom build processes
+** Checking the versions of packages
+=depsCheck= attribute is a derivation that checks version boundaries between Emacs Lisp packages.
+If any of the dependencies are lower than the versions specified in =Package-Requires= header of their dependants, it will exit with non-zero:
+
+#+begin_src sh
+  nix build .#emacs-config.depsCheck --print-build-logs
+#+end_src
+
+You can add it to the =checks= output of your flake:
+
+#+begin_src nix
+  {
+    outputs = inputs:
+      let
+        ..
+      in
+        {
+          checks.x86_64-linux.elisp-versions = emacs-config.depsCheck;
+        }
+  }
+#+end_src
+
 * Troubleshooting
 This section describes how to deal with common errors in building configurations.
 * Tips
