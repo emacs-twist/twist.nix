@@ -4,6 +4,7 @@
   builtinLibraries,
   emptyFile,
   runCommandLocal,
+  jq,
 }: packageInputs: let
   inherit
     (builtins)
@@ -104,9 +105,15 @@ in
   else
     runCommandLocal "emacs-deps-error" {
       passthru = status;
+      errors = builtins.toJSON status.errors;
+      passAsFile = ["errors"];
     } ''
-      echo >&2 "ERROR: Some packages require updates: ${
+      echo "Warning: The following packages have insufficient dependencies:" >&2
+      ${jq}/bin/jq . $errorsPath >&2
+
+      echo >&2 "Error: Some packages require updates: ${
         concatStringsSep " " (attrNames status.summary)
       }"
+
       exit 1
     ''
