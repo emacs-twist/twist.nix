@@ -47,8 +47,6 @@ in
       (lib.toPName ename)
     ];
 
-    allowSubstitutes = false;
-
     outputs =
       ["out"]
       ++ lib.optional (wantExtraOutputs && canProduceInfo) "info";
