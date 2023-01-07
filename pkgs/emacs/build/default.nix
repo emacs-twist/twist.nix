@@ -7,7 +7,7 @@
 }: {
   ename,
   src,
-  version,
+  version ? null,
   files,
   lispFiles,
   meta,
@@ -40,7 +40,9 @@ with builtins; let
     files);
 in
   stdenv.mkDerivation {
-    inherit src ename meta version;
+    inherit src ename meta;
+    # Add a fake version if the version is null
+    version = if version == null then "0.0.0" else version;
 
     pname = concatStringsSep "-" [
       (replaceStrings ["."] ["-"] emacs.name)

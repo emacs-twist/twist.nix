@@ -28,7 +28,16 @@
   inputVersion = isDate: attrs:
     if isDate
     then srcDateString attrs.src
-    else attrs.version;
+    else if ! attrs ? version
+    then null
+    # Some packages have a version suffixed with "-pre", and there are
+    # packages that depend on the version with the suffix removed. For
+    # example, envrc depends on inheritenv 0.1, while the latest version of
+    # inheritenv is 0.1-pre at present. In this case, we will consider that
+    # envrc depends on a pre-release version of the package, which should work
+    # once the version is officially released. Thus, we can strip "-pre"
+    # suffix.
+    else lib.removeSuffix "-pre" attrs.version;
 
   compareVersions = isDate: actual: required:
     if isDate
@@ -57,7 +66,16 @@
         required
         == null
         || actual == "builtin"
-        || compareVersions isDateVersion actual required;
+        || (
+          if actual == null
+          # There are packages that seem to have removed a version header. In
+          # that case, there are dependants that have a version requirement,
+          # while their dependency actually have no version. It is impossible
+          # to compare the versions in this case. I don't know if I can simply
+          # ignore this case, so I will display a warning for now.
+          then lib.warn "Package ${ename} has no version header" true
+          else compareVersions isDateVersion actual required
+        );
     } ["isDateVersion"];
 
   filterErrors = lib.filterAttrs (_: {satisfied, ...}: !satisfied);

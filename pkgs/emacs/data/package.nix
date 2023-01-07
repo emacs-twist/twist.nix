@@ -127,8 +127,8 @@ in
         or headers.Version
         or headers.Package-Version
         or packageDesc.version
-        # There are packages that lack a version header, so fallback to zero.
-        or "0.0.0";
+        # Set a null version if the package lacks a version header.
+        or null;
 
       author = headers.Author or null;
 
