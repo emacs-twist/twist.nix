@@ -19,9 +19,7 @@ jobs:
 
     - uses: cachix/cachix-action@v12
       with:
-        name: akirak
-        signingKey: '${{ secrets.CACHIX_SIGNING_KEY }}'
-        extraPullNames: emacs-ci
+        name: emacs-ci
 
     - name: Update the flake inputs for the test
       run: nix flake update --inputs-from $PWD/.. --override-input twist $PWD/..

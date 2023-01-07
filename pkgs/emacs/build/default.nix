@@ -47,9 +47,6 @@ in
       (lib.toPName ename)
     ];
 
-    preferLocalBuild = true;
-    allowSubstitutes = false;
-
     outputs =
       ["out"]
       ++ lib.optional (wantExtraOutputs && canProduceInfo) "info";
