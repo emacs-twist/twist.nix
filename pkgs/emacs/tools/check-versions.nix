@@ -28,6 +28,8 @@
   inputVersion = isDate: attrs:
     if isDate
     then srcDateString attrs.src
+    else if ! attrs ? version
+    then null
     # Some packages have a version suffixed with "-pre", and there are
     # packages that depend on the version with the suffix removed. For
     # example, envrc depends on inheritenv 0.1, while the latest version of
