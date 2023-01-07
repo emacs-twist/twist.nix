@@ -28,7 +28,14 @@
   inputVersion = isDate: attrs:
     if isDate
     then srcDateString attrs.src
-    else attrs.version;
+    # Some packages have a version suffixed with "-pre", and there are
+    # packages that depend on the version with the suffix removed. For
+    # example, envrc depends on inheritenv 0.1, while the latest version of
+    # inheritenv is 0.1-pre at present. In this case, we will consider that
+    # envrc depends on a pre-release version of the package, which should work
+    # once the version is officially released. Thus, we can strip "-pre"
+    # suffix.
+    else lib.removeSuffix "-pre" attrs.version;
 
   compareVersions = isDate: actual: required:
     if isDate
