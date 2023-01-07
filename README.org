@@ -5,7 +5,7 @@
 This repository is currently in *alpha* state.
 It has finished basic functionalities, but there is still room for improvement in API, and it completely lacks proper documentation:
 
-- Functionalities: *Good*. The author builds his own [[https://git.sr.ht/~akirak/nix-config][config]] with twist, and the config is already almost as capable as the previous version which used straight.el. Additionally, [[https://github.com/emacs-twist/nomake][NoMake]] is used in some packages. The basic use cases of twist.nix are covered.
+- Functionalities: *Good*. The author builds [[https://github.com/akirak/nix-config#emacs-configuration][his own config]] with twist, and the config is already almost as capable as the previous version which used straight.el. Additionally, [[https://github.com/emacs-twist/nomake][NoMake]] is used in some packages. The basic use cases of twist.nix are covered.
 - API: *Unstable*. It is mostly stable, but options may undergo changes in the future.
 - Documentation: *Poor*. There is [[https://github.com/emacs-twist/twist.nix/pull/16][a branch]]. I will rework on it after I gain more confidence with the API.
 ** Introduction
