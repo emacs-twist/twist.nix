@@ -8,16 +8,11 @@
       repo = "emacs-async";
       type = "github";
     };
-    bind-key = {
-      flake = false;
-      owner = "jwiegley";
-      repo = "use-package";
-      type = "github";
-    };
     compat = {
       flake = false;
-      type = "git";
-      url = "https://git.sr.ht/~pkal/compat";
+      owner = "emacs-compat";
+      repo = "compat";
+      type = "github";
     };
     consult = {
       flake = false;
@@ -79,28 +74,22 @@
       repo = "popup-el";
       type = "github";
     };
+    refactor = {
+      flake = false;
+      owner = "emacsattic";
+      repo = "refactor";
+      type = "github";
+    };
     tramp = {
       flake = false;
       ref = "externals/tramp";
       type = "git";
-      url = "git://git.sv.gnu.org/tramp.git";
-    };
-    undo-browse = {
-      flake = false;
-      owner = "emacsattic";
-      repo = "undo-browse";
-      type = "github";
+      url = "https://git.savannah.gnu.org/git/tramp.git";
     };
     undo-tree = {
       flake = false;
       type = "git";
       url = "https://gitlab.com/tsc25/undo-tree";
-    };
-    use-package = {
-      flake = false;
-      owner = "jwiegley";
-      repo = "use-package";
-      type = "github";
     };
     vertico = {
       flake = false;

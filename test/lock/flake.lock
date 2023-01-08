@@ -16,36 +16,20 @@
         "type": "github"
       }
     },
-    "bind-key": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1656185839,
-        "narHash": "sha256-nJcSaWcHAanGluVj4rhyHn3jY2i8O8TdpjLHSEgKT4Q=",
-        "owner": "jwiegley",
-        "repo": "use-package",
-        "rev": "0ad5d9d5d8a61517a207ab04bf69e71c081149eb",
-        "type": "github"
-      },
-      "original": {
-        "owner": "jwiegley",
-        "repo": "use-package",
-        "type": "github"
-      }
-    },
     "compat": {
       "flake": false,
       "locked": {
-        "lastModified": 1657882937,
-        "narHash": "sha256-od2eRsCZt/OL8XJHNv5kCy8yqsb7n493weZlbbpymtQ=",
-        "ref": "refs/heads/master",
-        "rev": "54413f82c44579eccd1771e0f9f83ecf7df3b896",
-        "revCount": 360,
-        "type": "git",
-        "url": "https://git.sr.ht/~pkal/compat"
+        "lastModified": 1673124789,
+        "narHash": "sha256-+DQRJqNi/W/25vp68LlTwut3a2uaLyn7+iit5gyHToA=",
+        "owner": "emacs-compat",
+        "repo": "compat",
+        "rev": "887ec71fa3a90bc0d333ae9c333436148e909dbd",
+        "type": "github"
       },
       "original": {
-        "type": "git",
-        "url": "https://git.sr.ht/~pkal/compat"
+        "owner": "emacs-compat",
+        "repo": "compat",
+        "type": "github"
       }
     },
     "consult": {
@@ -208,10 +192,25 @@
         "type": "github"
       }
     },
+    "refactor": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1294521240,
+        "narHash": "sha256-/GCkvECaUbMvtv4digvqxaqlW68X4/d/P0Yn3WVnG6U=",
+        "owner": "emacsattic",
+        "repo": "refactor",
+        "rev": "5ee61bbd2bc5622a802d9e9283c6e1b23e2bf580",
+        "type": "github"
+      },
+      "original": {
+        "owner": "emacsattic",
+        "repo": "refactor",
+        "type": "github"
+      }
+    },
     "root": {
       "inputs": {
         "async": "async",
-        "bind-key": "bind-key",
         "compat": "compat",
         "consult": "consult",
         "dash": "dash",
@@ -223,10 +222,9 @@
         "magit-section": "magit-section",
         "org-transclusion": "org-transclusion",
         "popup": "popup",
+        "refactor": "refactor",
         "tramp": "tramp",
-        "undo-browse": "undo-browse",
         "undo-tree": "undo-tree",
-        "use-package": "use-package",
         "vertico": "vertico",
         "with-editor": "with-editor"
       }
@@ -234,34 +232,18 @@
     "tramp": {
       "flake": false,
       "locked": {
-        "lastModified": 1656496224,
-        "narHash": "sha256-QpsytnW3ugJrDqPvjlZW9hQTzg9HhIZEv+kveOoAHkc=",
+        "lastModified": 1672395337,
+        "narHash": "sha256-glJxoEs2yIRD7OeRxeE5ACYBnmJF/b1UzmIBmhNh0JQ=",
         "ref": "externals/tramp",
-        "rev": "3e0278ea5938092600a781947334d175a4e4b542",
-        "revCount": 62,
+        "rev": "f1e00a4adb4de8f322f48cceec7e5c8bd3b298b6",
+        "revCount": 67,
         "type": "git",
-        "url": "git://git.sv.gnu.org/tramp.git"
+        "url": "https://git.savannah.gnu.org/git/tramp.git"
       },
       "original": {
         "ref": "externals/tramp",
         "type": "git",
-        "url": "git://git.sv.gnu.org/tramp.git"
-      }
-    },
-    "undo-browse": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1259864529,
-        "narHash": "sha256-AM7EgHrN4gSt/ctcd2CXBRpVBbc3Ef1YmGJNw3/46eI=",
-        "owner": "emacsattic",
-        "repo": "undo-browse",
-        "rev": "34fcaeb6cd4b73d84b43c02196d0af8659f25841",
-        "type": "github"
-      },
-      "original": {
-        "owner": "emacsattic",
-        "repo": "undo-browse",
-        "type": "github"
+        "url": "https://git.savannah.gnu.org/git/tramp.git"
       }
     },
     "undo-tree": {
@@ -278,22 +260,6 @@
       "original": {
         "type": "git",
         "url": "https://gitlab.com/tsc25/undo-tree"
-      }
-    },
-    "use-package": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1656185839,
-        "narHash": "sha256-nJcSaWcHAanGluVj4rhyHn3jY2i8O8TdpjLHSEgKT4Q=",
-        "owner": "jwiegley",
-        "repo": "use-package",
-        "rev": "0ad5d9d5d8a61517a207ab04bf69e71c081149eb",
-        "type": "github"
-      },
-      "original": {
-        "owner": "jwiegley",
-        "repo": "use-package",
-        "type": "github"
       }
     },
     "vertico": {
