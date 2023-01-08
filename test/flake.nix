@@ -118,10 +118,33 @@
         inventories = [];
       };
 
+      # This is an example of interactive Emacs session.
+      # You can start Emacs by running `nix run .#emacs-interactive`.
+      emacs-interactive = pkgs.writeShellApplication {
+        name = "emacs-interactive";
+
+        runtimeInputs = [
+          emacs
+        ];
+
+        text = ''
+          tmpdir=$(mktemp -d twist-test-XXX)
+          cleanup() {
+            echo "Clean up"
+            rm -rf "$tmpdir"
+          }
+          trap cleanup EXIT ERR
+          [[ -f init.el ]] && [[ -f early-init.el ]]
+          cp init.el early-init.el "$tmpdir"
+          echo "The init directory is $tmpdir"
+          emacs --init-directory="$tmpdir" "$@"
+        '';
+      };
+
       inherit (flake-utils.lib) mkApp;
     in {
       packages = {
-        inherit emacs emacs-wrapper;
+        inherit emacs emacs-wrapper emacs-interactive;
       };
       apps = emacs.makeApps {
         lockDirName = "lock";
