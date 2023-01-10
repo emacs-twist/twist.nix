@@ -1,4 +1,4 @@
-name: Update inputs for the test
+name: Update inputs
 
 on:
   schedule:
@@ -17,8 +17,6 @@ jobs:
         extra_nix_config: |
           access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
     - run: nix flake update
-    - run: nix flake lock --update-input emacs-ci
-      working-directory: test
     - uses: peter-evans/create-pull-request@v4
       id: pr
       with:
