@@ -16,6 +16,9 @@
     overlays = {
       default = import ./pkgs inputs;
     };
+    homeModules = {
+      emacs-twist = ./modules/home-manager.nix;
+    };
     templates = {
       default = {
         description = "A basic configuration for use-package";
