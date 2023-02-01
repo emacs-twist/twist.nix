@@ -32,6 +32,10 @@
     flake = false;
   };
 
+  inputs.home-manager = {
+    url = "github:nix-community/home-manager";
+  };
+
   # You could use one of the Emacs builds from emacs-overlay,
   # but I wouldn't use it on CI.
   #
@@ -150,6 +154,30 @@
         lockDirName = "lock";
       };
       defaultPackage = emacs;
+      homeConfigurations = inputs.home-manager.lib.homeManagerConfiguration {
+        inherit pkgs;
+        modules = [
+          inputs.twist.homeModules.emacs-twist
+          {
+            home = {
+              stateVersion = "22.11";
+              # fake data
+              username = "user";
+              homeDirectory = "/home/user";
+            };
+            # Prevent build error
+            manual.manpages.enable = false;
+            programs.emacs-twist = {
+              enable = true;
+              name = "my-emacs";
+              emacsclient.enable = true;
+              directory = ".local/share/emacs";
+              earlyInitFile = ./early-init.el;
+              config = emacs;
+            };
+          }
+        ];
+      };
       checks = {
         symlink = pkgs.stdenv.mkDerivation {
           name = "emacs-twist-wrapper-test";
