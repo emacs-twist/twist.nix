@@ -2,9 +2,10 @@
   inputs,
   emacs,
   pkgs,
+  lib,
 }:
 inputs.home-manager.lib.homeManagerConfiguration {
-  inherit pkgs;
+  inherit pkgs lib;
   modules = [
     inputs.twist.homeModules.emacs-twist
     {

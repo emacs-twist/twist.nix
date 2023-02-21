@@ -35,19 +35,36 @@
   outputs = {
     flake-utils,
     emacs-ci,
-    # , emacs-unstable
+    self,
     ...
-  } @ inputs:
-    flake-utils.lib.eachDefaultSystem (system: let
-      inherit (builtins) filter match elem;
+  } @ inputs: let
+    inherit (builtins) listToAttrs map filter match elem;
 
-      # Access niv sources of nix-emacs-ci
-      inherit
-        (import (inputs.emacs-ci + "/nix/sources.nix") {
-          inherit system;
-        })
-        nixpkgs
-        ;
+    # Access niv sources of nix-emacs-ci
+    nixpkgsFor = system:
+      (import (inputs.emacs-ci + "/nix/sources.nix") {
+        inherit system;
+      }).nixpkgs;
+
+    makeHomeConfiguration = system:
+      import ./home.nix rec {
+        inherit inputs;
+        pkgs = import (nixpkgsFor system) { inherit system; };
+        inherit (pkgs) lib;
+        inherit (self.packages.${system}) emacs;
+      };
+  in
+    {
+      homeConfigurations = listToAttrs (map (system: {
+          name = system;
+          value = makeHomeConfiguration system;
+        }) [
+          "x86_64-linux"
+          "aarch64-darwin"
+        ]);
+    }
+    // flake-utils.lib.eachDefaultSystem (system: let
+      nixpkgs = nixpkgsFor system;
 
       pkgs = import nixpkgs {
         inherit system;
@@ -60,14 +77,14 @@
 
       inherit (pkgs) lib;
 
-      emacs = pkgs.callPackage ./twist.nix { inherit inputs; };
+      emacs = pkgs.callPackage ./twist.nix {inherit inputs;};
 
       # Another test path to build the whole derivation (not with --dry-run).
-      emacs-wrapper = pkgs.callPackage ./twist-minimal.nix { };
+      emacs-wrapper = pkgs.callPackage ./twist-minimal.nix {};
 
       # This is an example of interactive Emacs session.
       # You can start Emacs by running `nix run .#emacs-interactive`.
-      emacs-interactive = pkgs.callPackage ./interactive.nix { inherit emacs; };
+      emacs-interactive = pkgs.callPackage ./interactive.nix {inherit emacs;};
 
       inherit (flake-utils.lib) mkApp;
     in {
@@ -78,9 +95,6 @@
         lockDirName = "lock";
       };
       defaultPackage = emacs;
-      homeConfigurations = import ./home.nix {
-        inherit inputs emacs pkgs;
-      };
       checks = {
         symlink = pkgs.stdenv.mkDerivation {
           name = "emacs-twist-wrapper-test";
