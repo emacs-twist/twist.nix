@@ -52,6 +52,12 @@ in {
         example = ".local/share/emacs";
       };
 
+      createInitFile = mkOption {
+        type = types.bool;
+        description = "Whether to create init.el in the directory";
+        default = false;
+      };
+
       earlyInitFile = mkOption {
         type = types.nullOr types.path;
         description = ''
@@ -83,14 +89,12 @@ in {
     home.packages = [wrapper] ++ lib.optional cfg.emacsclient.enable emacsclient;
 
     home.file = builtins.listToAttrs (
-      [
-        {
-          name = "${cfg.directory}/init.el";
-          value = {
-            source = "${initFile}/init.el";
-          };
-        }
-      ]
+      (lib.optional cfg.createInitFile {
+        name = "${cfg.directory}/init.el";
+        value = {
+          source = "${initFile}/init.el";
+        };
+      })
       ++ (lib.optional (cfg.earlyInitFile != null) {
         name = "${cfg.directory}/early-init.el";
         value = {

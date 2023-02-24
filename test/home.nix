@@ -22,6 +22,7 @@ inputs.home-manager.lib.homeManagerConfiguration {
         name = "my-emacs";
         emacsclient.enable = true;
         directory = ".local/share/emacs";
+        createInitFile = true;
         earlyInitFile = ./early-init.el;
         config = emacs;
       };
