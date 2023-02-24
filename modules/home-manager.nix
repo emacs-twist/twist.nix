@@ -1,4 +1,6 @@
-/* home-manager module that provides an installation of Emacs */
+/*
+home-manager module that provides an installation of Emacs
+*/
 {
   config,
   lib,
@@ -51,8 +53,13 @@ in {
       };
 
       earlyInitFile = mkOption {
-        type = types.path;
-        description = "Path to early-init.el";
+        type = types.nullOr types.path;
+        description = ''
+          Path to early-init.el.
+
+          If the value is nil, no file is created in the directory.
+        '';
+        default = null;
       };
 
       config = mkOption {
@@ -75,7 +82,21 @@ in {
   config = lib.mkIf cfg.enable {
     home.packages = [wrapper] ++ lib.optional cfg.emacsclient.enable emacsclient;
 
-    home.file."${cfg.directory}/early-init.el".source = cfg.earlyInitFile;
-    home.file."${cfg.directory}/init.el".source = "${initFile}/init.el";
+    home.file = builtins.listToAttrs (
+      [
+        {
+          name = "${cfg.directory}/init.el";
+          value = {
+            source = "${initFile}/init.el";
+          };
+        }
+      ]
+      ++ (lib.optional (cfg.earlyInitFile != null) {
+        name = "${cfg.directory}/early-init.el";
+        value = {
+          source = cfg.earlyInitFile;
+        };
+      })
+    );
   };
 }
