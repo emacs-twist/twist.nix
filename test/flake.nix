@@ -1,57 +1,70 @@
 {
-  description = "";
-
-  nixConfig.extra-substituters = "https://emacs-ci.cachix.org";
-  nixConfig.extra-trusted-public-keys = "emacs-ci.cachix.org-1:B5FVOrxhXXrOL0S+tQ7USrhjMT5iOPH+QN9q0NItom4=";
-
-  inputs.flake-utils.url = "github:numtide/flake-utils";
-
-  inputs.twist = {
-    url = "github:emacs-twist/twist.nix";
+  nixConfig = {
+    extra-substituters = "https://emacs-ci.cachix.org";
+    extra-trusted-public-keys = "emacs-ci.cachix.org-1:B5FVOrxhXXrOL0S+tQ7USrhjMT5iOPH+QN9q0NItom4=";
   };
 
-  inputs.melpa = {
-    url = "github:melpa/melpa";
-    flake = false;
-  };
-  inputs.gnu-elpa = {
-    url = "git+https://git.savannah.gnu.org/git/emacs/elpa.git?ref=main";
-    flake = false;
-  };
-  inputs.nongnu = {
-    url = "git+https://git.savannah.gnu.org/git/emacs/nongnu.git?ref=main";
-    flake = false;
-  };
-  inputs.epkgs = {
-    url = "github:emacsmirror/epkgs";
-    flake = false;
-  };
+  inputs = {
+    flake-utils.url = "github:numtide/flake-utils";
+    twist.url = "github:emacs-twist/twist.nix";
+    home-manager.url = "github:nix-community/home-manager";
 
-  inputs.emacs-ci = {
-    url = "github:purcell/nix-emacs-ci";
-    flake = false;
-  };
+    melpa = {
+      url = "github:melpa/melpa";
+      flake = false;
+    };
+    gnu-elpa = {
+      url = "git+https://git.savannah.gnu.org/git/emacs/elpa.git?ref=main";
+      flake = false;
+    };
+    nongnu = {
+      url = "git+https://git.savannah.gnu.org/git/emacs/nongnu.git?ref=main";
+      flake = false;
+    };
+    epkgs = {
+      url = "github:emacsmirror/epkgs";
+      flake = false;
+    };
 
-  # You could use one of the Emacs builds from emacs-overlay,
-  # but I wouldn't use it on CI.
-  #
-  # inputs.emacs-unstable = {
-  #   url = "github:nix-community/emacs-overlay";
-  # };
+    emacs-ci = {
+      url = "github:purcell/nix-emacs-ci";
+      flake = false;
+    };
+  };
 
   outputs = {
     flake-utils,
     emacs-ci,
-    # , emacs-unstable
+    self,
     ...
-  } @ inputs:
-    flake-utils.lib.eachDefaultSystem (system: let
-      inherit (builtins) filter match elem;
+  } @ inputs: let
+    inherit (builtins) listToAttrs map filter match elem;
 
-      # Access niv sources of nix-emacs-ci
-      inherit (import (inputs.emacs-ci + "/nix/sources.nix") {
+    # Access niv sources of nix-emacs-ci
+    nixpkgsFor = system:
+      (import (inputs.emacs-ci + "/nix/sources.nix") {
         inherit system;
-      }) nixpkgs;
+      }).nixpkgs;
+
+    makeHomeConfiguration = system:
+      import ./home.nix rec {
+        inherit inputs;
+        pkgs = import (nixpkgsFor system) { inherit system; };
+        inherit (pkgs) lib;
+        inherit (self.packages.${system}) emacs;
+      };
+  in
+    {
+      homeConfigurations = listToAttrs (map (system: {
+          name = system;
+          value = makeHomeConfiguration system;
+        }) [
+          "x86_64-linux"
+          "aarch64-darwin"
+        ]);
+    }
+    // flake-utils.lib.eachDefaultSystem (system: let
+      nixpkgs = nixpkgsFor system;
 
       pkgs = import nixpkgs {
         inherit system;
@@ -64,82 +77,14 @@
 
       inherit (pkgs) lib;
 
-      emacs = pkgs.emacsTwist {
-        # Use nix-emacs-ci which is more lightweight than a regular build
-        emacsPackage = pkgs.emacs-snapshot;
-        # In an actual configuration, you would use this:
-        # emacs = pkgs.emacsPgtkGcc.overrideAttrs (_: { version = "29.0.50"; });
-        initFiles = [
-          ./init.el
-        ];
-        lockDir = ./lock;
-        inventories = [
-          {
-            type = "elpa";
-            path = inputs.gnu-elpa.outPath + "/elpa-packages";
-            core-src = pkgs.emacs-snapshot.src;
-            auto-sync-only = true;
-          }
-          {
-            name = "melpa";
-            type = "melpa";
-            path = inputs.melpa.outPath + "/recipes";
-          }
-          {
-            type = "elpa";
-            path = inputs.nongnu.outPath + "/elpa-packages";
-          }
-          {
-            name = "gnu";
-            type = "archive";
-            url = "https://elpa.gnu.org/packages/";
-          }
-          {
-            name = "emacsmirror";
-            type = "gitmodules";
-            path = inputs.epkgs.outPath + "/.gitmodules";
-          }
-        ];
-        inputOverrides = {
-          bbdb = _: super: {
-            files = builtins.removeAttrs super.files [
-              "bbdb-vm.el"
-              "bbdb-vm-aux.el"
-            ];
-          };
-        };
-      };
+      emacs = pkgs.callPackage ./twist.nix {inherit inputs;};
 
       # Another test path to build the whole derivation (not with --dry-run).
-      emacs-wrapper = pkgs.emacsTwist {
-        emacsPackage = pkgs.emacs-28-2.overrideAttrs (_: {version = "20221201.0";});
-        initFiles = [];
-        lockDir = ./lock;
-        inventories = [];
-      };
+      emacs-wrapper = pkgs.callPackage ./twist-minimal.nix {};
 
       # This is an example of interactive Emacs session.
       # You can start Emacs by running `nix run .#emacs-interactive`.
-      emacs-interactive = pkgs.writeShellApplication {
-        name = "emacs-interactive";
-
-        runtimeInputs = [
-          emacs
-        ];
-
-        text = ''
-          tmpdir=$(mktemp -d twist-test-XXX)
-          cleanup() {
-            echo "Clean up"
-            rm -rf "$tmpdir"
-          }
-          trap cleanup EXIT ERR
-          [[ -f init.el ]] && [[ -f early-init.el ]]
-          cp init.el early-init.el "$tmpdir"
-          echo "The init directory is $tmpdir"
-          emacs --init-directory="$tmpdir" "$@"
-        '';
-      };
+      emacs-interactive = pkgs.callPackage ./interactive.nix {inherit emacs;};
 
       inherit (flake-utils.lib) mkApp;
     in {

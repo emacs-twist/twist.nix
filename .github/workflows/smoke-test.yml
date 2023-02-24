@@ -103,4 +103,14 @@ jobs:
         nix build .#checks.${{ steps.system.outputs.system }}.symlink
       working-directory: test
 
+    - name: Build home-manager configuration
+      run: |
+        nix build .#homeConfigurations.${{ steps.system.outputs.system }}.activationPackage
+        test -f result/home-files/.local/share/emacs/init.el
+        test -f result/home-files/.local/share/emacs/early-init.el
+        test -x result/home-path/bin/emacsclient
+        test -x result/home-path/bin/my-emacs
+        result/home-path/bin/my-emacs -batch -l consult
+      working-directory: test
+
     - run: nix flake show
