@@ -15,6 +15,36 @@
     },
     "version": "3.2.2.2"
   },
+  "dict-tree": {
+    "archive": {
+      "narHash": "sha256-oOLncpjxAcSi5SBGCwr/2TCWdJwR1wQVyPBpZ2Wu/3I=",
+      "type": "tarball",
+      "url": "https://elpa.gnu.org/packages/dict-tree-0.16.tar"
+    },
+    "inventory": {
+      "type": "archive",
+      "url": "https://elpa.gnu.org/packages/"
+    },
+    "packageRequires": {
+      "heap": "0.3",
+      "tNFA": "0.1.1",
+      "trie": "0.3"
+    },
+    "version": "0.16"
+  },
+  "heap": {
+    "archive": {
+      "narHash": "sha256-sZ0BZW9/lEzeurBfd2nzh+5F+xOzrbBUozdxk3E0EkQ=",
+      "type": "file",
+      "url": "https://elpa.gnu.org/packages/heap-0.5.el"
+    },
+    "inventory": {
+      "type": "archive",
+      "url": "https://elpa.gnu.org/packages/"
+    },
+    "packageRequires": {},
+    "version": "0.5"
+  },
   "ivy": {
     "archive": {
       "narHash": "sha256-qoK7Sk3npmID1UD2BZ4IQGJpMtfmYpTXhrpz0/uJb6w=",
@@ -42,5 +72,36 @@
     },
     "packageRequires": {},
     "version": "0.2"
+  },
+  "tNFA": {
+    "archive": {
+      "narHash": "sha256-ASFlaAupNzeXOXUgKO2wbysHCt3G2M7N5HAPBYgw+9U=",
+      "type": "file",
+      "url": "https://elpa.gnu.org/packages/tNFA-0.1.1.el"
+    },
+    "inventory": {
+      "type": "archive",
+      "url": "https://elpa.gnu.org/packages/"
+    },
+    "packageRequires": {
+      "queue": "0.1"
+    },
+    "version": "0.1.1"
+  },
+  "trie": {
+    "archive": {
+      "narHash": "sha256-7Lrmt6zItGT8/Eee8SLBwzTaXEF3hRS7XigJP6n7UYI=",
+      "type": "tarball",
+      "url": "https://elpa.gnu.org/packages/trie-0.5.tar"
+    },
+    "inventory": {
+      "type": "archive",
+      "url": "https://elpa.gnu.org/packages/"
+    },
+    "packageRequires": {
+      "heap": "0.3",
+      "tNFA": "0.1.1"
+    },
+    "version": "0.5"
   }
 }

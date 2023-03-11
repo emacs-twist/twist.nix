@@ -34,23 +34,23 @@
 (use-package undo-tree
   :ensure t)
 
-;; GNU ELPA external package with :auto-sync (simple)
+;; GNU ELPA external package
 (use-package async
   :ensure t)
 
-;; GNU ELPA external package with :auto-sync (complex)
+;; GNU ELPA external package
 (use-package consult
   :ensure t)
 
-;; GNU ELPA external package with :auto-sync and :make
+;; GNU ELPA external package with :make
 (use-package org-transclusion
   :ensure t)
 
-;; GNU ELPA external package with :auto-sync and :renames
+;; GNU ELPA external package with :renames
 (use-package vertico
   :ensure t)
 
-;; GNU ELPA external package with :auto-sync, the hardest one
+;; The hardest GNU ELPA external package
 (use-package tramp
   :ensure t)
 
@@ -58,6 +58,18 @@
 (use-package bbdb
   :pin gnu
   :ensure t)
+
+;; GNU ELPA external package with :manual-sync, which should be installed from
+;; archive
+(use-package dict-tree
+  :ensure t)
+
+;; GNU ELPA external package with :manual-sync
+;;
+;; This package currently fails to build:
+;;
+;; > tex-mik.el:32:2: Error: Setting current directory: No such file or
+;; directory, /homeless-shelter/ (use-package auctex :ensure t)
 
 (use-package google-translate
   :ensure t)
