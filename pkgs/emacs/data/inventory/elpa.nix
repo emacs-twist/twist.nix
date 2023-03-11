@@ -153,7 +153,7 @@ with builtins;
 
     checkUrl = url: url != null && ! lib.hasPrefix "bzr::" url;
 
-    filterAutoSync = lib.filterAttrs (_: entry: entry ? auto-sync);
+    filterAutoSync = lib.filterAttrs (_: entry: ! entry ? manual-sync);
 
     externalPackages = lib.pipe elpaEntries [
       (
