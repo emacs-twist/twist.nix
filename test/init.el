@@ -59,6 +59,18 @@
   :pin gnu
   :ensure t)
 
+;; GNU ELPA external package with :manual-sync, which should be installed from
+;; archive
+(use-package dict-tree
+  :ensure t)
+
+;; GNU ELPA external package with :manual-sync
+;;
+;; This package currently fails to build:
+;;
+;; > tex-mik.el:32:2: Error: Setting current directory: No such file or
+;; directory, /homeless-shelter/ (use-package auctex :ensure t)
+
 (use-package google-translate
   :ensure t)
 
