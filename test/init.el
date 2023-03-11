@@ -34,23 +34,23 @@
 (use-package undo-tree
   :ensure t)
 
-;; GNU ELPA external package with :auto-sync (simple)
+;; GNU ELPA external package
 (use-package async
   :ensure t)
 
-;; GNU ELPA external package with :auto-sync (complex)
+;; GNU ELPA external package
 (use-package consult
   :ensure t)
 
-;; GNU ELPA external package with :auto-sync and :make
+;; GNU ELPA external package with :make
 (use-package org-transclusion
   :ensure t)
 
-;; GNU ELPA external package with :auto-sync and :renames
+;; GNU ELPA external package with :renames
 (use-package vertico
   :ensure t)
 
-;; GNU ELPA external package with :auto-sync, the hardest one
+;; The hardest GNU ELPA external package
 (use-package tramp
   :ensure t)
 
