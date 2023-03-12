@@ -26,6 +26,18 @@ home-manager module that provides an installation of Emacs
     exec ${emacs-config}/bin/emacs --init-directory="$HOME/${cfg.directory}" "$@"
   '';
 
+  desktopItem = pkgs.makeDesktopItem {
+    name = cfg.name;
+    inherit (cfg.desktopItem) desktopName mimeTypes;
+    comment = "Edit text";
+    genericName = "Text Editor";
+    exec = "${cfg.name} %F";
+    icon = "emacs";
+    startupNotify = true;
+    startupWMClass = "Emacs";
+    categories = ["TextEditor" "Development"];
+  };
+
   emacsclient =
     pkgs.runCommandLocal "emacsclient" {
       propagatedBuildInputs = [emacs-config.emacs];
@@ -90,6 +102,20 @@ in {
           default = true;
         };
       };
+
+      desktopItem = {
+        desktopName = mkOption {
+          type = types.str;
+          description = "Long name of the desktop item";
+          default = "Emacs";
+        };
+
+        mimeTypes = mkOption {
+          type = types.listOf types.str;
+          description = "List of mime types associated with the wrapper";
+          default = ["text/plain" "inode/directory"];
+        };
+      };
     };
   };
 
@@ -97,7 +123,13 @@ in {
     home.packages =
       [wrapper]
       ++ lib.optional cfg.emacsclient.enable emacsclient
-      ++ lib.optional cfg.icons.enable emacs-config.icons;
+      ++ lib.optional cfg.icons.enable emacs-config.icons
+      ++ lib.optional (!pkgs.stdenv.isDarwin) (pkgs.runCommandLocal "${cfg.name}-desktop-item" {
+          nativeBuildInputs = [pkgs.copyDesktopItems];
+          desktopItems = desktopItem;
+        } ''
+          runHook postInstall
+        '');
 
     home.file = builtins.listToAttrs (
       (lib.optional cfg.createInitFile {
