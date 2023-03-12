@@ -82,11 +82,22 @@ in {
           description = "Whether to install emacsclient";
         };
       };
+
+      icons = {
+        enable = mkOption {
+          type = types.bool;
+          description = "Whether to install Emacs icons";
+          default = true;
+        };
+      };
     };
   };
 
   config = lib.mkIf cfg.enable {
-    home.packages = [wrapper] ++ lib.optional cfg.emacsclient.enable emacsclient;
+    home.packages =
+      [wrapper]
+      ++ lib.optional cfg.emacsclient.enable emacsclient
+      ++ lib.optional cfg.icons.enable emacs-config.icons;
 
     home.file = builtins.listToAttrs (
       (lib.optional cfg.createInitFile {
