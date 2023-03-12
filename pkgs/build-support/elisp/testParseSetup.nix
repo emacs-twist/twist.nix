@@ -1,8 +1,6 @@
 with builtins; let
   pkgs = import <nixpkgs> {};
-  fromElisp = import (fetchTree (fromJSON (readFile ../../../flake.lock)).nodes.fromElisp.locked) {
-    inherit pkgs;
-  };
+  inherit (import ./helpers.nix { inherit pkgs; }) fromElisp;
   parseSetup = import ./parseSetup.nix {
     inherit (pkgs) lib;
     inherit fromElisp;
