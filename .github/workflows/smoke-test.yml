@@ -19,13 +19,10 @@ jobs:
       with:
         extra_nix_config: |
           access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
-
-    - uses: cachix/cachix-action@v12
-      with:
-        name: emacs-ci
+          accept-flake-config = true
 
     - name: Update the flake inputs for the test
-      run: nix flake update --inputs-from $PWD/.. --override-input twist $PWD/..
+      run: nix flake update --override-input twist $PWD/..
       working-directory: test
 
     - name: Check the precondition

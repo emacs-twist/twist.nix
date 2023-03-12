@@ -22,13 +22,11 @@
 
   inherit (pkgs) lib;
 
-  fromElisp = import inputs.fromElisp {
-    pkgs = {inherit lib;};
-  };
-
   elispHelpers = import inputs.elisp-helpers {
     pkgs = {inherit lib;};
   };
+
+  inherit (elispHelpers) fromElisp;
 
   packReqEntriesToAttrs = import ./elisp/packReqEntriesToAttrs.nix {inherit lib;};
 
