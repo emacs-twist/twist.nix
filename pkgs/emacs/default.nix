@@ -162,6 +162,8 @@ in
         (userConfig.systemPackages or [])
       else [];
 
+    icons = self.callPackage ./icons.nix {};
+
     emacsWrapper =
       self.callPackage ./wrapper.nix
       {
