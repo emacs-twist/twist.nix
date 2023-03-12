@@ -21,10 +21,6 @@ jobs:
           access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
           accept-flake-config = true
 
-    - uses: cachix/cachix-action@v12
-      with:
-        name: emacs-ci
-
     - name: Update the flake inputs for the test
       run: nix flake update --inputs-from $PWD/.. --override-input twist $PWD/..
       working-directory: test
