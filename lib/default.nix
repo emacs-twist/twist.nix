@@ -1,7 +1,9 @@
 inputs: {lib}: let
-  fromElisp = import inputs.fromElisp {
+  elispHelpers = import inputs.elisp-helpers {
     pkgs = {inherit lib;};
   };
+
+  inherit (elispHelpers) fromElisp;
 
   inherit (builtins) readFile split filter isString;
 in {
