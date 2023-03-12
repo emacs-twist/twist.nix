@@ -19,6 +19,7 @@ jobs:
       with:
         extra_nix_config: |
           access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
+          accept-flake-config = true
 
     - uses: cachix/cachix-action@v12
       with:
