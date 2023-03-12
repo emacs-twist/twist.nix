@@ -20,6 +20,9 @@ jobs:
       with:
         nix_path: nixpkgs=channel:nixos-unstable
 
+    - run: nix flake update
+      working-directory: pkgs/build-support/elisp
+
     - name: Run unit tests
       run: |
         set -euo pipefail
