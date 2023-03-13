@@ -1,0 +1,27 @@
+{
+  "nodes": {
+    "elisp-helpers": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1678600653,
+        "narHash": "sha256-WjBiXeK5rIHeRMCH+/Caww6ut9kZzlqdaEpJEb0wIp8=",
+        "owner": "emacs-twist",
+        "repo": "elisp-helpers",
+        "rev": "361e7d18aac6e2c2c53beab4cc2fc043fb8a7b3c",
+        "type": "github"
+      },
+      "original": {
+        "owner": "emacs-twist",
+        "repo": "elisp-helpers",
+        "type": "github"
+      }
+    },
+    "root": {
+      "inputs": {
+        "elisp-helpers": "elisp-helpers"
+      }
+    }
+  },
+  "root": "root",
+  "version": 7
+}
