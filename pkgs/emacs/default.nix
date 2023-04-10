@@ -21,6 +21,9 @@
     if wantExtraOutputs
     then ["info"]
     else [],
+  # Export a JSON digest of packages from the wrapper (experimental).
+  # Needed if you use the hot-reloading feature of twist.el.
+  exportDigest ? false,
 }: let
   inherit
     (builtins)
@@ -167,8 +170,8 @@ in
     emacsWrapper =
       self.callPackage ./wrapper.nix
       {
-        elispInputs = lib.attrVals (attrNames packageInputs) self.elispPackages;
-        inherit extraOutputsToInstall;
+        packageNames = attrNames packageInputs;
+        inherit extraOutputsToInstall exportDigest;
       };
 
     # This makes the attrset a derivation for a shorthand.
