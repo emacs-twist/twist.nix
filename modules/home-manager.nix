@@ -22,9 +22,25 @@ home-manager module that provides an installation of Emacs
     done
   '';
 
-  wrapper = pkgs.writeShellScriptBin cfg.name ''
-    exec ${emacs-config}/bin/emacs --init-directory="$HOME/${cfg.directory}" "$@"
-  '';
+  wrapper =
+    pkgs.runCommandLocal cfg.name {
+      propagatedBuildInputs = [
+        emacs-config
+      ];
+      nativeBuildInputs = [
+        pkgs.makeWrapper
+      ];
+    } ''
+      mkdir -p $out/bin
+
+      makeWrapper ${emacs-config}/bin/emacs $out/bin/${cfg.name} \
+        --add-flags --init-directory="${config.home.homeDirectory}/${cfg.directory}"
+
+      ${
+        lib.optionalString cfg.emacsclient.enable
+        "ln -t $out/bin -s ${emacs-config.emacs}/bin/emacsclient"
+      }
+    '';
 
   desktopItem = pkgs.makeDesktopItem {
     name = cfg.name;
@@ -37,14 +53,6 @@ home-manager module that provides an installation of Emacs
     startupWMClass = "Emacs";
     categories = ["TextEditor" "Development"];
   };
-
-  emacsclient =
-    pkgs.runCommandLocal "emacsclient" {
-      propagatedBuildInputs = [emacs-config.emacs];
-    } ''
-      mkdir -p $out/bin
-      ln -t $out/bin -s ${emacs-config.emacs}/bin/emacsclient
-    '';
 in {
   options = {
     programs.emacs-twist = {
@@ -129,7 +137,6 @@ in {
   config = lib.mkIf cfg.enable {
     home.packages =
       [wrapper]
-      ++ lib.optional cfg.emacsclient.enable emacsclient
       ++ lib.optional cfg.icons.enable emacs-config.icons
       ++ lib.optional (!pkgs.stdenv.isDarwin) (pkgs.runCommandLocal "${cfg.name}-desktop-item" {
           nativeBuildInputs = [pkgs.copyDesktopItems];
