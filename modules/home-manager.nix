@@ -88,6 +88,13 @@ in {
         };
       };
 
+      wrapper = mkOption {
+        type = types.package;
+        description = "The wrapper derivation";
+        readOnly = true;
+        default = wrapper;
+      };
+
       emacsclient = {
         enable = mkOption {
           type = types.bool;
