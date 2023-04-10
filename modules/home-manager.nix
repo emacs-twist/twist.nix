@@ -110,6 +110,12 @@ in {
         };
       };
 
+      serviceIntegration = {
+        enable = mkEnableOption (lib.mdDoc ''
+          Enable service integration. For now, only systemd is supported.
+        '');
+      };
+
       icons = {
         enable = mkOption {
           type = types.bool;
@@ -159,5 +165,19 @@ in {
         };
       })
     );
+
+    services.emacs = lib.mkIf cfg.serviceIntegration.enable {
+      enable = true;
+      package = wrapper;
+    };
+
+    systemd.user.services.emacs = lib.mkIf (cfg.serviceIntegration.enable
+      && pkgs.stdenv.isLinux) {
+      Service = {
+        ExecReload = "${wrapper}/bin/emacsclient --eval '(twist-push-digest \"${
+          emacs-config.emacsWrapper.elispEnvDigestPath
+        }\")'";
+      };
+    };
   };
 }
