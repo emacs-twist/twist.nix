@@ -12,6 +12,7 @@
   executablePackages,
   extraOutputsToInstall,
   exportDigest,
+  configurationRevision,
 }: let
   inherit (builtins) length listToAttrs;
 
@@ -91,6 +92,9 @@ in
         (defconst twist-running-emacs "${emacs.outPath}")
         (defconst twist-current-digest-file "${elispEnvDigest}")
       ''}
+        ${lib.optionalString (configurationRevision != null) ''
+          (defvar twist-configuration-revision "${configurationRevision}")
+        ''}
         ${
         lib.concatMapStrings (pkg: ''
           (load "${pkg}/share/emacs/site-lisp/${pkg.ename}-autoloads.el" t t)

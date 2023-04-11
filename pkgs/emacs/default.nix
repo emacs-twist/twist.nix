@@ -24,6 +24,7 @@
   # Export a JSON digest of packages from the wrapper (experimental).
   # Needed if you use the hot-reloading feature of twist.el.
   exportDigest ? false,
+  configurationRevision ? null,
 }: let
   inherit
     (builtins)
@@ -139,6 +140,7 @@ in
 
     inherit builtinLibraryList;
     inherit depsCheck revDeps;
+    inherit configurationRevision;
 
     # An actual derivation set of Emacs Lisp packages. You can override this
     # attribute set to change how they are built.
