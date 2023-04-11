@@ -12,6 +12,8 @@ home-manager module that provides an installation of Emacs
 
   emacs-config = cfg.config;
 
+  configurationRevision = emacs-config.configurationRevision;
+
   initFile = pkgs.runCommandLocal "init.el" {} ''
     mkdir -p $out
     touch $out/init.el
@@ -176,7 +178,10 @@ in {
       Service = {
         ExecReload = "${wrapper}/bin/emacsclient --eval '(twist-push-digest \"${
           emacs-config.emacsWrapper.elispEnvDigestPath
-        }\")'";
+        }\"${
+          lib.optionalString (configurationRevision != null)
+          " \"${configurationRevision}\""
+        })'";
       };
     };
   };
