@@ -106,7 +106,7 @@ in
     elispEnvStatePath =
       if exportState
       then elispEnvState.outPath
-      else "";
+      else null;
   }
   ''
     mkdir -p $out/bin
