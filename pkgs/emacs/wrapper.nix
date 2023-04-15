@@ -90,7 +90,7 @@ in
       (when init-file-user
         ${lib.optionalString exportState ''
         (defconst twist-running-emacs "${emacs.outPath}")
-        (defconst twist-current-digest-file "${elispEnvState}")
+        (defconst twist-current-state-file "${elispEnvState}")
       ''}
         ${lib.optionalString (configurationRevision != null) ''
           (defvar twist-configuration-revision "${configurationRevision}")
