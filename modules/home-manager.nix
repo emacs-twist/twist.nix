@@ -189,17 +189,5 @@ in {
       enable = true;
       package = wrapper;
     };
-
-    systemd.user.services.emacs = lib.mkIf (cfg.serviceIntegration.enable
-      && pkgs.stdenv.isLinux) {
-      Service = {
-        ExecReload = "${wrapper}/bin/emacsclient --eval '(twist-push-digest \"${
-          emacs-config.emacsWrapper.elispEnvStatePath
-        }\"${
-          lib.optionalString (configurationRevision != null)
-          " \"${configurationRevision}\""
-        })'";
-      };
-    };
   };
 }
