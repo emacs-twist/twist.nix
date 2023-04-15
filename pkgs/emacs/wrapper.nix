@@ -11,7 +11,7 @@
   elispPackages,
   executablePackages,
   extraOutputsToInstall,
-  exportDigest,
+  exportState,
   configurationRevision,
 }: let
   inherit (builtins) length listToAttrs;
@@ -59,7 +59,7 @@
 
   infoPath = "${packageEnv}/share/info";
 
-  elispEnvDigest = writeText "elisp-digest.json" (builtins.toJSON {
+  elispEnvState = writeText "elisp-digest.json" (builtins.toJSON {
     emacsPath = emacs.outPath;
     inherit nativeLoadPath infoPath;
     elispPackages = lib.genAttrs packageNames (
@@ -88,9 +88,9 @@ in
 
     siteStartExtra = ''
       (when init-file-user
-        ${lib.optionalString exportDigest ''
+        ${lib.optionalString exportState ''
         (defconst twist-running-emacs "${emacs.outPath}")
-        (defconst twist-current-digest-file "${elispEnvDigest}")
+        (defconst twist-current-digest-file "${elispEnvState}")
       ''}
         ${lib.optionalString (configurationRevision != null) ''
           (defvar twist-configuration-revision "${configurationRevision}")
@@ -103,9 +103,9 @@ in
       })
     '';
 
-    elispEnvDigestPath =
-      if exportDigest
-      then elispEnvDigest.outPath
+    elispEnvStatePath =
+      if exportState
+      then elispEnvState.outPath
       else "";
   }
   ''

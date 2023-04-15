@@ -21,9 +21,9 @@
     if wantExtraOutputs
     then ["info"]
     else [],
-  # Export a JSON digest of packages from the wrapper (experimental).
+  # Export a state file of of the package set from the wrapper (experimental).
   # Needed if you use the hot-reloading feature of twist.el.
-  exportDigest ? false,
+  exportState ? false,
   configurationRevision ? null,
 }: let
   inherit
@@ -173,7 +173,7 @@ in
       self.callPackage ./wrapper.nix
       {
         packageNames = attrNames packageInputs;
-        inherit extraOutputsToInstall exportDigest;
+        inherit extraOutputsToInstall exportState;
       };
 
     # This makes the attrset a derivation for a shorthand.
