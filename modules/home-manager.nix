@@ -90,6 +90,17 @@ in {
         default = null;
       };
 
+      stateFile = mkOption {
+        type = types.nullOr types.str;
+        description = lib.mdDoc ''
+          Name of the state file, relative from `user-emacs-directory.
+
+          This is necessary to enable hot reloading of packages.
+        '';
+        example = "twist.json";
+        default = null;
+      };
+
       config = mkOption {
         type = mkOptionType {
           name = "twist";
@@ -166,6 +177,12 @@ in {
           source = cfg.earlyInitFile;
         };
       })
+      ++ (lib.optional (cfg.stateFile != null) {
+        name = "${cfg.directory}/${cfg.stateFile}";
+        value = {
+          source = emacs-config.emacsWrapper.elispEnvStatePath;
+        };
+      })
     );
 
     services.emacs = lib.mkIf cfg.serviceIntegration.enable {
@@ -177,7 +194,7 @@ in {
       && pkgs.stdenv.isLinux) {
       Service = {
         ExecReload = "${wrapper}/bin/emacsclient --eval '(twist-push-digest \"${
-          emacs-config.emacsWrapper.elispEnvDigestPath
+          emacs-config.emacsWrapper.elispEnvStatePath
         }\"${
           lib.optionalString (configurationRevision != null)
           " \"${configurationRevision}\""
