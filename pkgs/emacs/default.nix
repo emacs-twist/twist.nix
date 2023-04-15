@@ -140,7 +140,6 @@ in
 
     inherit builtinLibraryList;
     inherit depsCheck revDeps;
-    inherit configurationRevision;
 
     # An actual derivation set of Emacs Lisp packages. You can override this
     # attribute set to change how they are built.
@@ -173,7 +172,7 @@ in
       self.callPackage ./wrapper.nix
       {
         packageNames = attrNames packageInputs;
-        inherit extraOutputsToInstall exportState;
+        inherit extraOutputsToInstall exportState configurationRevision;
       };
 
     # This makes the attrset a derivation for a shorthand.

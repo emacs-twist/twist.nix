@@ -60,6 +60,7 @@
   infoPath = "${packageEnv}/share/info";
 
   elispEnvState = writeText "elisp-digest.json" (builtins.toJSON {
+    inherit configurationRevision;
     emacsPath = emacs.outPath;
     inherit nativeLoadPath infoPath;
     elispPackages = lib.genAttrs packageNames (
