@@ -97,8 +97,11 @@ in {
 
           This is necessary to enable hot reloading of packages.
         '';
-        example = "twist.json";
-        default = null;
+        example = "twist-manifesto.json";
+        default =
+          if emacs-config.emacsWrapper.elispManifestPath !=null
+          then "twist-manifest.json"
+          else null;
       };
 
       config = mkOption {
