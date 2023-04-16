@@ -25,6 +25,7 @@ inputs.home-manager.lib.homeManagerConfiguration {
         createInitFile = true;
         earlyInitFile = ./early-init.el;
         config = emacs;
+        createManifestFile = true;
       };
     }
   ];
