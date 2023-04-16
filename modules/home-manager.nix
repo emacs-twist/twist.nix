@@ -12,6 +12,8 @@ home-manager module that provides an installation of Emacs
 
   emacs-config = cfg.config;
 
+  configurationRevision = emacs-config.configurationRevision;
+
   initFile = pkgs.runCommandLocal "init.el" {} ''
     mkdir -p $out
     touch $out/init.el
@@ -22,9 +24,25 @@ home-manager module that provides an installation of Emacs
     done
   '';
 
-  wrapper = pkgs.writeShellScriptBin cfg.name ''
-    exec ${emacs-config}/bin/emacs --init-directory="$HOME/${cfg.directory}" "$@"
-  '';
+  wrapper =
+    pkgs.runCommandLocal cfg.name {
+      propagatedBuildInputs = [
+        emacs-config
+      ];
+      nativeBuildInputs = [
+        pkgs.makeWrapper
+      ];
+    } ''
+      mkdir -p $out/bin
+
+      makeWrapper ${emacs-config}/bin/emacs $out/bin/${cfg.name} \
+        --add-flags --init-directory="${config.home.homeDirectory}/${cfg.directory}"
+
+      ${
+        lib.optionalString cfg.emacsclient.enable
+        "ln -t $out/bin -s ${emacs-config.emacs}/bin/emacsclient"
+      }
+    '';
 
   desktopItem = pkgs.makeDesktopItem {
     name = cfg.name;
@@ -37,14 +55,6 @@ home-manager module that provides an installation of Emacs
     startupWMClass = "Emacs";
     categories = ["TextEditor" "Development"];
   };
-
-  emacsclient =
-    pkgs.runCommandLocal "emacsclient" {
-      propagatedBuildInputs = [emacs-config.emacs];
-    } ''
-      mkdir -p $out/bin
-      ln -t $out/bin -s ${emacs-config.emacs}/bin/emacsclient
-    '';
 in {
   options = {
     programs.emacs-twist = {
@@ -80,6 +90,22 @@ in {
         default = null;
       };
 
+      createManifestFile = mkOption {
+        type = types.bool;
+        description = "Whether to create the manifest file in the directory";
+        default = false;
+      };
+
+      manifestFileName = mkOption {
+        type = types.str;
+        description = lib.mdDoc ''
+          Name of the manifest file, relative from `user-emacs-directory.
+
+          This is necessary to enable hot reloading of packages.
+        '';
+        default = "twist-manifest.json";
+      };
+
       config = mkOption {
         type = mkOptionType {
           name = "twist";
@@ -88,11 +114,24 @@ in {
         };
       };
 
+      wrapper = mkOption {
+        type = types.package;
+        description = "The wrapper derivation";
+        readOnly = true;
+        default = wrapper;
+      };
+
       emacsclient = {
         enable = mkOption {
           type = types.bool;
           description = "Whether to install emacsclient";
         };
+      };
+
+      serviceIntegration = {
+        enable = mkEnableOption (lib.mdDoc ''
+          Enable service integration. For now, only systemd is supported.
+        '');
       };
 
       icons = {
@@ -122,7 +161,6 @@ in {
   config = lib.mkIf cfg.enable {
     home.packages =
       [wrapper]
-      ++ lib.optional cfg.emacsclient.enable emacsclient
       ++ lib.optional cfg.icons.enable emacs-config.icons
       ++ lib.optional (!pkgs.stdenv.isDarwin) (pkgs.runCommandLocal "${cfg.name}-desktop-item" {
           nativeBuildInputs = [pkgs.copyDesktopItems];
@@ -144,6 +182,20 @@ in {
           source = cfg.earlyInitFile;
         };
       })
+      ++ (lib.optional (
+          cfg.createManifestFile
+          && emacs-config.emacsWrapper.elispManifestPath != null
+        ) {
+          name = "${cfg.directory}/${cfg.manifestFileName}";
+          value = {
+            source = emacs-config.emacsWrapper.elispManifestPath;
+          };
+        })
     );
+
+    services.emacs = lib.mkIf cfg.serviceIntegration.enable {
+      enable = true;
+      package = wrapper;
+    };
   };
 }

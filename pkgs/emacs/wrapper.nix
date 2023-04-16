@@ -2,15 +2,21 @@
   lib,
   runCommandLocal,
   makeWrapper,
+  writeText,
   buildEnv,
   emacs,
   lndir,
   texinfo,
-  elispInputs,
+  packageNames,
+  elispPackages,
   executablePackages,
   extraOutputsToInstall,
+  exportManifest,
+  configurationRevision,
 }: let
-  inherit (builtins) length;
+  inherit (builtins) length listToAttrs;
+
+  elispInputs = lib.attrVals packageNames elispPackages;
 
   nativeComp = emacs.nativeComp or false;
 
@@ -48,6 +54,20 @@
   lispList = strings:
     wrap "'(" ")"
     (lib.concatMapStringsSep " " (wrap "\"" "\"") strings);
+
+  nativeLoadPath = "${packageEnv}/share/emacs/native-lisp/";
+
+  infoPath = "${packageEnv}/share/info";
+
+  elispManifest = writeText "elisp-digest.json" (builtins.toJSON {
+    inherit configurationRevision;
+    emacsPath = emacs.outPath;
+    inherit nativeLoadPath infoPath;
+    elispPackages = lib.genAttrs packageNames (
+      name: "${elispPackages.${name}}/share/emacs/site-lisp/"
+    );
+    executablePackages = map (pkg: "${pkg}/bin") executablePackages;
+  });
 in
   runCommandLocal "emacs"
   {
@@ -59,16 +79,23 @@ in
 
     passAsFile = ["subdirs" "siteStartExtra"];
 
-    nativeLoadPath = "${packageEnv}/share/emacs/native-lisp/:${emacs}/share/emacs/native-lisp/:";
+    nativeLoadPath = "${nativeLoadPath}:${emacs}/share/emacs/native-lisp/:";
 
     subdirs = ''
       (setq load-path (append ${
-        lispList (map (path: "${path}/share/emacs/site-lisp/") elispInputs)
+        lispList (map (pkg: "${pkg}/share/emacs/site-lisp/") elispInputs)
       } load-path))
     '';
 
     siteStartExtra = ''
       (when init-file-user
+        ${lib.optionalString exportManifest ''
+        (defconst twist-running-emacs "${emacs.outPath}")
+        (defconst twist-current-manifest-file "${elispManifest}")
+      ''}
+        ${lib.optionalString (configurationRevision != null) ''
+          (defvar twist-configuration-revision "${configurationRevision}")
+        ''}
         ${
         lib.concatMapStrings (pkg: ''
           (load "${pkg}/share/emacs/site-lisp/${pkg.ename}-autoloads.el" t t)
@@ -76,6 +103,11 @@ in
         elispInputs
       })
     '';
+
+    elispManifestPath =
+      if exportManifest
+      then elispManifest.outPath
+      else null;
   }
   ''
     mkdir -p $out/bin
@@ -146,7 +178,7 @@ in
       then
       wrapProgram $bin \
         ${lib.optionalString (length executablePackages > 0) "--prefix PATH : ${lib.escapeShellArg (lib.makeBinPath executablePackages)}"} \
-        --prefix INFOPATH : ${emacs}/share/info:$out/share/info:${packageEnv}/share/info \
+        --prefix INFOPATH : ${emacs}/share/info:$out/share/info:${infoPath} \
         ${
       lib.optionalString nativeComp "--set EMACSNATIVELOADPATH $nativeLisp:$nativeLoadPath"
     } \

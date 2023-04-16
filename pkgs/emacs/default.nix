@@ -21,6 +21,10 @@
     if wantExtraOutputs
     then ["info"]
     else [],
+  # Export a manifest file of of the package set from the wrapper
+  # (experimental). Needed if you use the hot-reloading feature of twist.el.
+  exportManifest ? false,
+  configurationRevision ? null,
 }: let
   inherit
     (builtins)
@@ -167,8 +171,8 @@ in
     emacsWrapper =
       self.callPackage ./wrapper.nix
       {
-        elispInputs = lib.attrVals (attrNames packageInputs) self.elispPackages;
-        inherit extraOutputsToInstall;
+        packageNames = attrNames packageInputs;
+        inherit extraOutputsToInstall exportManifest configurationRevision;
       };
 
     # This makes the attrset a derivation for a shorthand.

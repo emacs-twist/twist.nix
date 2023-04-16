@@ -5,6 +5,7 @@ on:
     paths:
     - 'flake.lock'
     - 'pkgs/**'
+    - 'modules/**'
     - 'test/**'
     - '.github/workflows/smoke-test.yml'
   workflow_dispatch:
