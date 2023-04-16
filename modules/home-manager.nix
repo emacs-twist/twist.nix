@@ -90,18 +90,20 @@ in {
         default = null;
       };
 
-      manifestFile = mkOption {
-        type = types.nullOr types.str;
+      createManifestFile = mkOption {
+        type = types.bool;
+        description = "Whether to create the manifest file in the directory";
+        default = false;
+      };
+
+      manifestFileName = mkOption {
+        type = types.str;
         description = lib.mdDoc ''
           Name of the manifest file, relative from `user-emacs-directory.
 
           This is necessary to enable hot reloading of packages.
         '';
-        example = "twist-manifesto.json";
-        default =
-          if emacs-config.emacsWrapper.elispManifestPath !=null
-          then "twist-manifest.json"
-          else null;
+        default = "twist-manifest.json";
       };
 
       config = mkOption {
@@ -180,12 +182,15 @@ in {
           source = cfg.earlyInitFile;
         };
       })
-      ++ (lib.optional (cfg.manifestFile != null) {
-        name = "${cfg.directory}/${cfg.manifestFile}";
-        value = {
-          source = emacs-config.emacsWrapper.elispManifestPath;
-        };
-      })
+      ++ (lib.optional (
+          cfg.createManifestFile
+          && emacs-config.emacsWrapper.elispManifestPath != null
+        ) {
+          name = "${cfg.directory}/${cfg.manifestFileName}";
+          value = {
+            source = emacs-config.emacsWrapper.elispManifestPath;
+          };
+        })
     );
 
     services.emacs = lib.mkIf cfg.serviceIntegration.enable {
