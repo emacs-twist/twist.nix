@@ -21,9 +21,9 @@
     if wantExtraOutputs
     then ["info"]
     else [],
-  # Export a state file of of the package set from the wrapper (experimental).
-  # Needed if you use the hot-reloading feature of twist.el.
-  exportState ? false,
+  # Export a manifest file of of the package set from the wrapper
+  # (experimental). Needed if you use the hot-reloading feature of twist.el.
+  exportManifest ? false,
   configurationRevision ? null,
 }: let
   inherit
@@ -172,7 +172,7 @@ in
       self.callPackage ./wrapper.nix
       {
         packageNames = attrNames packageInputs;
-        inherit extraOutputsToInstall exportState configurationRevision;
+        inherit extraOutputsToInstall exportManifest configurationRevision;
       };
 
     # This makes the attrset a derivation for a shorthand.

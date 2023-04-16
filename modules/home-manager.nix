@@ -90,10 +90,10 @@ in {
         default = null;
       };
 
-      stateFile = mkOption {
+      manifestFile = mkOption {
         type = types.nullOr types.str;
         description = lib.mdDoc ''
-          Name of the state file, relative from `user-emacs-directory.
+          Name of the manifest file, relative from `user-emacs-directory.
 
           This is necessary to enable hot reloading of packages.
         '';
@@ -177,10 +177,10 @@ in {
           source = cfg.earlyInitFile;
         };
       })
-      ++ (lib.optional (cfg.stateFile != null) {
-        name = "${cfg.directory}/${cfg.stateFile}";
+      ++ (lib.optional (cfg.manifestFile != null) {
+        name = "${cfg.directory}/${cfg.manifestFile}";
         value = {
-          source = emacs-config.emacsWrapper.elispEnvStatePath;
+          source = emacs-config.emacsWrapper.elispManifestPath;
         };
       })
     );
