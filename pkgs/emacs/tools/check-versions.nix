@@ -39,10 +39,10 @@
     # suffix.
     else lib.removeSuffix "-pre" attrs.version;
 
-  compareVersions = isDate: actual: required:
+  compareVersions = isDate: current: required:
     if isDate
-    then ! lessThan (lib.toInt actual) (lib.toInt required)
-    else lib.versionAtLeast actual required;
+    then ! lessThan (lib.toInt current) (lib.toInt required)
+    else lib.versionAtLeast current required;
 
   # Some packages (e.g. magit) contain dates as dependency versions in *-pkg.el.
   dependencyStatus = ename: required:
@@ -54,7 +54,7 @@
         && length (lib.splitVersion required) == 1
         && match "[0-9]{8}" (head (lib.splitVersion required)) != null;
       inherit required;
-      actual =
+      current =
         if ename == "emacs"
         then emacsVersion
         else if hasAttr ename packageInputs
@@ -65,16 +65,16 @@
       satisfied =
         required
         == null
-        || actual == "builtin"
+        || current == "builtin"
         || (
-          if actual == null
+          if current == null
           # There are packages that seem to have removed a version header. In
           # that case, there are dependants that have a version requirement,
           # while their dependency actually have no version. It is impossible
           # to compare the versions in this case. I don't know if I can simply
           # ignore this case, so I will display a warning for now.
           then lib.warn "Package ${ename} has no version header" true
-          else compareVersions isDateVersion actual required
+          else compareVersions isDateVersion current required
         );
     } ["isDateVersion"];
 
@@ -92,7 +92,7 @@
       concatLists
       (lib.groupBy ({ename, ...}: ename))
       (mapAttrs (ename: statuses: {
-        current = (head statuses).actual;
+        current = (head statuses).current;
         # Showing the source date may be useful, but maybe later.
         #
         # lastModifiedDate =
@@ -105,7 +105,7 @@
           lib.last
         ];
         details =
-          map (status: removeAttrs status ["actual" "ename" "satisfied"]) statuses;
+          map (status: removeAttrs status ["current" "ename" "satisfied"]) statuses;
       }))
     ];
     errors = lib.pipe packages [
