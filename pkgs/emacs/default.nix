@@ -141,6 +141,9 @@ in
     inherit builtinLibraryList;
     inherit depsCheck revDeps;
 
+    maskedBuiltins =
+      lib.intersectLists builtinLibraries (attrNames packageInputs);
+
     # An actual derivation set of Emacs Lisp packages. You can override this
     # attribute set to change how they are built.
     elispPackages = lib.makeScope self.newScope (eself:
