@@ -40,6 +40,7 @@
     match
     isList
     isAttrs
+    elem
     ;
 in
   lib.makeScope pkgs.newScope (self: let
@@ -133,7 +134,16 @@ in
           lib.filterAttrs (_: v: ! isFunction v)
           (attrs
             // lib.optionalAttrs (isAttrs attrs.src && attrs.src ? rev) {
-              sourceInfo = removeAttrs attrs.src ["outPath"];
+              sourceInfo =
+                lib.filterAttrs
+                  (name: _: elem name [
+                    "lastModified"
+                    "lastModifiedDate"
+                    "narHash"
+                    "rev"
+                    "shortRev"
+                  ])
+                  attrs.src;
             })
       ))
     ];
