@@ -18,7 +18,7 @@
 
   elispInputs = lib.attrVals packageNames elispPackages;
 
-  nativeComp = emacs.nativeComp or false;
+  nativeComp = emacs.withNativeCompilation or emacs.nativeComp or false;
 
   # Use a symlink farm for specifying subdirectory names inside site-lisp.
   packageEnv = buildEnv {
