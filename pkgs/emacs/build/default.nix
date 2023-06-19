@@ -17,7 +17,7 @@
   ...
 } @ attrs:
 with builtins; let
-  nativeComp = emacs.nativeComp or false;
+  nativeComp = emacs.withNativeCompilation or emacs.nativeComp or false;
 
   regex = ".*/([^/]+)";
 
