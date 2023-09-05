@@ -1,11 +1,11 @@
 {
   emacsTwist,
-  emacs-snapshot,
+  emacsPackage,
   inputs,
 }:
 emacsTwist {
   # Use nix-emacs-ci which is more lightweight than a regular build
-  emacsPackage = emacs-snapshot;
+  inherit emacsPackage;
   # In an actual configuration, you would use this:
   # emacs = pkgs.emacsPgtkGcc.overrideAttrs (_: { version = "29.0.50"; });
   initFiles = [
@@ -16,7 +16,7 @@ emacsTwist {
     {
       type = "elpa";
       path = inputs.gnu-elpa.outPath + "/elpa-packages";
-      core-src = emacs-snapshot.src;
+      core-src = emacsPackage.src;
       auto-sync-only = true;
     }
     {

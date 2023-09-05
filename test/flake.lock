@@ -133,6 +133,22 @@
         "type": "github"
       }
     },
+    "nixpkgs_2": {
+      "locked": {
+        "lastModified": 1693663421,
+        "narHash": "sha256-ImMIlWE/idjcZAfxKK8sQA7A1Gi/O58u5/CJA+mxvl8=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "e56990880811a451abd32515698c712788be5720",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "ref": "nixos-unstable",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
     "nongnu": {
       "flake": false,
       "locked": {
@@ -158,6 +174,7 @@
         "gnu-elpa": "gnu-elpa",
         "home-manager": "home-manager",
         "melpa": "melpa",
+        "nixpkgs": "nixpkgs_2",
         "nongnu": "nongnu",
         "twist": "twist"
       }
