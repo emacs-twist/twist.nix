@@ -1,9 +1,9 @@
 {
   emacsTwist,
-  emacs-28-2,
+  emacsPackage,
 }:
 emacsTwist {
-  emacsPackage = emacs-28-2.overrideAttrs (_: {version = "20221201.0";});
+  inherit emacsPackage;
   initFiles = [];
   lockDir = ./lock;
   inventories = [];

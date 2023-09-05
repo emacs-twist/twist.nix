@@ -5,6 +5,7 @@
   };
 
   inputs = {
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     flake-utils.url = "github:numtide/flake-utils";
     twist.url = "github:emacs-twist/twist.nix";
     home-manager.url = "github:nix-community/home-manager";
@@ -26,13 +27,11 @@
       flake = false;
     };
 
-    emacs-ci = {
-      url = "github:purcell/nix-emacs-ci";
-      flake = false;
-    };
+    emacs-ci.url = "github:purcell/nix-emacs-ci";
   };
 
   outputs = {
+    nixpkgs,
     flake-utils,
     emacs-ci,
     self,
@@ -40,17 +39,11 @@
   } @ inputs: let
     inherit (builtins) listToAttrs map filter match elem;
 
-    # Access niv sources of nix-emacs-ci
-    nixpkgsFor = system:
-      (import (inputs.emacs-ci + "/nix/sources.nix") {
-        inherit system;
-      }).nixpkgs;
-
     makeHomeConfiguration = system:
       import ./home.nix rec {
         inherit inputs;
-        pkgs = import (nixpkgsFor system) { inherit system; };
-        inherit (pkgs) lib;
+        pkgs = nixpkgs.legacyPackages.${system};
+        inherit (nixpkgs) lib;
         inherit (self.packages.${system}) emacs;
       };
   in
@@ -64,12 +57,9 @@
         ]);
     }
     // flake-utils.lib.eachDefaultSystem (system: let
-      nixpkgs = nixpkgsFor system;
-
       pkgs = import nixpkgs {
         inherit system;
         overlays = [
-          (import (emacs-ci.outPath + "/overlay.nix"))
           # emacs-unstable.overlay
           inputs.twist.overlays.default
         ];
@@ -77,10 +67,17 @@
 
       inherit (pkgs) lib;
 
-      emacs = pkgs.callPackage ./twist.nix {inherit inputs;};
+      emacsPackage = emacs-ci.packages.${system}.emacs-snapshot;
+
+      emacs = pkgs.callPackage ./twist.nix {
+        inherit inputs;
+        inherit emacsPackage;
+      };
 
       # Another test path to build the whole derivation (not with --dry-run).
-      emacs-wrapper = pkgs.callPackage ./twist-minimal.nix {};
+      emacs-wrapper = pkgs.callPackage ./twist-minimal.nix {
+        inherit emacsPackage;
+      };
 
       # This is an example of interactive Emacs session.
       # You can start Emacs by running `nix run .#emacs-interactive`.
