@@ -27,13 +27,14 @@ jobs:
           accept-flake-config = true
 
     - name: Update the flake inputs for the test
-      run: nix flake update --override-input twist $PWD/..
+      run: |
+        nix develop -c just local-update-flake
       working-directory: test
 
     - name: Check the precondition
       working-directory: test
       run: |
-        make clean
+        nix develop -c just purge-lock
         [[ ! -f lock/flake.nix ]]
         [[ ! -f lock/flake.lock ]]
         [[ ! -f lock/archive.lock ]]
