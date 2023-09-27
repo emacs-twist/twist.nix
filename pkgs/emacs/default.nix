@@ -168,6 +168,10 @@ in
           // attrs))
       packageInputs);
 
+    # nixpkgs used in elisp build overrides. It is not meant to be overridden by
+    # the user.
+    pkgs = final;
+
     executablePackages =
       if addSystemPackages
       then
