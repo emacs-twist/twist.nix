@@ -58,7 +58,9 @@ in
 
     # If the repository contains a Makefile, configurePhase can be problematic, so
     # exclude it.
-    phases = ["unpackPhase" "buildPhase" "checkPhase" "installPhase"];
+    phases = ["unpackPhase" "patchPhase" "buildPhase" "checkPhase" "installPhase"];
+
+    patches = [];
 
     # False by default; You can override this later
     doCheck = false;
