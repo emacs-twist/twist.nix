@@ -53,6 +53,14 @@
           })
       );
   in {
+    devShells = eachSystemPkgs (pkgs: {
+      default = pkgs.mkShell {
+        buildInputs = [
+          pkgs.just
+        ];
+      };
+    });
+
     packages = eachSystemPkgs (pkgs: {
       emacs = pkgs.callPackage ./twist.nix {
         inherit inputs;

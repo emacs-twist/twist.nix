@@ -1,0 +1,14 @@
+purge-lock:
+    rm -f lock/flake.nix lock/flake.lock lock/archive.lock
+
+# Used for local development.
+local-lock:
+    nix run .\#lock --impure --override-input twist "path:$(readlink -f ..)"
+
+# Used for local development.
+local-update:
+    nix run .\#update --impure --override-input twist "path:$(readlink -f ..)"
+
+# Used for CI.
+local-update-flake:
+    nix flake update --override-input twist "path:$(readlink -f ..)"
