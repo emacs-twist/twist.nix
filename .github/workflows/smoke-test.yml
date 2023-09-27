@@ -42,7 +42,7 @@ jobs:
     - name: Build the configuration without a lock file (which should fail)
       id: no-lock
       working-directory: test
-      run: nix build --dry-run
+      run: nix build .#emacs --dry-run
       continue-on-error: true
 
     - name: Pure evaluation without the lock file must fail
@@ -66,7 +66,7 @@ jobs:
 
     - name: Build the configuration with the generated lock file
       working-directory: test
-      run: nix build --dry-run
+      run: nix build .#emacs --dry-run
 
     - name: Get the system
       id: system
