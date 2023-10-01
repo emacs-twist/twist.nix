@@ -14,7 +14,7 @@
     packageInputs;
 in
   mapAttrs (name: {
-    version,
+    version ? null,
     src,
     ...
   }: (
