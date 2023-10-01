@@ -31,42 +31,9 @@ jobs:
         nix develop -c just local-update-flake
       working-directory: test
 
-    - name: Check the precondition
+    - name: Test
       working-directory: test
-      run: |
-        nix develop -c just purge-lock
-        [[ ! -f lock/flake.nix ]]
-        [[ ! -f lock/flake.lock ]]
-        [[ ! -f lock/archive.lock ]]
-
-    - name: Build the configuration without a lock file (which should fail)
-      id: no-lock
-      working-directory: test
-      run: nix build .#emacs --dry-run
-      continue-on-error: true
-
-    - name: Pure evaluation without the lock file must fail
-      if: ${{ steps.no-lock.outcome == 'success' }}
-      run: exit 1
-
-    - name: Lock the ELPA packages
-      working-directory: test
-      run: nix run .#update --impure
-
-    - name: Generate the lock file for MELPA packages
-      working-directory: test
-      run: nix run .#lock --impure
-
-    - name: The lock file exists
-      working-directory: test
-      run: |
-        [[ -s lock/archive.lock ]]
-        [[ -s lock/flake.nix ]]
-        [[ -s lock/flake.lock ]]
-
-    - name: Build the configuration with the generated lock file
-      working-directory: test
-      run: nix build .#emacs --dry-run
+      run: nix develop -c just test-build
 
     - name: Get the system
       id: system

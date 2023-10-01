@@ -12,3 +12,22 @@ local-update:
 # Used for CI.
 local-update-flake:
     nix flake update --override-input twist "path:$(readlink -f ..)"
+
+test-fail-without-lock: purge-lock
+    # Test preconditions
+    [[ ! -f lock/flake.nix ]]
+    [[ ! -f lock/flake.lock ]]
+    [[ ! -f lock/archive.lock ]]
+    # Build the configuration without a lock file (which should fail)
+    ! nix build .\#emacs --dry-run
+
+test-recreate-lock: test-fail-without-lock
+    nix run .\#update --impure
+    nix run .\#lock --impure
+    # Test post-conditions
+    [[ -s lock/archive.lock ]]
+    [[ -s lock/flake.nix ]]
+    [[ -s lock/flake.lock ]]
+
+test-build: test-recreate-lock
+    nix build .\#emacs --dry-run
