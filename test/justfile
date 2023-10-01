@@ -29,5 +29,33 @@ test-recreate-lock: test-fail-without-lock
     [[ -s lock/flake.nix ]]
     [[ -s lock/flake.lock ]]
 
-test-build: test-recreate-lock
+test-dry-build: test-recreate-lock
     nix build .\#emacs --dry-run
+
+check-attributes: test-dry-build
+    # Test the API
+    # TODO: Perform assertions on the values
+    nix eval .\#emacs.initFiles --json | jq
+    nix eval .\#emacs.packageInputs --json | jq
+    nix eval .\#emacs.revDeps --json | jq
+    nix eval .\#emacs.maskedBuiltins --json | jq
+    nix build .\#emacs.elispPackages.magit --dry-run
+
+test-build: test-dry-build
+    # Perform a complete build of a wrapper with an empty config
+    nix build .\#emacs-wrapper
+    # Test if Emacs runs
+    nix run .\#emacs-wrapper -- --version
+
+test-home-manager: test-build
+    nix build .\#homeConfigurations.$(nix eval --expr builtins.currentSystem --raw --impure).activationPackage
+    test -f result/home-files/.local/share/emacs/init.el
+    test -f result/home-files/.local/share/emacs/early-init.el
+    test -x result/home-path/bin/emacsclient
+    test -x result/home-path/bin/my-emacs
+    result/home-path/bin/my-emacs -batch -l consult
+
+other-checks: test-build
+    nix build .\#checks.$(nix eval --expr builtins.currentSystem --raw --impure).symlink
+
+test: check-attributes test-build other-checks test-home-manager
