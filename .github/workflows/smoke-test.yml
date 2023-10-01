@@ -27,97 +27,12 @@ jobs:
           accept-flake-config = true
 
     - name: Update the flake inputs for the test
-      run: nix flake update --override-input twist $PWD/..
-      working-directory: test
-
-    - name: Check the precondition
-      working-directory: test
       run: |
-        make clean
-        [[ ! -f lock/flake.nix ]]
-        [[ ! -f lock/flake.lock ]]
-        [[ ! -f lock/archive.lock ]]
-
-    - name: Build the configuration without a lock file (which should fail)
-      id: no-lock
-      working-directory: test
-      run: nix build --dry-run
-      continue-on-error: true
-
-    - name: Pure evaluation without the lock file must fail
-      if: ${{ steps.no-lock.outcome == 'success' }}
-      run: exit 1
-
-    - name: Lock the ELPA packages
-      working-directory: test
-      run: nix run .#update --impure
-
-    - name: Generate the lock file for MELPA packages
-      working-directory: test
-      run: nix run .#lock --impure
-
-    - name: The lock file exists
-      working-directory: test
-      run: |
-        [[ -s lock/archive.lock ]]
-        [[ -s lock/flake.nix ]]
-        [[ -s lock/flake.lock ]]
-
-    - name: Build the configuration with the generated lock file
-      working-directory: test
-      run: nix build --dry-run
-
-    - name: Get the system
-      id: system
-      run: |
-        system=$(nix eval --impure --expr builtins.currentSystem)
-        echo "system=$system" >> $GITHUB_OUTPUT
-        echo "emacs=packages.$system.emacs" >> $GITHUB_OUTPUT
-
-    - run: |
-        nix eval --json .#${{ steps.system.outputs.emacs }}.initFiles \
-        | jq
+        nix develop -c just local-update-flake
       working-directory: test
 
-    - run: |
-        nix eval --json .#${{ steps.system.outputs.emacs }}.packageInputs \
-        | jq
+    - name: Test
       working-directory: test
-
-    - run: |
-        nix eval --json .#${{ steps.system.outputs.emacs }}.revDeps \
-        | jq
-      working-directory: test
-
-    - run: |
-        nix eval --json .#${{ steps.system.outputs.emacs }}.maskedBuiltins \
-        | jq
-      working-directory: test
-
-    - run: |
-        nix eval --json .#${{ steps.system.outputs.emacs }}.elispPackages.magit \
-        | jq
-      working-directory: test
-
-    - name: Perform a complete build of a wrapper with an empty config
-      run: |
-        nix build .#emacs-wrapper
-        nix run .#emacs-wrapper -- --version
-      working-directory: test
-
-    - name: Check the build output of the wrapper
-      run: |
-        nix build .#checks.${{ steps.system.outputs.system }}.symlink
-      working-directory: test
-
-    - name: Build home-manager configuration
-      run: |
-        nix build .#homeConfigurations.${{ steps.system.outputs.system }}.activationPackage
-        test -f result/home-files/.local/share/emacs/init.el
-        test -f result/home-files/.local/share/emacs/early-init.el
-        test -x result/home-path/bin/emacsclient
-        test -x result/home-path/bin/my-emacs
-        result/home-path/bin/my-emacs -batch -l consult
-      working-directory: test
+      run: nix develop -c just test
 
     - run: nix flake show

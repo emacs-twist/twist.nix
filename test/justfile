@@ -1,0 +1,61 @@
+purge-lock:
+    rm -f lock/flake.nix lock/flake.lock lock/archive.lock
+
+# Used for local development.
+local-lock:
+    nix run .\#lock --impure --override-input twist "path:$(readlink -f ..)"
+
+# Used for local development.
+local-update:
+    nix run .\#update --impure --override-input twist "path:$(readlink -f ..)"
+
+# Used for CI.
+local-update-flake:
+    nix flake update --override-input twist "path:$(readlink -f ..)"
+
+test-fail-without-lock: purge-lock
+    # Test preconditions
+    [[ ! -f lock/flake.nix ]]
+    [[ ! -f lock/flake.lock ]]
+    [[ ! -f lock/archive.lock ]]
+    # Build the configuration without a lock file (which should fail)
+    ! nix build .\#emacs --dry-run
+
+test-recreate-lock: test-fail-without-lock
+    nix run .\#update --impure
+    nix run .\#lock --impure
+    # Test post-conditions
+    [[ -s lock/archive.lock ]]
+    [[ -s lock/flake.nix ]]
+    [[ -s lock/flake.lock ]]
+
+test-dry-build: test-recreate-lock
+    nix build .\#emacs --dry-run
+
+check-attributes: test-dry-build
+    # Test the API
+    # TODO: Perform assertions on the values
+    nix eval .\#emacs.initFiles --json | jq
+    nix eval .\#emacs.packageInputs --json | jq
+    nix eval .\#emacs.revDeps --json | jq
+    nix eval .\#emacs.maskedBuiltins --json | jq
+    nix build .\#emacs.elispPackages.magit --dry-run
+
+test-build: test-dry-build
+    # Perform a complete build of a wrapper with an empty config
+    nix build .\#emacs-wrapper
+    # Test if Emacs runs
+    nix run .\#emacs-wrapper -- --version
+
+test-home-manager: test-build
+    nix build .\#homeConfigurations.$(nix eval --expr builtins.currentSystem --raw --impure).activationPackage
+    test -f result/home-files/.local/share/emacs/init.el
+    test -f result/home-files/.local/share/emacs/early-init.el
+    test -x result/home-path/bin/emacsclient
+    test -x result/home-path/bin/my-emacs
+    result/home-path/bin/my-emacs -batch -l consult
+
+other-checks: test-build
+    nix build .\#checks.$(nix eval --expr builtins.currentSystem --raw --impure).symlink
+
+test: check-attributes test-build other-checks test-home-manager
