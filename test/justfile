@@ -55,6 +55,11 @@ test-home-manager: test-build
     test -x result/home-path/bin/my-emacs
     result/home-path/bin/my-emacs -batch -l consult
 
+test-builtins:
+    nix build .\#emacs-wrapper.builtinLibraryList  --show-trace --print-build-logs > /dev/null
+    nix build .\#emacs-wrapper-unstable.builtinLibraryList --show-trace --print-build-logs > /dev/null
+    nix build .\#emacs-wrapper-git.builtinLibraryList --show-trace --print-build-logs > /dev/null
+
 other-checks: test-build
     nix build .\#checks.$(nix eval --expr builtins.currentSystem --raw --impure).symlink
 

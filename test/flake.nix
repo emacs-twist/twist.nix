@@ -28,6 +28,7 @@
     };
 
     emacs-ci.url = "github:purcell/nix-emacs-ci";
+    emacs-overlay.url = "github:nix-community/emacs-overlay";
   };
 
   outputs = {
@@ -35,6 +36,7 @@
     systems,
     emacs-ci,
     self,
+    emacs-overlay,
     ...
   } @ inputs: let
     eachSystem = nixpkgs.lib.genAttrs (import systems);
@@ -70,6 +72,14 @@
       # Another test path to build the whole derivation (not with --dry-run).
       emacs-wrapper = pkgs.callPackage ./twist-minimal.nix {
         inherit (pkgs) emacsPackage;
+      };
+
+      emacs-wrapper-unstable = pkgs.callPackage ./twist-minimal.nix {
+        emacsPackage = emacs-overlay.packages.${pkgs.system}.emacs-unstable;
+      };
+
+      emacs-wrapper-git = pkgs.callPackage ./twist-minimal.nix {
+        emacsPackage = emacs-overlay.packages.${pkgs.system}.emacs-git;
       };
 
       # This is an example of interactive Emacs session.
