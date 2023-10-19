@@ -67,7 +67,7 @@ in
 
     builtinLibraryList = self.callPackage ./builtins.nix {};
 
-    builtinLibraries = lib.pipe (readFile builtinLibraryList.outPath) [
+    builtinLibraries = lib.pipe (readFile builtinLibraryList) [
       (split "\n")
       (filter (s: isString s && s != ""))
     ];
