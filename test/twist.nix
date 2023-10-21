@@ -2,6 +2,7 @@
   emacsTwist,
   emacsPackage,
   inputs,
+  initialLibraries ? null,
 }:
 emacsTwist {
   # Use nix-emacs-ci which is more lightweight than a regular build
@@ -12,6 +13,7 @@ emacsTwist {
     ./init.el
   ];
   lockDir = ./lock;
+  inherit initialLibraries;
   inventories = [
     {
       type = "elpa";

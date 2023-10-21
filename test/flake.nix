@@ -28,6 +28,7 @@
     };
 
     emacs-ci.url = "github:purcell/nix-emacs-ci";
+    emacs-builtins.url = "github:emacs-twist/emacs-builtins";
   };
 
   outputs = {
@@ -65,6 +66,13 @@
       emacs = pkgs.callPackage ./twist.nix {
         inherit inputs;
         inherit (pkgs) emacsPackage;
+      };
+
+      # With explicit buitlins
+      emacs-builtins = pkgs.callPackage ./twist.nix {
+        inherit inputs;
+        inherit (pkgs) emacsPackage;
+        initialLibraries = inputs.emacs-builtins.data.emacs-snapshot.libraries;
       };
 
       # Another test path to build the whole derivation (not with --dry-run).

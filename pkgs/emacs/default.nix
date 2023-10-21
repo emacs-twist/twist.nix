@@ -13,6 +13,8 @@
     if builtins.compareVersions emacsPackage.version "29" > 0
     then []
     else ["use-package"],
+  # User-provided list of Emacs built-in libraries as a string list
+  initialLibraries ? null,
   addSystemPackages ? true,
   inputOverrides ? {},
   nativeCompileAheadDefault ? true,
@@ -67,10 +69,14 @@ in
 
     builtinLibraryList = self.callPackage ./builtins.nix {};
 
-    builtinLibraries = lib.pipe (readFile builtinLibraryList) [
-      (split "\n")
-      (filter (s: isString s && s != ""))
-    ];
+    builtinLibraries =
+      if initialLibraries != null
+      then initialLibraries
+      else
+        lib.pipe (readFile builtinLibraryList) [
+          (split "\n")
+          (filter (s: isString s && s != ""))
+        ];
 
     enumerateConcretePackageSet = import ./data {
       inherit (pkgs) linkFarm;
