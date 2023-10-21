@@ -32,7 +32,12 @@ test-recreate-lock: test-fail-without-lock
 test-dry-build: test-recreate-lock
     nix build .\#emacs --dry-run
 
-check-attributes: test-dry-build
+test-builtins: test-dry-build
+    nix build .\#emacs-builtins --dry-run
+    [[ $(nix eval .\#emacs.packageInputs --apply builtins.attrNames | jq | md5sum) \
+       = $(nix eval .\#emacs-builtins.packageInputs --apply builtins.attrNames | jq | md5sum) ]]
+
+check-attributes: test-dry-build test-builtins
     # Test the API
     # TODO: Perform assertions on the values
     nix eval .\#emacs.initFiles --json | jq
