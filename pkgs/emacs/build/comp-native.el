@@ -5,6 +5,8 @@
 ;; Based on code from https://www.emacswiki.org/emacs/GccEmacs#h5o-14
 
 (defun run-native-compile-sync ()
+  (require 'bytecomp)
+  (require 'comp)
   (native-compile-async (or (pop command-line-args-left)
                             (error "Specify a source directory as the argument"))
                         nil nil
