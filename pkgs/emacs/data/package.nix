@@ -56,13 +56,21 @@ in
 
     # builtins.readFile fails when the source file contains control characters.
     # pydoc.el is an example. A workaround is to take only the first N bytes of
-    # the file using `head` command and read its output.
+    # the file using `head` command and read its output. This is IFD, which
+    # effectively prevents you from adding elisp packages directly to the flake
+    # outputs.
     headers =
       lib.parseElispHeaders
-      (lib.readFirstBytes
-        # magit.el has a relatively long header, so other libraries would be shorter.
-        1500
-        (self.src + "/${self.mainFile}"));
+      (
+        # Add support for an option to remove IFD.
+        if self.mainIsAscii or false
+        then builtins.readFile (self.src + "/${self.mainFile}")
+        else
+          (lib.readFirstBytes
+            # magit.el has a relatively long header, so other libraries would be shorter.
+            1500
+            (self.src + "/${self.mainFile}"))
+      );
   in
     lib.getAttrs
     (filter (name: hasAttr name attrs) [
