@@ -9,6 +9,21 @@ local-lock:
 local-update:
     nix run .\#update --impure --override-input twist "path:$(readlink -f ..)"
 
+local-lock-2:
+    nix run .\#emacs.generateLockDir --impure \
+      --override-input twist "path:$(readlink -f ..)" \
+      -- ./lock2
+    [[ -d lock2 ]]
+    [[ -f lock2/flake.lock ]]
+    nix run .\#emacs.generateLockDir --impure \
+      --override-input twist "path:$(readlink -f ..)" \
+      -- --force ./lock2
+    nix run .\#emacs.generateLockDir --impure \
+      --override-input twist "path:$(readlink -f ..)" \
+      -- --force --no-update-flake-lock ./lock2
+    rm -r ./lock2
+    git rm -r --cached ./lock2
+
 # Used for CI.
 local-update-flake:
     nix flake update --override-input twist "path:$(readlink -f ..)"
