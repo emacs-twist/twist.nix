@@ -35,6 +35,8 @@ jobs:
 
     - name: Test
       working-directory: test
-      run: nix develop -c just test
+      run: |
+        nix develop -c just test
+        nix develop -c just local-lock-2
 
     - run: nix flake show

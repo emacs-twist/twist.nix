@@ -13,6 +13,15 @@
     if builtins.compareVersions emacsPackage.version "29" > 0
     then []
     else ["use-package"],
+  # List of package names that are supposed to be reside in the same repository.
+  # These packages won't be declared in the generated flake.nix to not produce
+  # meaningless diffs in flake.lock.
+  localPackages ? [],
+  # Commands to run after running generateLockDir. The command is run at the
+  # root of the Git repository containing the lock directory. For example, if
+  # you have added the lock directory as a subflake, you can run `nix flake lock
+  # --update-input <input name>` to update the flake input.
+  postCommandOnGeneratingLockDir ? null,
   # User-provided list of Emacs built-in libraries as a string list
   initialLibraries ? null,
   addSystemPackages ? true,
@@ -43,6 +52,7 @@
     isList
     isAttrs
     elem
+    removeAttrs
     ;
 in
   lib.makeScope pkgs.newScope (self: let
@@ -125,6 +135,8 @@ in
     generateLockFiles = self.callPackage ./lock {
       inherit flakeLockFile;
     };
+
+    excludeLocalPackages = attrs: removeAttrs attrs localPackages;
   in {
     inherit lib;
     emacs = emacsPackage;
@@ -142,14 +154,15 @@ in
             // lib.optionalAttrs (isAttrs attrs.src && attrs.src ? rev) {
               sourceInfo =
                 lib.filterAttrs
-                  (name: _: elem name [
+                (name: _:
+                  elem name [
                     "lastModified"
                     "lastModifiedDate"
                     "narHash"
                     "rev"
                     "shortRev"
                   ])
-                  attrs.src;
+                attrs.src;
             })
       ))
     ];
@@ -201,34 +214,42 @@ in
     # This makes the attrset a derivation for a shorthand.
     inherit (self.emacsWrapper) name type outputName outPath drvPath;
 
+    # A package/derivation for a command that accepts a directory as an argument
+    # and write lock files to it
+    generateLockDir =
+      (generateLockFiles {
+        packageInputs =
+          excludeLocalPackages (enumerateConcretePackageSet "update" explicitPackages);
+        flakeNix = true;
+        archiveLock = true;
+      })
+      .writerScript {inherit postCommandOnGeneratingLockDir;};
+
     makeApps = {lockDirName}: {
       # Generate flake.nix and archive.lock with a complete package set. You
       # have to run `nix flake lock`` in the target directory to update
       # flake.lock.
       lock =
-        generateLockFiles
-        {
-          packageInputs = enumerateConcretePackageSet "lock" explicitPackages;
-          flakeNix = true;
-          archiveLock = true;
-          postCommand = "nix flake lock";
-        }
+        (generateLockFiles
+          {
+            packageInputs =
+              excludeLocalPackages (enumerateConcretePackageSet "lock" explicitPackages);
+            flakeNix = true;
+            archiveLock = true;
+            postCommand = "nix flake lock";
+          })
+        .asAppWritingToRelativeDir
         lockDirName;
-
-      # Generate flake.lock with the current revisions
-      #
-      # sync = generateLockFiles {
-      #   inherit packageInputs;
-      #   flakeLock = true;
-      # };
 
       # Generate archive.lock with latest packages from ELPA package archives
       update =
-        generateLockFiles
-        {
-          packageInputs = enumerateConcretePackageSet "update" explicitPackages;
-          archiveLock = true;
-        }
+        (generateLockFiles
+          {
+            packageInputs =
+              excludeLocalPackages (enumerateConcretePackageSet "update" explicitPackages);
+            archiveLock = true;
+          })
+        .asAppWritingToRelativeDir
         lockDirName;
     };
   })
