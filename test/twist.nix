@@ -50,4 +50,7 @@ emacsTwist {
       ];
     };
   };
+  postCommandOnGeneratingLockDir = ''
+    touch test/lock-success
+  '';
 }
