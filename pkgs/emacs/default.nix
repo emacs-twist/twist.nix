@@ -13,6 +13,10 @@
     if builtins.compareVersions emacsPackage.version "29" > 0
     then []
     else ["use-package"],
+  # List of package names that are supposed to be reside in the same repository.
+  # These packages won't be declared in the generated flake.nix to not produce
+  # meaningless diffs in flake.lock.
+  localPackages ? [],
   # User-provided list of Emacs built-in libraries as a string list
   initialLibraries ? null,
   addSystemPackages ? true,
@@ -43,6 +47,7 @@
     isList
     isAttrs
     elem
+    removeAttrs
     ;
 in
   lib.makeScope pkgs.newScope (self: let
@@ -125,6 +130,8 @@ in
     generateLockFiles = self.callPackage ./lock {
       inherit flakeLockFile;
     };
+
+    excludeLocalPackages = attrs: removeAttrs attrs localPackages;
   in {
     inherit lib;
     emacs = emacsPackage;
@@ -206,7 +213,8 @@ in
     # and write lock files to it
     generateLockDir =
       (generateLockFiles {
-        packageInputs = enumerateConcretePackageSet "update" explicitPackages;
+        packageInputs =
+          excludeLocalPackages (enumerateConcretePackageSet "update" explicitPackages);
         flakeNix = true;
         archiveLock = true;
       })
@@ -219,7 +227,8 @@ in
       lock =
         (generateLockFiles
           {
-            packageInputs = enumerateConcretePackageSet "lock" explicitPackages;
+            packageInputs =
+              excludeLocalPackages (enumerateConcretePackageSet "lock" explicitPackages);
             flakeNix = true;
             archiveLock = true;
             postCommand = "nix flake lock";
@@ -231,7 +240,8 @@ in
       update =
         (generateLockFiles
           {
-            packageInputs = enumerateConcretePackageSet "update" explicitPackages;
+            packageInputs =
+              excludeLocalPackages (enumerateConcretePackageSet "update" explicitPackages);
             archiveLock = true;
           })
         .asAppWritingToRelativeDir
