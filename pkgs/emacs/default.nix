@@ -217,13 +217,6 @@ in
         .asAppWritingToRelativeDir
         lockDirName;
 
-      # Generate flake.lock with the current revisions
-      #
-      # sync = generateLockFiles {
-      #   inherit packageInputs;
-      #   flakeLock = true;
-      # };
-
       # Generate archive.lock with latest packages from ELPA package archives
       update =
         (generateLockFiles
