@@ -6,6 +6,7 @@
   runCommandLocal,
   writeTextFile,
   writeShellScript,
+  writeShellApplication,
   # Current version
   flakeLockFile ? null,
 }: {
@@ -80,5 +81,12 @@ in {
         inherit outDir src postCommand;
       })
       .outPath;
+  };
+
+  writerScript = writeShellApplication {
+    name = "emacs-twist-write-lock";
+    text =
+      builtins.replaceStrings ["@lockSrcDir@"] [src.outPath]
+      (builtins.readFile ./write-lock-2.bash);
   };
 }
