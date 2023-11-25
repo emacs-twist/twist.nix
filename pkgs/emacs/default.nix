@@ -202,6 +202,16 @@ in
     # This makes the attrset a derivation for a shorthand.
     inherit (self.emacsWrapper) name type outputName outPath drvPath;
 
+    # A package/derivation for a command that accepts a directory as an argument
+    # and write lock files to it
+    generateLockDir =
+      (generateLockFiles {
+        packageInputs = enumerateConcretePackageSet "update" explicitPackages;
+        flakeNix = true;
+        archiveLock = true;
+      })
+      .writerScript;
+
     makeApps = {lockDirName}: {
       # Generate flake.nix and archive.lock with a complete package set. You
       # have to run `nix flake lock`` in the target directory to update
