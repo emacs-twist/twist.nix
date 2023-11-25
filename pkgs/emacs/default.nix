@@ -206,13 +206,14 @@ in
       # have to run `nix flake lock`` in the target directory to update
       # flake.lock.
       lock =
-        generateLockFiles
-        {
-          packageInputs = enumerateConcretePackageSet "lock" explicitPackages;
-          flakeNix = true;
-          archiveLock = true;
-          postCommand = "nix flake lock";
-        }
+        (generateLockFiles
+          {
+            packageInputs = enumerateConcretePackageSet "lock" explicitPackages;
+            flakeNix = true;
+            archiveLock = true;
+            postCommand = "nix flake lock";
+          })
+        .asAppWritingToRelativeDir
         lockDirName;
 
       # Generate flake.lock with the current revisions
@@ -224,11 +225,12 @@ in
 
       # Generate archive.lock with latest packages from ELPA package archives
       update =
-        generateLockFiles
-        {
-          packageInputs = enumerateConcretePackageSet "update" explicitPackages;
-          archiveLock = true;
-        }
+        (generateLockFiles
+          {
+            packageInputs = enumerateConcretePackageSet "update" explicitPackages;
+            archiveLock = true;
+          })
+        .asAppWritingToRelativeDir
         lockDirName;
     };
   })
