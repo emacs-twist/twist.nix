@@ -17,6 +17,11 @@
   # These packages won't be declared in the generated flake.nix to not produce
   # meaningless diffs in flake.lock.
   localPackages ? [],
+  # Commands to run after running generateLockDir. The command is run at the
+  # root of the Git repository containing the lock directory. For example, if
+  # you have added the lock directory as a subflake, you can run `nix flake lock
+  # --update-input <input name>` to update the flake input.
+  postCommandOnGeneratingLockDir ? null,
   # User-provided list of Emacs built-in libraries as a string list
   initialLibraries ? null,
   addSystemPackages ? true,
@@ -218,7 +223,7 @@ in
         flakeNix = true;
         archiveLock = true;
       })
-      .writerScript;
+      .writerScript {inherit postCommandOnGeneratingLockDir;};
 
     makeApps = {lockDirName}: {
       # Generate flake.nix and archive.lock with a complete package set. You
