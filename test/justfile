@@ -15,6 +15,7 @@ local-lock-2:
       -- ./lock2
     [[ -d lock2 ]]
     [[ -f lock2/flake.lock ]]
+    [[ -f lock-success ]]
     nix run .\#emacs.generateLockDir --impure \
       --override-input twist "path:$(readlink -f ..)" \
       -- --force ./lock2
@@ -23,6 +24,7 @@ local-lock-2:
       -- --force --no-update-flake-lock ./lock2
     rm -r ./lock2
     git rm -r --cached ./lock2
+    rm lock-success
 
 # Used for CI.
 local-update-flake:
