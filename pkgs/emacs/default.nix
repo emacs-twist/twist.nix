@@ -142,14 +142,15 @@ in
             // lib.optionalAttrs (isAttrs attrs.src && attrs.src ? rev) {
               sourceInfo =
                 lib.filterAttrs
-                  (name: _: elem name [
+                (name: _:
+                  elem name [
                     "lastModified"
                     "lastModifiedDate"
                     "narHash"
                     "rev"
                     "shortRev"
                   ])
-                  attrs.src;
+                attrs.src;
             })
       ))
     ];
