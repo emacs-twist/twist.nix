@@ -83,10 +83,21 @@ in {
       .outPath;
   };
 
-  writerScript = writeShellApplication {
-    name = "emacs-twist-write-lock";
-    text =
-      builtins.replaceStrings ["@lockSrcDir@"] [src.outPath]
-      (builtins.readFile ./write-lock-2.bash);
-  };
+  writerScript = {postCommandOnGeneratingLockDir}:
+    writeShellApplication {
+      name = "emacs-twist-write-lock";
+      text =
+        builtins.replaceStrings [
+          "@lockSrcDir@"
+          "@postCommand@"
+        ] [
+          src.outPath
+          (lib.optionalString (builtins.isString postCommandOnGeneratingLockDir) ''
+            ( cd "$outDir" && cd "$(git rev-parse --show-toplevel)" &&
+              ( ${postCommandOnGeneratingLockDir} )
+            )
+          '')
+        ]
+        (builtins.readFile ./write-lock-2.bash);
+    };
 }

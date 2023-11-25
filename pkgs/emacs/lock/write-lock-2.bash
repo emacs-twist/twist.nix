@@ -103,3 +103,4 @@ function runNix() {
 checkSettings
 copyFiles
 runNix
+@postCommand@
