@@ -15,7 +15,7 @@ jobs:
         install_url: https://nixos-nix-install-tests.cachix.org/serve/vij683ly7sl95nnhb67bdjjfabclr85m/install
         install_options: '--tarball-url-prefix https://nixos-nix-install-tests.cachix.org/serve'
 
-    - uses: cachix/cachix-action@v12
+    - uses: cachix/cachix-action@v13
       with:
         name: akirak
         signingKey: '${{ secrets.CACHIX_SIGNING_KEY }}'
