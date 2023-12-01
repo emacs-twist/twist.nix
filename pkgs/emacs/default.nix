@@ -19,8 +19,8 @@
   localPackages ? [],
   # Commands to run after running generateLockDir. The command is run at the
   # root of the Git repository containing the lock directory. For example, if
-  # you have added the lock directory as a subflake, you can run `nix flake lock
-  # --update-input <input name>` to update the flake input.
+  # you have added the lock directory as a subflake, you can run `nix flake update
+  # <input name>` (since Nix 2.19) to update the flake input.
   postCommandOnGeneratingLockDir ? null,
   # User-provided list of Emacs built-in libraries as a string list
   initialLibraries ? null,
