@@ -14,7 +14,7 @@ emacsTwist {
   ];
   lockDir = ./lock;
   inherit initialLibraries;
-  inventories = [
+  registries = [
     {
       type = "elpa";
       path = inputs.gnu-elpa.outPath + "/elpa-packages";

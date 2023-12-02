@@ -6,5 +6,5 @@ emacsTwist {
   inherit emacsPackage;
   initFiles = [];
   lockDir = ./lock;
-  inventories = [];
+  registries = [];
 }
