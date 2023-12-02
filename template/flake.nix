@@ -58,7 +58,8 @@
           emacsPackage = pkgsForEmacs.emacsUnstable.overrideAttrs (_: {
             version = "28.0.91";
           });
-          inventories = import ./inventories.nix inputs;
+
+          registries = import ./registries.nix inputs;
           lockDir = ./lock;
           initFiles = [
             ./init.el
