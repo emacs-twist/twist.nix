@@ -5,7 +5,11 @@
 }: {
   emacsPackage ? pkgs.emacs,
   lockDir,
-  inventories,
+  inventories ? null,
+  registries ?
+    if inventories == null
+    then builtins.abort "emacsTwist: registries is a required argument"
+    else lib.warn "emacsTwist: inventories is deprecated. Use registries instead." inventories,
   initFiles,
   initParser ? lib.parseUsePackages {},
   initReader ? file: initParser (builtins.readFile file),
@@ -95,9 +99,10 @@ in
         flakeLockFile
         archiveLockFile
         builtinLibraries
-        inventories
         inputOverrides
         ;
+      # Just remap the name
+      inventories = registries;
       elispPackagePins = userConfig.elispPackagePins or {};
     };
 
