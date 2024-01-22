@@ -10,9 +10,9 @@ emacsTwist {
   # In an actual configuration, you would use this:
   # emacs = pkgs.emacsPgtkGcc.overrideAttrs (_: { version = "29.0.50"; });
   initFiles = [
-    ./init.el
+    ./init-elpa.el
   ];
-  lockDir = ./lock;
+  lockDir = ./lock-elpa;
   inherit initialLibraries;
   registries = [
     {
@@ -22,27 +22,12 @@ emacsTwist {
       auto-sync-only = true;
     }
     {
-      name = "melpa";
-      type = "melpa";
-      path = inputs.melpa.outPath + "/recipes";
-    }
-    {
       type = "elpa";
       path = inputs.nongnu.outPath + "/elpa-packages";
-    }
-    {
-      name = "gnu";
-      type = "archive";
-      url = "https://elpa.gnu.org/packages/";
-    }
-    {
-      name = "emacsmirror";
-      type = "gitmodules";
-      path = inputs.epkgs.outPath + "/.gitmodules";
     }
   ];
   inputOverrides = import ./overrides.nix;
   postCommandOnGeneratingLockDir = ''
-    touch test/lock-success
+    touch test/lock-success-elpa
   '';
 }

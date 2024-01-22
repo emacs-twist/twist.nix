@@ -80,6 +80,12 @@
         inherit (pkgs) emacsPackage;
       };
 
+      # An alternative configuration that depends only on GNU and NonGNU ELPA
+      emacs-elpa = pkgs.callPackage ./twist-elpa.nix {
+        inherit inputs;
+        inherit (pkgs) emacsPackage;
+      };
+
       # This is an example of interactive Emacs session.
       # You can start Emacs by running `nix run .#emacs-interactive`.
       emacs-interactive = pkgs.callPackage ./interactive.nix {
