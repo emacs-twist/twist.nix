@@ -59,7 +59,7 @@
     removeAttrs
     ;
 in
-  lib.makeScope pkgs.newScope (self: let
+  lib.overrideScope pkgs.newScope (self: let
     flakeLockFile = lockDir + "/flake.lock";
 
     archiveLockFile = lockDir + "/archive.lock";
@@ -180,7 +180,7 @@ in
 
     # An actual derivation set of Emacs Lisp packages. You can override this
     # attribute set to change how they are built.
-    elispPackages = lib.makeScope self.newScope (eself:
+    elispPackages = lib.overrideScope self.newScope (eself:
       mapAttrs
       (ename: attrs:
         self.callPackage ./build {}
