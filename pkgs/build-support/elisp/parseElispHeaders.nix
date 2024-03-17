@@ -10,7 +10,7 @@ with builtins; let
   dropWhile = import ../utils/dropWhile.nix;
 
   # Regular expression patterns
-  descriptionRegex = ";;;.+ --- (.+?)";
+  descriptionRegex = ";;;.+ --- (.+)";
   magicHeaderRegex = "(.+)-\\*-.+-\\*-[[:space:]]*";
   headerRegex = ";;[[:space:]]*(.*[^[:space:]]):([[:space:]]*.*)?";
 
