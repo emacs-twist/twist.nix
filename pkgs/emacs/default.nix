@@ -40,6 +40,10 @@
   # (experimental). Needed if you use the hot-reloading feature of twist.el.
   exportManifest ? false,
   configurationRevision ? null,
+  # List of treesitter grammars to include. Emacs must be compiled with
+  # treesitter support. e.g.
+  # (grammars: builtins.attrValues grammars)
+  treesitterGrammars ? (_: []),
 }: let
   inherit
     (builtins)
@@ -142,6 +146,8 @@ in
     };
 
     excludeLocalPackages = attrs: removeAttrs attrs localPackages;
+
+    treesitterPackage = emacsPackage.pkgs.treesit-grammars.with-grammars treesitterGrammars;
   in {
     inherit lib;
     emacs = emacsPackage;
@@ -209,11 +215,13 @@ in
 
     icons = self.callPackage ./icons.nix {};
 
+    inherit treesitterPackage;
+
     emacsWrapper =
       self.callPackage ./wrapper.nix
       {
         packageNames = attrNames packageInputs;
-        inherit extraOutputsToInstall exportManifest configurationRevision;
+        inherit extraOutputsToInstall exportManifest configurationRevision treesitterPackage;
       };
 
     # This makes the attrset a derivation for a shorthand.
