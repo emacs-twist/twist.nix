@@ -10,6 +10,7 @@
   packageNames,
   elispPackages,
   executablePackages,
+  treesitterPackage,
   extraOutputsToInstall,
   exportManifest,
   configurationRevision,
@@ -19,6 +20,7 @@
   elispInputs = lib.attrVals packageNames elispPackages;
 
   nativeComp = emacs.withNativeCompilation or emacs.nativeComp or false;
+  withTreeSitter = emacs.withTreeSitter or false;
 
   # Use a symlink farm for specifying subdirectory names inside site-lisp.
   packageEnv = buildEnv {
@@ -96,6 +98,9 @@ in
         ${lib.optionalString (configurationRevision != null) ''
           (defvar twist-configuration-revision "${configurationRevision}")
         ''}
+        ${lib.optionalString withTreeSitter ''
+          (add-to-list 'treesit-extra-load-path "${treesitterPackage}/lib/")
+        ''}
         ${
         lib.concatMapStrings (pkg: ''
           (load "${pkg}/share/emacs/site-lisp/${pkg.ename}-autoloads.el" t t)
@@ -154,6 +159,11 @@ in
     else
       echo -n "$siteStartExtra" >> $siteLisp/site-start.el
     fi
+
+    ${lib.optionalString withTreeSitter ''
+      mkdir -p $out/lib
+      lndir -silent "${treesitterPackage}/lib" "$out/lib"
+    ''}
 
     cd $siteLisp
     ${emacs}/bin/emacs --batch -f batch-byte-compile site-start.el
