@@ -40,6 +40,7 @@
   # (experimental). Needed if you use the hot-reloading feature of twist.el.
   exportManifest ? false,
   configurationRevision ? null,
+  extraSiteStartElisp ? "",
 }: let
   inherit
     (builtins)
@@ -213,7 +214,7 @@ in
       self.callPackage ./wrapper.nix
       {
         packageNames = attrNames packageInputs;
-        inherit extraOutputsToInstall exportManifest configurationRevision;
+        inherit extraOutputsToInstall exportManifest configurationRevision extraSiteStartElisp;
       };
 
     # This makes the attrset a derivation for a shorthand.

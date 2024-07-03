@@ -13,6 +13,7 @@
   extraOutputsToInstall,
   exportManifest,
   configurationRevision,
+  extraSiteStartElisp,
 }: let
   inherit (builtins) length listToAttrs;
 
@@ -101,7 +102,8 @@ in
           (load "${pkg}/share/emacs/site-lisp/${pkg.ename}-autoloads.el" t t)
         '')
         elispInputs
-      })
+        })
+      ${extraSiteStartElisp}
     '';
 
     elispManifestPath =
