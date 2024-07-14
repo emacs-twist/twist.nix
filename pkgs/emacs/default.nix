@@ -228,7 +228,6 @@ in
           excludeLocalPackages (enumerateConcretePackageSet "lock" explicitPackages);
         flakeNix = true;
         archiveLock = true;
-        postCommand = "nix flake lock";
       })
       .writerScript {inherit postCommandOnGeneratingLockDir;};
 
