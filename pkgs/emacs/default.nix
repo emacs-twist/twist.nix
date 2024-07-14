@@ -225,9 +225,10 @@ in
     generateLockDir =
       (generateLockFiles {
         packageInputs =
-          excludeLocalPackages (enumerateConcretePackageSet "update" explicitPackages);
+          excludeLocalPackages (enumerateConcretePackageSet "lock" explicitPackages);
         flakeNix = true;
         archiveLock = true;
+        postCommand = "nix flake lock";
       })
       .writerScript {inherit postCommandOnGeneratingLockDir;};
 
