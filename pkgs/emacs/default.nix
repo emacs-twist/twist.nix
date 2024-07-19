@@ -36,6 +36,11 @@
     if wantExtraOutputs
     then ["info"]
     else [],
+  # Assume the main files of all packages contain only ASCII characters. This is
+  # a requirement for avoiding IFD, but some libraries actually contain
+  # non-ASCII characters, which cannot be parsed with `builtins.readFile`
+  # function of Nix.
+  defaultMainIsAscii ? false,
   # Export a manifest file of of the package set from the wrapper
   # (experimental). Needed if you use the hot-reloading feature of twist.el.
   exportManifest ? false,
@@ -101,6 +106,7 @@ in
         archiveLockFile
         builtinLibraries
         inputOverrides
+        defaultMainIsAscii
         ;
       # Just remap the name
       inventories = registries;

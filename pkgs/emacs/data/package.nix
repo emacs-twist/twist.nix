@@ -22,7 +22,11 @@ let
     isFunction
     ;
 in
-  {lib, linkFarm}: ename: mkAttrs: self: let
+  {
+    lib,
+    linkFarm,
+    defaultMainIsAscii,
+  }: ename: mkAttrs: self: let
     attrs =
       if isAttrs mkAttrs
       then mkAttrs
@@ -63,7 +67,7 @@ in
       lib.parseElispHeaders
       (
         # Add support for an option to remove IFD.
-        if self.mainIsAscii or false
+        if self.mainIsAscii or defaultMainIsAscii
         then builtins.readFile (self.src + "/${self.mainFile}")
         else
           (lib.readFirstBytes
@@ -88,12 +92,13 @@ in
         # If the source if a single-file archive from ELPA or MELPA, src will be
         # a file, and not a directory, so the file should be put in a directory.
         if attrs.inventory.type == "archive" && attrs.archive.type == "file"
-        then linkFarm (ename + ".el") [
-          {
-            name = ename + ".el";
-            path = attrs.src;
-          }
-        ]
+        then
+          linkFarm (ename + ".el") [
+            {
+              name = ename + ".el";
+              path = attrs.src;
+            }
+          ]
         else attrs.src;
 
       files = attrs.files or (lib.expandMelpaRecipeFiles self.src null);
