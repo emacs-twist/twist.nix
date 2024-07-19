@@ -27,6 +27,7 @@ in
     archiveLockFile,
     inputOverrides,
     elispPackagePins,
+    defaultMainIsAscii,
   }: mode: let
     toLockData = {
       nodes,
@@ -92,7 +93,7 @@ in
         );
 
     getPackageData = revDep: ename:
-      lib.makeExtensible (import ./package.nix {inherit lib linkFarm;}
+      lib.makeExtensible (import ./package.nix {inherit lib linkFarm defaultMainIsAscii;}
         ename
         # It would be nice if it were possible to set the pin from inside
         # overrideInputs, but it causes infinite recursion unfortunately :(
