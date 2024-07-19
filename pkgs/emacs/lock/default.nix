@@ -10,6 +10,7 @@
   # Current version
   flakeLockFile ? null,
 }: {
+  emacsName,
   packageInputs,
   flakeNix ? false,
   archiveLock ? false,
@@ -85,7 +86,7 @@ in {
 
   writerScript = {postCommandOnGeneratingLockDir}:
     writeShellApplication {
-      name = "emacs-twist-write-lock";
+      name = "twist-write-lock-${emacsName}";
       text =
         builtins.replaceStrings [
           "@lockSrcDir@"

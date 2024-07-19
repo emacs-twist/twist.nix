@@ -224,6 +224,7 @@ in
     # and write lock files to it
     generateLockDir =
       (generateLockFiles {
+        emacsName = emacsPackage.name;
         packageInputs =
           excludeLocalPackages (enumerateConcretePackageSet "update" explicitPackages);
         flakeNix = true;
@@ -238,6 +239,7 @@ in
       lock =
         (generateLockFiles
           {
+            emacsName = emacsPackage.name;
             packageInputs =
               excludeLocalPackages (enumerateConcretePackageSet "lock" explicitPackages);
             flakeNix = true;
