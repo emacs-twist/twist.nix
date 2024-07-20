@@ -25,9 +25,11 @@ in
     inventories,
     flakeLockFile,
     archiveLockFile,
+    metadataJsonFile,
     inputOverrides,
     elispPackagePins,
     defaultMainIsAscii,
+    persistMetadata,
   }: mode: let
     toLockData = {
       nodes,
@@ -46,6 +48,11 @@ in
     archiveLockData =
       if pathExists archiveLockFile
       then lib.importJSON archiveLockFile
+      else {};
+
+    cachedMetadata =
+      if mode == "build" && persistMetadata && pathExists metadataJsonFile
+      then lib.importJSON metadataJsonFile
       else {};
 
     makeInventory = import ./inventory {
@@ -92,8 +99,11 @@ in
           or (throw "Inventory named ${pin} does not exist")
         );
 
+    getPackageData0 =
+      import ./package.nix {inherit lib linkFarm defaultMainIsAscii cachedMetadata;};
+
     getPackageData = revDep: ename:
-      lib.makeExtensible (import ./package.nix {inherit lib linkFarm defaultMainIsAscii;}
+      lib.makeExtensible (getPackageData0
         ename
         # It would be nice if it were possible to set the pin from inside
         # overrideInputs, but it causes infinite recursion unfortunately :(
