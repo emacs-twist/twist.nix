@@ -13,6 +13,7 @@
   packageInputs,
   flakeNix ? false,
   archiveLock ? false,
+  metadataJson ? false,
   # Command run after writing the directory in asAppWritingToRelativeDir
   postCommand ? null,
 }:
@@ -30,6 +31,20 @@ assert (flakeNix || archiveLock); let
       ]))
   ];
 
+  packageMetadata =
+    mapAttrs (_: {
+      src,
+      version,
+      packageRequires,
+      meta,
+      author,
+      ...
+    }: {
+      inherit (src) narHash;
+      inherit version packageRequires meta author;
+    })
+    packageInputs;
+
   data = {
     flakeNix = lib.toNix {
       description = "THIS IS AN AUTO-GENERATED FILE. PLEASE DON'T EDIT IT MANUALLY.";
@@ -40,11 +55,13 @@ assert (flakeNix || archiveLock); let
       outputs = {...}: {};
     };
     archiveLock = toJSON archiveLockData;
+    metadataJson = toJSON packageMetadata;
   };
 
   passAsFile =
     lib.optional flakeNix "flakeNix"
-    ++ lib.optional archiveLock "archiveLock";
+    ++ lib.optional archiveLock "archiveLock"
+    ++ lib.optional metadataJson "metadataJson";
 
   # HACK: Use sed to convert JSON to Nix
   #
@@ -60,6 +77,10 @@ assert (flakeNix || archiveLock); let
     ${jq}/bin/jq . "$archiveLockPath" > "$out/archive.lock"
   '';
 
+  generateMetadataJson = ''
+    ${jq}/bin/jq . "$metadataJsonPath" > "$out/metadata.json"
+  '';
+
   src =
     runCommandLocal "emacs-twist-lock" ({
         inherit passAsFile;
@@ -70,6 +91,7 @@ assert (flakeNix || archiveLock); let
 
       ${lib.optionalString flakeNix generateFlakeNix}
       ${lib.optionalString archiveLock generateArchiveLock}
+      ${lib.optionalString metadataJson generateMetadataJson}
     '';
 in {
   asAppWritingToRelativeDir = outDir: {

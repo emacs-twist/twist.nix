@@ -36,6 +36,9 @@
     if wantExtraOutputs
     then ["info"]
     else [],
+  # Whether to persist package metadata in the lock directory. This is needed to
+  # avoid IFD in certain situations.
+  persistMetadata ? false,
   # Assume the main files of all packages contain only ASCII characters. This is
   # a requirement for avoiding IFD, but some libraries actually contain
   # non-ASCII characters, which cannot be parsed with `builtins.readFile`
@@ -69,6 +72,8 @@ in
     flakeLockFile = lockDir + "/flake.lock";
 
     archiveLockFile = lockDir + "/archive.lock";
+
+    metadataJsonFile = lockDir + "/metadata.json";
 
     userConfig = lib.pipe self.initFiles [
       (map initReader)
@@ -104,9 +109,11 @@ in
         lib
         flakeLockFile
         archiveLockFile
+        metadataJsonFile
         builtinLibraries
         inputOverrides
         defaultMainIsAscii
+        persistMetadata
         ;
       # Just remap the name
       inventories = registries;
@@ -234,6 +241,7 @@ in
           excludeLocalPackages (enumerateConcretePackageSet "update" explicitPackages);
         flakeNix = true;
         archiveLock = true;
+        metadataJson = persistMetadata;
       })
       .writerScript {inherit postCommandOnGeneratingLockDir;};
 
@@ -248,6 +256,7 @@ in
               excludeLocalPackages (enumerateConcretePackageSet "lock" explicitPackages);
             flakeNix = true;
             archiveLock = true;
+            metadataJson = persistMetadata;
             postCommand = "nix flake lock";
           })
         .asAppWritingToRelativeDir
@@ -260,6 +269,7 @@ in
             packageInputs =
               excludeLocalPackages (enumerateConcretePackageSet "update" explicitPackages);
             archiveLock = true;
+            metadataJson = persistMetadata;
           })
         .asAppWritingToRelativeDir
         lockDirName;

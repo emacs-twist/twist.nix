@@ -26,6 +26,7 @@ in
     lib,
     linkFarm,
     defaultMainIsAscii,
+    cachedMetadata,
   }: ename: mkAttrs: self: let
     attrs =
       if isAttrs mkAttrs
@@ -56,6 +57,11 @@ in
           lib.filterAttrs (_: v: v != null)
           (lib.parsePkg (readFile pkgFile))
         )
+      else {};
+
+    metadata =
+      if hasAttr ename cachedMetadata && cachedMetadata.${ename}.narHash == (self.src.narHash or null)
+      then cachedMetadata.${ename}
       else {};
 
     # builtins.readFile fails when the source file contains control characters.
@@ -136,26 +142,30 @@ in
 
       # TODO: Check https://github.com/melpa/melpa/issues/2955 on the right versioning scheme
       version =
-        attrs.version
+        metadata.version
+        or attrs.version
         or headers.Version
         or headers.Package-Version
         or packageDesc.version
         # Set a null version if the package lacks a version header.
         or null;
 
-      author = headers.Author or null;
+      author =
+        metadata.author
+        or headers.Author or null;
 
       meta =
-        (lib.optionalAttrs hasPkgFile {
-          description = packageDesc.summary;
-        })
-        // (import ./headers-to-meta.nix {
-          inherit lib;
-          inherit (self) headers;
-        });
+        metadata.meta
+        or ((lib.optionalAttrs hasPkgFile {
+            description = packageDesc.summary;
+          })
+          // (import ./headers-to-meta.nix {
+            inherit lib headers;
+          }));
 
       packageRequires =
-        attrs.packageRequires
+        metadata.packageRequires
+        or attrs.packageRequires
         or packageDesc.packageRequires
         or (
           if headers ? Package-Requires
