@@ -138,8 +138,6 @@ in
           )
           self.lispFiles;
 
-      inherit headers;
-
       # TODO: Check https://github.com/melpa/melpa/issues/2955 on the right versioning scheme
       version =
         metadata.version
