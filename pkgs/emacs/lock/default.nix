@@ -32,16 +32,13 @@ assert (flakeNix || archiveLock); let
   ];
 
   packageMetadata =
-    mapAttrs (_: {
-      src,
-      version,
-      packageRequires,
-      meta,
-      author,
-      ...
-    }: {
-      inherit (src) narHash;
-      inherit version packageRequires meta author;
+    mapAttrs (name: attrs: {
+      inherit (attrs.src) narHash;
+      inherit (attrs) version packageRequires meta;
+      # There can be packages that lack Author header, so set null in that case.
+      author =
+        attrs.author
+        or (builtins.trace "Warning: Package ${name} lacks Author header. This still works, but it is considered a bad practice." null);
     })
     packageInputs;
 
