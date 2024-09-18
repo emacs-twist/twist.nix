@@ -79,5 +79,6 @@ test-home-manager: test-build
 
 other-checks: test-build
     nix build .\#checks.$(nix eval --expr builtins.currentSystem --raw --impure).symlink
+    nix build .\#packages.$(nix eval --expr builtins.currentSystem --raw --impure).elpa-archive
 
 test: check-attributes test-build other-checks test-home-manager
