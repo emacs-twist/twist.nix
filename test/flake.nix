@@ -91,6 +91,11 @@
         emacs-interactive = pkgs.callPackage ./interactive.nix {
           inherit (self.packages.${pkgs.system}) emacs;
         };
+
+        # An example of ELPA-compatible package archive
+        elpa-archive =
+          inputs.twist.lib.buildElpaArchive pkgs
+            self.packages.${pkgs.system}.emacs.packageInputs.dash;
       });
 
       homeConfigurations = eachSystem (
