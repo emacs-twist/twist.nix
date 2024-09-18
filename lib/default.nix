@@ -1,25 +1,42 @@
-inputs: {lib}: let
-  elispHelpers = import inputs.elisp-helpers {
-    pkgs = {inherit lib;};
-  };
+inputs:
+let
+  makeFromElisp =
+    lib:
+    (import inputs.elisp-helpers {
+      pkgs = {
+        inherit lib;
+      };
+    }).fromElisp;
 
-  inherit (elispHelpers) fromElisp;
+  inherit (builtins)
+    readFile
+    split
+    filter
+    isString
+    ;
+in
+{
+  parseSetup =
+    { lib }:
+    import ../pkgs/build-support/elisp/parseSetup.nix {
+      inherit lib;
+      fromElisp = makeFromElisp lib;
+    };
 
-  inherit (builtins) readFile split filter isString;
-in {
-  parseSetup = import ../pkgs/build-support/elisp/parseSetup.nix {
-    inherit lib fromElisp;
-  };
+  parseUsePackages =
+    { lib }:
+    import ../pkgs/build-support/elisp/parseUsePackages.nix {
+      inherit lib;
+      fromElisp = makeFromElisp lib;
+    };
 
-  parseUsePackages = import ../pkgs/build-support/elisp/parseUsePackages.nix {
-    inherit lib fromElisp;
-  };
-
-  emacsBuiltinLibraries = {
-    stdenv,
-    ripgrep,
-    emacs,
-  } @ args:
+  emacsBuiltinLibraries =
+    {
+      stdenv,
+      ripgrep,
+      emacs,
+      lib,
+    }@args:
     lib.pipe (readFile (import ../pkgs/emacs/builtins.nix args)) [
       (split "\n")
       (filter (s: isString s && s != ""))
