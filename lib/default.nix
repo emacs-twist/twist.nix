@@ -41,4 +41,18 @@ in
       (split "\n")
       (filter (s: isString s && s != ""))
     ];
+
+  # A function that builds a single Emacs Lisp package. The argument should be
+  # an attribute set that takes the same form as an entry value in
+  # packageInputs. Most attributes for basic usage are self-explanatory, but it
+  # requires elispInputs, which is a list of derivations that contain Emacs Lisp
+  # source files in share/emacs/site-lisp directory and (optional)
+  # native-compiled libraries in share/emacs/native-lisp directory.
+  buildElispPackage =
+    pkgs:
+    pkgs.callPackage ../pkgs/emacs/build {
+      lib = import ../pkgs/build-support {
+        inherit inputs pkgs;
+      };
+    };
 }
