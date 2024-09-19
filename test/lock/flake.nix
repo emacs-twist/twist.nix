@@ -1,6 +1,5 @@
 {
-  description =
-    "THIS IS AN AUTO-GENERATED FILE. PLEASE DON'T EDIT IT MANUALLY.";
+  description = "THIS IS AN AUTO-GENERATED FILE. PLEASE DON'T EDIT IT MANUALLY.";
   inputs = {
     async = {
       flake = false;
@@ -41,6 +40,7 @@
     git-commit = {
       flake = false;
       owner = "magit";
+      ref = "legacy-stub";
       repo = "magit";
       type = "github";
     };
