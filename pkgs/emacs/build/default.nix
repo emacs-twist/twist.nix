@@ -14,6 +14,7 @@
   nativeCompileAhead,
   wantExtraOutputs,
   elispInputs,
+  dontByteCompile ? false,
   ...
 } @ attrs:
 with builtins; let
@@ -132,8 +133,8 @@ in
       lib.makeSearchPath "share/emacs/native-lisp/" elispInputs
     }:";
 
-    dontByteCompile = false;
     errorOnWarn = false;
+    inherit dontByteCompile;
 
     buildCmd = ''
       # Don't make the package description of package.el available
