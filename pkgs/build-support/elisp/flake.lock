@@ -1,18 +1,36 @@
 {
   "nodes": {
     "elisp-helpers": {
-      "flake": false,
+      "inputs": {
+        "fromElisp": "fromElisp"
+      },
       "locked": {
-        "lastModified": 1728187985,
-        "narHash": "sha256-n6blnx4Q0ibNrXriEKBBIfNIo1OuULY9Tt+D2frGvtc=",
+        "lastModified": 1728190720,
+        "narHash": "sha256-Zppl5O1qvaLqzEq52VeX0SY7eS5pIi3eQVlunx71QLE=",
         "owner": "emacs-twist",
         "repo": "elisp-helpers",
-        "rev": "83b86dbe5132125e230b1caf9dcef6147209c258",
+        "rev": "79689d57fb07ace7b24a7a3988171f9348adf51a",
         "type": "github"
       },
       "original": {
         "owner": "emacs-twist",
         "repo": "elisp-helpers",
+        "type": "github"
+      }
+    },
+    "fromElisp": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1723987997,
+        "narHash": "sha256-OhaVgTG6zjLByzl+uPTvtCld3p2uqgbCXmOl/s3LVRo=",
+        "owner": "talyz",
+        "repo": "fromElisp",
+        "rev": "f071a0e262c02c0895b575c4e322b7fd90713543",
+        "type": "github"
+      },
+      "original": {
+        "owner": "talyz",
+        "repo": "fromElisp",
         "type": "github"
       }
     },
