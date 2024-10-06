@@ -1,12 +1,6 @@
 inputs:
 let
-  makeFromElisp =
-    lib:
-    (import inputs.elisp-helpers {
-      pkgs = {
-        inherit lib;
-      };
-    }).fromElisp;
+  makeFromElisp = lib: (inputs.elisp-helpers.lib.makeLib { inherit lib; }).fromElisp;
 
   inherit (builtins)
     readFile

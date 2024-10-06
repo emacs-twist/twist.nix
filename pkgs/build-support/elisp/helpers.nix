@@ -1,9 +1,12 @@
-/* Helpers for testing */
-{pkgs ? import <nixpkgs> {}}: let
-  inherit (builtins) fetchTree fromJSON readFile;
-  elispHelpers = import (fetchTree (fromJSON (readFile ./flake.lock)).nodes.elisp-helpers.locked) {
-    inherit pkgs;
+# Helpers for testing
+{
+  pkgs ? import <nixpkgs> { },
+}:
+let
+  elispHelpers = (builtins.getFlake "github:emacs-twist/elisp-helpers").lib.makeLib {
+    inherit (pkgs) lib;
   };
-in {
+in
+{
   inherit (elispHelpers) fromElisp;
 }
