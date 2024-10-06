@@ -22,9 +22,7 @@
 
   inherit (pkgs) lib;
 
-  elispHelpers = import inputs.elisp-helpers {
-    pkgs = {inherit lib;};
-  };
+  elispHelpers = inputs.elisp-helpers.lib.makeLib { inherit lib; };
 
   inherit (elispHelpers) fromElisp;
 
