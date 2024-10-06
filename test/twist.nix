@@ -1,10 +1,11 @@
 {
-  emacsTwist,
+  pkgs,
   emacsPackage,
   inputs,
   initialLibraries ? null,
 }:
-emacsTwist {
+{
+  inherit pkgs;
   # Use nix-emacs-ci which is more lightweight than a regular build
   inherit emacsPackage;
   # In an actual configuration, you would use this:

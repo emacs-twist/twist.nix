@@ -50,7 +50,6 @@
             import nixpkgs {
               inherit system;
               overlays = [
-                inputs.twist.overlays.default
                 (final: prev: {
                   emacsPackage = emacs-ci.packages.${system}.emacs-snapshot;
                 })
@@ -58,6 +57,8 @@
             }
           )
         );
+
+      inherit (inputs.twist.lib) makeEnv;
     in
     {
       devShells = eachSystemPkgs (pkgs: {
@@ -69,22 +70,23 @@
       });
 
       packages = eachSystemPkgs (pkgs: {
-        emacs = pkgs.callPackage ./twist.nix {
-          inherit inputs;
+        emacs = makeEnv (import ./twist.nix {
+          inherit inputs pkgs;
           inherit (pkgs) emacsPackage;
-        };
+        });
 
         # With explicit buitlins
-        emacs-builtins = pkgs.callPackage ./twist.nix {
-          inherit inputs;
+        emacs-builtins = makeEnv (import ./twist.nix {
+          inherit inputs pkgs;
           inherit (pkgs) emacsPackage;
           initialLibraries = inputs.emacs-builtins.data.emacs-snapshot.libraries;
-        };
+        });
 
         # Another test path to build the whole derivation (not with --dry-run).
-        emacs-wrapper = pkgs.callPackage ./twist-minimal.nix {
+        emacs-wrapper = makeEnv (import ./twist-minimal.nix {
+          inherit pkgs;
           inherit (pkgs) emacsPackage;
-        };
+        });
 
         # This is an example of interactive Emacs session.
         # You can start Emacs by running `nix run .#emacs-interactive`.
