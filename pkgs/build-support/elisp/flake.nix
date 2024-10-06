@@ -1,9 +1,8 @@
 {
-  inputs.elisp-helpers = {
-    url = "github:emacs-twist/elisp-helpers";
-    flake = false;
-  };
+  inputs.elisp-helpers.url = "github:emacs-twist/elisp-helpers";
 
-  outputs = {...}: {
-  };
+  outputs =
+    { ... }:
+    {
+    };
 }
