@@ -1,7 +1,7 @@
 {
   lib,
   pkgs,
-  final,
+  final ? pkgs
 }: {
   emacsPackage ? pkgs.emacs,
   lockDir,

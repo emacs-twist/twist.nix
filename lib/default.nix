@@ -7,6 +7,7 @@ let
     split
     filter
     isString
+    removeAttrs
     ;
 in
 {
@@ -49,4 +50,7 @@ in
         inherit inputs pkgs;
       };
     };
+
+  # A non-overlay API that builds a configuration environment.
+  makeEnv = { pkgs, ... }@args: import ../pkgs { inherit inputs pkgs; } (removeAttrs args [ "pkgs" ]);
 }
