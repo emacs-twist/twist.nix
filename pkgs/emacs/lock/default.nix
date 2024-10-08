@@ -3,6 +3,7 @@
   nix,
   nixfmt-rfc-style,
   jq,
+  coreutils,
   runCommandLocal,
   writeTextFile,
   writeShellScript,
@@ -96,7 +97,7 @@ in {
     type = "app";
     program =
       (import ./write-lock-1.nix {inherit lib writeShellScript;} {
-        inherit outDir src postCommand;
+        inherit outDir src postCommand coreutils;
       })
       .outPath;
   };
@@ -104,6 +105,7 @@ in {
   writerScript = {postCommandOnGeneratingLockDir}:
     writeShellApplication {
       name = "emacs-twist-write-lock";
+      runtimeInputs = [ coreutils ];
       text =
         builtins.replaceStrings [
           "@lockSrcDir@"

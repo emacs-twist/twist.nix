@@ -5,6 +5,7 @@
   outDir,
   src,
   postCommand,
+  coreutils,
 }:
 writeShellScript "lock" ''
   outDir="${outDir}"
@@ -27,7 +28,7 @@ writeShellScript "lock" ''
     fi
   done
 
-  install -m 644 -t "$outDir" ${src}/*.*
+  ${coreutils}/bin/install -m 644 -t "$outDir" ${src}/*.*
 
   ${lib.optionalString (postCommand != null) ''
     cd "$outDir"
