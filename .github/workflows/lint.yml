@@ -1,0 +1,16 @@
+name: Lint
+on:
+  pull_request:
+    paths-ignore:
+      - 'README.*'
+  push:
+    branches:
+      - master
+    paths-ignore:
+      - 'README.*'
+  workflow_dispatch:
+jobs:
+  lint:
+    uses: emacs-twist/internal/.github/workflows/check.yml@master
+    with:
+      package: linters
