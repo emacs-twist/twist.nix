@@ -27,7 +27,7 @@ with builtins;
         lib.pipe elpaEntries [
           (lib.filterAttrs (_: entry: entry ? core))
           (lib.mapAttrs (
-            _: {core, ...} @ entry: {
+            _: {core, ...}: {
               inherit inventory;
               src = args.core-src;
               doTangle = true;

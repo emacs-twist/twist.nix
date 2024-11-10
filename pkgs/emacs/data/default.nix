@@ -6,11 +6,8 @@ let
     tail
     hasAttr
     filter
-    elem
     mapAttrs
-    readFile
     pathExists
-    concatLists
     isFunction
     removeAttrs
     attrNames

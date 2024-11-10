@@ -3,7 +3,7 @@ with builtins; let
   go = {
     data,
     rest,
-  } @ acc: fields: {
+  }: fields: {
     data =
       data
       ++ lib.pipe fields [

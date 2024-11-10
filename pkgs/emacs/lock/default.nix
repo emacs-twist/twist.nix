@@ -1,15 +1,12 @@
 {
   lib,
-  nix,
   nixfmt-rfc-style,
   jq,
   coreutils,
   runCommandLocal,
-  writeTextFile,
   writeShellScript,
   writeShellApplication,
   # Current version
-  flakeLockFile ? null,
 }: {
   packageInputs,
   flakeNix ? false,
@@ -19,7 +16,7 @@
   postCommand ? null,
 }:
 assert (flakeNix || archiveLock); let
-  inherit (builtins) toJSON attrNames mapAttrs;
+  inherit (builtins) toJSON mapAttrs;
 
   archiveLockData = lib.pipe packageInputs [
     (lib.filterAttrs (_: attrs: attrs ? archive))
@@ -50,7 +47,7 @@ assert (flakeNix || archiveLock); let
         (lib.filterAttrs (_: attrs: attrs ? origin))
         (lib.mapAttrs (_: {origin, ...}: origin // {flake = false;}))
       ];
-      outputs = {...}: {};
+      outputs = _: {};
     };
     archiveLock = toJSON archiveLockData;
     metadataJson = toJSON packageMetadata;

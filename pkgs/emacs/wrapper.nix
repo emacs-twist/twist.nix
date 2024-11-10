@@ -15,7 +15,7 @@
   configurationRevision,
   extraSiteStartElisp,
 }: let
-  inherit (builtins) length listToAttrs;
+  inherit (builtins) length;
 
   elispInputs = lib.attrVals packageNames elispPackages;
 

@@ -54,15 +54,12 @@
     (builtins)
     readFile
     attrNames
-    attrValues
     concatLists
     isFunction
     split
     filter
     isString
     mapAttrs
-    match
-    isList
     isAttrs
     elem
     removeAttrs

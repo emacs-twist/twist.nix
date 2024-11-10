@@ -1,6 +1,6 @@
 # Reverse dependencies of elisp packages
 {lib}: packageInputs: let
-  inherit (builtins) attrNames hasAttr mapAttrs substring;
+  inherit (builtins) mapAttrs substring;
 
   revDeps = name:
     lib.concatMapAttrs (

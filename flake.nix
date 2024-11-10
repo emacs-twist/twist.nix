@@ -3,7 +3,7 @@
 
   inputs.elisp-helpers.url = "github:emacs-twist/elisp-helpers";
 
-  outputs = {...} @ inputs: {
+  outputs = inputs: {
     # The APIs under lib is unstable at present. It may undergo changes in the
     # future.
     lib = import ./lib inputs;

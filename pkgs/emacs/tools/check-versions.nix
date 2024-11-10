@@ -9,7 +9,6 @@
   inherit
     (builtins)
     mapAttrs
-    all
     hasAttr
     elem
     length
@@ -18,7 +17,6 @@
     substring
     lessThan
     concatLists
-    sort
     concatStringsSep
     attrNames
     ;
@@ -90,9 +88,9 @@
           }
           // status)))
       concatLists
-      (lib.groupBy ({ename, ...}: ename))
-      (mapAttrs (ename: statuses: {
-        current = (head statuses).current;
+      (builtins.groupBy ({ename, ...}: ename))
+      (mapAttrs (_ename: statuses: {
+        inherit ((head statuses)) current;
         # Showing the source date may be useful, but maybe later.
         #
         # lastModifiedDate =

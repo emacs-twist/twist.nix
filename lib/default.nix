@@ -27,9 +27,6 @@ in
 
   emacsBuiltinLibraries =
     {
-      stdenv,
-      ripgrep,
-      emacs,
       lib,
     }@args:
     lib.pipe (readFile (import ../pkgs/emacs/builtins.nix args)) [

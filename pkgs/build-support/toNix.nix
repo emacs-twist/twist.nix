@@ -4,8 +4,6 @@
 {lib}: let
   inherit (builtins) isList isAttrs isFunction toJSON concatStringsSep match;
 
-  isPrimitive = v: ! (isList v || isAttrs v || isFunction v);
-
   wrap = open: close: body: open + body + close;
 
   printList = v:
