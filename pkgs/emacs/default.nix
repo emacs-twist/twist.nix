@@ -54,15 +54,12 @@
     (builtins)
     readFile
     attrNames
-    attrValues
     concatLists
     isFunction
     split
     filter
     isString
     mapAttrs
-    match
-    isList
     isAttrs
     elem
     removeAttrs
@@ -151,9 +148,7 @@ in
       }
       packageInputs;
 
-    generateLockFiles = self.callPackage ./lock {
-      inherit flakeLockFile;
-    };
+    generateLockFiles = self.callPackage ./lock { };
 
     excludeLocalPackages = attrs: removeAttrs attrs localPackages;
   in {

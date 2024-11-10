@@ -50,7 +50,7 @@
             import nixpkgs {
               inherit system;
               overlays = [
-                (final: prev: {
+                (_final: _prev: {
                   emacsPackage = emacs-ci.packages.${system}.emacs-snapshot;
                 })
               ];

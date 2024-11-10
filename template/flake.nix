@@ -31,7 +31,6 @@
   };
 
   outputs = {
-    self,
     nixpkgs,
     nixpkgs-emacs,
     flake-utils,

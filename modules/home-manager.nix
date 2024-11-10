@@ -12,8 +12,6 @@ home-manager module that provides an installation of Emacs
 
   emacs-config = cfg.config;
 
-  configurationRevision = emacs-config.configurationRevision;
-
   initFile = pkgs.runCommandLocal "init.el" {} ''
     mkdir -p $out
     touch $out/init.el
@@ -45,7 +43,7 @@ home-manager module that provides an installation of Emacs
     '';
 
   desktopItem = pkgs.makeDesktopItem {
-    name = cfg.name;
+    inherit (cfg) name;
     inherit (cfg.desktopItem) desktopName mimeTypes;
     comment = "Edit text";
     genericName = "Text Editor";

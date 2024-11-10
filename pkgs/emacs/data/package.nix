@@ -2,19 +2,11 @@ let
   inherit
     (builtins)
     pathExists
-    fetchTree
-    replaceStrings
-    map
-    readDir
     hasAttr
     readFile
     attrNames
     filter
-    all
     match
-    isString
-    isList
-    typeOf
     length
     head
     toJSON
@@ -120,10 +112,7 @@ in
       ];
 
       mainFile =
-        if attrs ? mainFile
-        then attrs.mainFile
-        else
-          lib.findFirst
+        attrs.mainFile or (lib.findFirst
           (file: baseNameOf file == ename + ".el")
           (
             if length self.lispFiles > 0
@@ -136,7 +125,7 @@ in
                 Entry: ${toJSON attrs.inventory}
               ''
           )
-          self.lispFiles;
+          self.lispFiles);
 
       # TODO: Check https://github.com/melpa/melpa/issues/2955 on the right versioning scheme
       version =
