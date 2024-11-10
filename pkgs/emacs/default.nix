@@ -148,9 +148,7 @@ in
       }
       packageInputs;
 
-    generateLockFiles = self.callPackage ./lock {
-      inherit flakeLockFile;
-    };
+    generateLockFiles = self.callPackage ./lock { };
 
     excludeLocalPackages = attrs: removeAttrs attrs localPackages;
   in {

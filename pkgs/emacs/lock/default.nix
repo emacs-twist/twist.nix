@@ -6,7 +6,6 @@
   runCommandLocal,
   writeShellScript,
   writeShellApplication,
-  # Current version
 }: {
   packageInputs,
   flakeNix ? false,
