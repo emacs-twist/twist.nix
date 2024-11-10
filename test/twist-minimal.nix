@@ -1,10 +1,10 @@
 {
-  emacsTwist,
+  pkgs,
   emacsPackage,
 }:
-emacsTwist {
-  inherit emacsPackage;
-  initFiles = [];
+{
+  inherit pkgs emacsPackage;
+  initFiles = [ ];
   lockDir = ./lock;
-  registries = [];
+  registries = [ ];
 }
