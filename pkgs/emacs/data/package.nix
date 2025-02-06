@@ -107,8 +107,10 @@ in
         (lib.filterAttrs (_: file: match "[^/]+\\.el" file != null))
         attrNames
         # *-pkg.el is not required unless you use package.el, and it makes
-        # *-byte-compile fail, so exclude them.
-        (filter (filename: match ".+-pkg\.el" filename == null))
+        # *-byte-compile fail, so exclude them. Also, a package can contain
+        # *-.dir-locals.el in its distribution, but it is a lisp data file
+        # *-rather than an Emacs Lisp source, which should be excluded.
+        (filter (filename: !(lib.hasSuffix "-pkg.el" filename || lib.hasPrefix "." filename)))
       ];
 
       mainFile =
