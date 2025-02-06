@@ -108,7 +108,7 @@ in
         attrNames
         # *-pkg.el is not required unless you use package.el, and it makes
         # *-byte-compile fail, so exclude them.
-        (filter (filename: match ".+-pkg\.el" filename == null))
+        (filter (filename: !(lib.hasSuffix "-pkg.el" filename)))
       ];
 
       mainFile =
