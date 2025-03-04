@@ -5,9 +5,9 @@
 This repository is currently in *alpha* state.
 It has finished basic functionalities, but there is still room for improvement in API, and it completely lacks proper documentation:
 
-- Functionalities: *Good*. The author builds [[https://github.com/akirak/nix-config#emacs-configuration][his own config]] with twist, and the config is already almost as capable as the previous version which used straight.el. Additionally, [[https://github.com/emacs-twist/nomake][NoMake]] is used in some packages (but it is being replaced with [[https://github.com/emacs-twist/rice-config][Rice]]). The basic use cases of twist.nix are covered.
+- Functionalities: *Good*. The author builds [[https://github.com/akirak/nix-config#emacs-configuration][his own config]] with twist, and the config is already almost as capable as the previous version which used straight.el. The library is also used in [[https://github.com/emacs-twist/rice-config][Rice]] to set up linting for Emacs Lisp projects. The basic use cases of twist.nix are covered.
 - API: *Unstable*. It is mostly stable, but options may undergo changes in the future.
-- Documentation: *Poor*. There is [[https://github.com/emacs-twist/twist.nix/pull/16][a branch]]. I will rework on it after I gain more confidence with the API.
+- Documentation: *Poor*. I will rework on it after I gain more confidence with the API.
 ** Introduction
 Twist.nix is a Nix library for building Emacs configurations with packages.
 It is an infrastructure for configuration (solely with this library) and package development (with [[https://github.com/emacs-twist/nomake][nomake]]).
@@ -23,7 +23,7 @@ See the following table for comparison with corresponding options:
 |-----------------------+-----------------------+-------------------------|
 | twist.nix (this repo) | Build machinery       | [[https://github.com/melpa/package-build/][package-build]]           |
 | [[https://github.com/emacs-twist/twist.el][twist.el]] combined with [[https://github.com/emacs-twist/nix3.el][nix3.el]] | Emacs package manager | [[https://github.com/raxod502/straight.el][straight.el]], [[https://github.com/emacscollective/borg][borg]], etc. |
-| [[https://github.com/emacs-twist/nomake][​+nomake]]+​ [[https://github.com/emacs-twist/rice-config][rice]]               | Package development   | [[https://github.com/cask/cask][cask]]                    |
+| [[https://github.com/emacs-twist/rice-config][rice]]               | Package development   | [[https://github.com/cask/cask][cask]]                    |
 
 As a Nix library, Twist.nix is also an alternative to [[https://nixos.org/manual/nixos/stable/index.html#module-services-emacs][the Emacs wrapper]] (i.e. =emacsWithPackages=) on NixOS.
 Twist.nix depends on Nix utility libraries, but it does not depend on the wrapper.
