@@ -51,6 +51,15 @@
         "bbdb-vm-aux.el"
       ];
     };
+    tramp = _: _: {
+      # Use a mirror repository, because savannah.gnu.org is often down
+      origin = {
+        type = "github";
+        owner = "emacs-straight";
+        repo = "tramp";
+        ref = "master";
+      };
+    };
   };
   postCommandOnGeneratingLockDir = ''
     touch test/lock-success
