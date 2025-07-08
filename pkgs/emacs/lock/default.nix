@@ -8,25 +8,12 @@
   writeShellApplication,
 }: {
   packageInputs,
-  flakeNix ? false,
-  archiveLock ? false,
   metadataJson ? false,
   # Command run after writing the directory in asAppWritingToRelativeDir
   postCommand ? null,
 }:
-assert (flakeNix || archiveLock); let
+let
   inherit (builtins) toJSON mapAttrs;
-
-  archiveLockData = lib.pipe packageInputs [
-    (lib.filterAttrs (_: attrs: attrs ? archive))
-    (mapAttrs (_:
-      lib.getAttrs [
-        "version"
-        "archive"
-        "packageRequires"
-        "inventory"
-      ]))
-  ];
 
   packageMetadata =
     mapAttrs (name: attrs: {
@@ -48,13 +35,11 @@ assert (flakeNix || archiveLock); let
       ];
       outputs = _: {};
     };
-    archiveLock = toJSON archiveLockData;
     metadataJson = toJSON packageMetadata;
   };
 
   passAsFile =
-    lib.optional flakeNix "flakeNix"
-    ++ lib.optional archiveLock "archiveLock"
+    [ "flakeNix" ]
     ++ lib.optional metadataJson "metadataJson";
 
   # HACK: Use sed to convert JSON to Nix
@@ -64,10 +49,6 @@ assert (flakeNix || archiveLock); let
   generateFlakeNix = ''
     sed -e 's/<LAMBDA>/{ ... }: { }/' $flakeNixPath > "$out/flake.nix"
     ${nixfmt-rfc-style}/bin/nixfmt "$out/flake.nix"
-  '';
-
-  generateArchiveLock = ''
-    ${jq}/bin/jq . "$archiveLockPath" > "$out/archive.lock"
   '';
 
   generateMetadataJson = ''
@@ -82,8 +63,7 @@ assert (flakeNix || archiveLock); let
     ''
       mkdir -p $out
 
-      ${lib.optionalString flakeNix generateFlakeNix}
-      ${lib.optionalString archiveLock generateArchiveLock}
+      ${generateFlakeNix}
       ${lib.optionalString metadataJson generateMetadataJson}
     '';
 in {
