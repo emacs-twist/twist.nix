@@ -1,20 +1,23 @@
-{
-  lib,
-  runCommandLocal,
-  makeWrapper,
-  writeText,
-  buildEnv,
-  emacs,
-  lndir,
-  texinfo,
-  packageNames,
-  elispPackages,
-  executablePackages,
-  extraOutputsToInstall,
-  exportManifest,
-  configurationRevision,
-  extraSiteStartElisp,
-}: let
+{ lib
+, stdenv
+, runCommandLocal
+, makeWrapper
+, writeText
+, writeShellScript
+, buildEnv
+, emacs
+, lndir
+, texinfo
+, packageNames
+, elispPackages
+, executablePackages
+, extraOutputsToInstall
+, exportManifest
+, configurationRevision
+, extraSiteStartElisp
+,
+}:
+let
   inherit (builtins) length;
 
   elispInputs = lib.attrVals packageNames elispPackages;
@@ -54,7 +57,7 @@
 
   lispList = strings:
     wrap "'(" ")"
-    (lib.concatMapStringsSep " " (wrap "\"" "\"") strings);
+      (lib.concatMapStringsSep " " (wrap "\"" "\"") strings);
 
   nativeLoadPath = "${packageEnv}/share/emacs/native-lisp/";
 
@@ -69,48 +72,51 @@
     );
     executablePackages = map (pkg: "${pkg}/bin") executablePackages;
   });
-in
-  runCommandLocal "emacs"
-  {
-    buildInputs = [lndir texinfo];
-    propagatedBuildInputs = [emacs packageEnv] ++ executablePackages;
-    nativeBuildInputs = [makeWrapper];
-    # Support for nix run
-    meta.mainProgram = "emacs";
 
-    passAsFile = ["subdirs" "siteStartExtra"];
-
-    nativeLoadPath = "${nativeLoadPath}:${emacs}/share/emacs/native-lisp/:";
-
-    subdirs = ''
-      (setq load-path (append ${
-        lispList (map (pkg: "${pkg}/share/emacs/site-lisp/") elispInputs)
-      } load-path))
-    '';
-
-    siteStartExtra = ''
-      (when init-file-user
-        ${lib.optionalString exportManifest ''
-        (defconst twist-running-emacs "${emacs.outPath}")
-        (defconst twist-current-manifest-file "${elispManifest}")
       ''}
-        ${lib.optionalString (configurationRevision != null) ''
-          (defvar twist-configuration-revision "${configurationRevision}")
-        ''}
-        ${
-        lib.concatMapStrings (pkg: ''
-          (load "${pkg}/share/emacs/site-lisp/${pkg.ename}-autoloads.el" t t)
-        '')
-        elispInputs
-        })
-      ${extraSiteStartElisp}
-    '';
 
-    elispManifestPath =
-      if exportManifest
-      then elispManifest.outPath
-      else null;
-  }
+in
+runCommandLocal "emacs"
+{
+  buildInputs = [ lndir texinfo ];
+  propagatedBuildInputs = [ emacs packageEnv ] ++ executablePackages;
+  nativeBuildInputs = [ makeWrapper ];
+  # Support for nix run
+  meta.mainProgram = "emacs";
+
+  passAsFile = [ "subdirs" "siteStartExtra" ];
+
+  nativeLoadPath = "${nativeLoadPath}:${emacs}/share/emacs/native-lisp/:";
+
+  subdirs = ''
+    (setq load-path (append ${
+      lispList (map (pkg: "${pkg}/share/emacs/site-lisp/") elispInputs)
+    } load-path))
+  '';
+
+  siteStartExtra = ''
+    (when init-file-user
+      ${lib.optionalString exportManifest ''
+      (defconst twist-running-emacs "${emacs.outPath}")
+      (defconst twist-current-manifest-file "${elispManifest}")
+    ''}
+      ${lib.optionalString (configurationRevision != null) ''
+        (defvar twist-configuration-revision "${configurationRevision}")
+      ''}
+      ${
+      lib.concatMapStrings (pkg: ''
+        (load "${pkg}/share/emacs/site-lisp/${pkg.ename}-autoloads.el" t t)
+      '')
+      elispInputs
+      })
+    ${extraSiteStartElisp}
+  '';
+
+  elispManifestPath =
+    if exportManifest
+    then elispManifest.outPath
+    else null;
+}
   ''
     mkdir -p $out/bin
     lndir -silent ${emacs}/bin $out/bin
