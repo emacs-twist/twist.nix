@@ -2,6 +2,12 @@ name: Unit tests
 
 on:
   push:
+    branches:
+    - master
+    paths:
+    - 'flake.lock'
+    - 'pkgs/build-support/**'
+  pull_request:
     paths:
     - 'flake.lock'
     - 'pkgs/build-support/**'
