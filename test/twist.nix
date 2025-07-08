@@ -33,8 +33,9 @@
     }
     {
       name = "gnu";
-      type = "archive";
-      url = "https://elpa.gnu.org/packages/";
+      type = "archive-contents";
+      path = inputs.gnu-elpa-archive.outPath;
+      base-url = "https://raw.githubusercontent.com/d12frosted/elpa-mirror/master/gnu/";
     }
     {
       name = "emacsmirror";
