@@ -14,12 +14,15 @@
       url = "github:melpa/melpa";
       flake = false;
     };
+    # Use GitHub mirrors
     gnu-elpa = {
-      url = "git+https://git.savannah.gnu.org/git/emacs/elpa.git?ref=main";
+      url = "github:elpa-mirrors/elpa";
+      # url = "git+https://git.savannah.gnu.org/git/emacs/elpa.git?ref=main";
       flake = false;
     };
     nongnu = {
-      url = "git+https://git.savannah.gnu.org/git/emacs/nongnu.git?ref=main";
+      url = "github:elpa-mirrors/nongnu";
+      # url = "git+https://git.savannah.gnu.org/git/emacs/nongnu.git?ref=main";
       flake = false;
     };
     epkgs = {
