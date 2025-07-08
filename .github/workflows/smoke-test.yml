@@ -2,6 +2,15 @@ name: Smoke test
 
 on:
   push:
+    branches:
+    - master
+    paths:
+    - 'flake.lock'
+    - 'pkgs/**'
+    - 'modules/**'
+    - 'test/**'
+    - '.github/workflows/smoke-test.yml'
+  pull_request:
     paths:
     - 'flake.lock'
     - 'pkgs/**'
