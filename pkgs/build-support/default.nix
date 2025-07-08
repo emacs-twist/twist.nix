@@ -126,4 +126,8 @@ in
     readPackageArchiveContents = import ./elisp/readArchiveContents.nix {
       inherit lib fromElisp;
     };
+
+    readPackageArchiveContentsPath = import ./elisp/readArchiveContentsPath.nix {
+      inherit lib fromElisp;
+    };
   }
