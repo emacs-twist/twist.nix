@@ -1,0 +1,32 @@
+name: Set up Nix
+
+description: Set up Nix
+
+inputs:
+  cachix-token:
+    description: Auth token for cachix
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - uses: nixbuild/nix-quick-install-action@63ca48f939ee3b8d835f4126562537df0fee5b91 # v32
+      with:
+        nix_conf: |
+          keep-env-derivations = true
+          keep-outputs = true
+          accept-flake-config = true
+
+    - name: Restore the package cache
+      uses: nix-community/cache-nix-action@135667ec418502fa5a3598af6fb9eb733888ce6a # v6
+      with:
+        primary-key: nix-${{ runner.os }}-${{ hashFiles('**/flake.lock') }}
+        restore-prefixes-first-match: nix-${{ runner.os }}-
+        gc-max-store-size-linux: 1G
+
+    - uses: cachix/cachix-action@v16
+      with:
+        name: emacs-twist
+        authToken: '${{ inputs.cachix-token }}'
+        # Push all dependencies, including sources
+        useDaemon: false
