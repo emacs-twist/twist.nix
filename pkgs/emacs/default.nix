@@ -68,8 +68,6 @@ in
   lib.makeScope pkgs.newScope (self: let
     flakeLockFile = lockDir + "/flake.lock";
 
-    archiveLockFile = lockDir + "/archive.lock";
-
     metadataJsonFile = lockDir + "/metadata.json";
 
     userConfig = lib.pipe self.initFiles [
@@ -105,7 +103,6 @@ in
       inherit
         lib
         flakeLockFile
-        archiveLockFile
         metadataJsonFile
         builtinLibraries
         inputOverrides
@@ -235,7 +232,6 @@ in
         packageInputs =
           excludeLocalPackages (enumerateConcretePackageSet "update" explicitPackages);
         flakeNix = true;
-        archiveLock = true;
         metadataJson = persistMetadata;
       })
       .writerScript {inherit postCommandOnGeneratingLockDir;};
@@ -250,7 +246,6 @@ in
             packageInputs =
               excludeLocalPackages (enumerateConcretePackageSet "lock" explicitPackages);
             flakeNix = true;
-            archiveLock = true;
             metadataJson = persistMetadata;
             postCommand = "nix flake lock";
           })
@@ -263,7 +258,6 @@ in
           {
             packageInputs =
               excludeLocalPackages (enumerateConcretePackageSet "update" explicitPackages);
-            archiveLock = true;
             metadataJson = persistMetadata;
           })
         .asAppWritingToRelativeDir
