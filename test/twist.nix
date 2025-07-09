@@ -33,8 +33,9 @@
     }
     {
       name = "gnu";
-      type = "archive";
-      url = "https://elpa.gnu.org/packages/";
+      type = "archive-contents";
+      path = inputs.gnu-elpa-archive.outPath;
+      base-url = "https://raw.githubusercontent.com/d12frosted/elpa-mirror/master/gnu/";
     }
     {
       name = "emacsmirror";
@@ -49,6 +50,15 @@
         "bbdb-vm.el"
         "bbdb-vm-aux.el"
       ];
+    };
+    tramp = _: _: {
+      # Use a mirror repository, because savannah.gnu.org is often down
+      origin = {
+        type = "github";
+        owner = "emacs-straight";
+        repo = "tramp";
+        ref = "master";
+      };
     };
   };
   postCommandOnGeneratingLockDir = ''

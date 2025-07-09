@@ -29,6 +29,10 @@
       url = "github:emacsmirror/epkgs";
       flake = false;
     };
+    gnu-elpa-archive = {
+      url = "file+https://raw.githubusercontent.com/d12frosted/elpa-mirror/master/gnu/archive-contents";
+      flake = false;
+    };
 
     emacs-ci.url = "github:purcell/nix-emacs-ci";
     emacs-builtins.url = "github:emacs-twist/emacs-builtins";

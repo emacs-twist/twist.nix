@@ -6,7 +6,6 @@ let
     tail
     hasAttr
     filter
-    mapAttrs
     pathExists
     isFunction
     removeAttrs

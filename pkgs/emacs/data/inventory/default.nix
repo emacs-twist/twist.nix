@@ -14,6 +14,8 @@ in
         then import ./melpa.nix {inherit lib flakeLockData;}
         else if type == "elpa"
         then import ./elpa.nix {inherit lib flakeLockData;}
+        else if type == "archive-contents"
+        then import ./archive-contents.nix {inherit lib flakeLockData;}
         else if type == "archive"
         then import ./archive.nix {inherit lib archiveLockData;}
         else if type == "gitmodules"

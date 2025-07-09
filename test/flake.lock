@@ -468,6 +468,18 @@
         "type": "github"
       }
     },
+    "gnu-elpa-archive": {
+      "flake": false,
+      "locked": {
+        "narHash": "sha256-KCimBa+8KsWS015lr/Css+BWAmZvuUwenFT06amPON4=",
+        "type": "file",
+        "url": "https://raw.githubusercontent.com/d12frosted/elpa-mirror/master/gnu/archive-contents"
+      },
+      "original": {
+        "type": "file",
+        "url": "https://raw.githubusercontent.com/d12frosted/elpa-mirror/master/gnu/archive-contents"
+      }
+    },
     "home-manager": {
       "inputs": {
         "nixpkgs": "nixpkgs_3"
@@ -602,6 +614,7 @@
         "emacs-ci": "emacs-ci",
         "epkgs": "epkgs",
         "gnu-elpa": "gnu-elpa",
+        "gnu-elpa-archive": "gnu-elpa-archive",
         "home-manager": "home-manager",
         "melpa": "melpa",
         "nixpkgs": "nixpkgs_4",
