@@ -47,7 +47,7 @@ let
   # It would be better to use either nix-eval or nix-instantiate to generate a
   # proper Nix, but it is troublesome to run a nested Nix during a build phase.
   generateFlakeNix = ''
-    sed -e 's/<LAMBDA>/{ ... }: { }/' $flakeNixPath > "$out/flake.nix"
+    sed -e 's/<LAMBDA>/_: { }/' $flakeNixPath > "$out/flake.nix"
     ${nixfmt-rfc-style}/bin/nixfmt "$out/flake.nix"
   '';
 
