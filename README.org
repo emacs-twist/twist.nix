@@ -1,6 +1,7 @@
 # -*- org-id-link-to-org-use-id: nil; -*-
 * Twist Nix Library
 [[https://github.com/emacs-twist/twist.nix/actions/workflows/test.yml][https://github.com/emacs-twist/twist.nix/actions/workflows/test.yml/badge.svg]]
+[[https://deepwiki.com/emacs-twist/twist.nix][https://deepwiki.com/badge.svg]]
 ** Status
 This repository is currently in *alpha* state.
 It has finished basic functionalities, but there is still room for improvement in API, and it completely lacks proper documentation:
