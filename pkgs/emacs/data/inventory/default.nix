@@ -1,7 +1,6 @@
 {
   lib,
   flakeLockData,
-  archiveLockData,
 }: {type, ...} @ inventory:
 with builtins; let
   args = removeAttrs inventory ["type" "name" "exclude"];
@@ -16,8 +15,6 @@ in
         then import ./elpa.nix {inherit lib flakeLockData;}
         else if type == "archive-contents"
         then import ./archive-contents.nix {inherit lib flakeLockData;}
-        else if type == "archive"
-        then import ./archive.nix {inherit lib archiveLockData;}
         else if type == "gitmodules"
         then import ./gitmodules.nix {inherit lib flakeLockData;}
         else throw "Unsupported inventory type: ${type}"

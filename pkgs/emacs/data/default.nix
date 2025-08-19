@@ -20,7 +20,6 @@ in
     builtinLibraries,
     inventories,
     flakeLockFile,
-    archiveLockFile,
     metadataJsonFile,
     inputOverrides,
     elispPackagePins,
@@ -41,18 +40,13 @@ in
       then toLockData (lib.importJSON flakeLockFile)
       else {};
 
-    archiveLockData =
-      if pathExists archiveLockFile
-      then lib.importJSON archiveLockFile
-      else {};
-
     cachedMetadata =
       if mode == "build" && persistMetadata && pathExists metadataJsonFile
       then lib.importJSON metadataJsonFile
       else {};
 
     makeInventory = import ./inventory {
-      inherit lib flakeLockData archiveLockData;
+      inherit lib flakeLockData;
     };
 
     inventoryPackageSets =
