@@ -58,7 +58,7 @@ let
             fetchTree
             origin;
 
-      origin = lib.filterAttrs (name: _: name != "narHash") origin;
+      origin = lib.filterAttrs (name: _: name != "narHash" && name != "lastModified") origin;
 
       inventory = {
         inherit path base-url;
