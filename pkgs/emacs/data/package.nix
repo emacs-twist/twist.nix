@@ -89,8 +89,7 @@ in
       src =
         # If the source if a single-file archive from ELPA or MELPA, src will be
         # a file, and not a directory, so the file should be put in a directory.
-        if ( attrs.inventory.type == "archive" && attrs.archive.type == "file" ) ||
-           ( attrs.inventory.type == "archive-contents" && attrs.origin.type == "file" )
+        if attrs.inventory.type == "archive-contents" && attrs.origin.type == "file"
         then
           linkFarm (ename + ".el") [
             {
