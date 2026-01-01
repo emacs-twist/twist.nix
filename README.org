@@ -51,6 +51,7 @@ It can already build configurations with a few hundreds of packages from various
 ** Configuration Examples
 - [[https://github.com/akirak/emacs-config][akirak/emacs-config]]
 - [[https://github.com/terlar/emacs-config][terlar/emacs-config]]
+- [[https://github.com/Kyure-A/.emacs.d][Kyure-A/.emacs.d]]
 ** Credits
 Twist is a Nix re-implementation of [[https://github.com/melpa/package-build][package-build]] and replicates its build logic.
 It is also heavily influenced by the Emacs wrapper in [[https://github.com/NixOS/nixpkgs/][nixpkgs]], though twist was written from scratch and different in implementation.
