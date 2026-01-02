@@ -40,6 +40,13 @@ home-manager module that provides an installation of Emacs
         lib.optionalString cfg.emacsclient.enable
         "ln -t $out/bin -s ${emacs-config.emacs}/bin/emacsclient"
       }
+
+      ${lib.optionalString pkgs.stdenv.isDarwin ''
+        if [[ -d "${emacs-config}/Applications" ]]; then
+          mkdir -p $out/Applications
+          ln -s ${emacs-config}/Applications/* $out/Applications/
+        fi
+      ''}
     '';
 
   desktopItem = pkgs.makeDesktopItem {

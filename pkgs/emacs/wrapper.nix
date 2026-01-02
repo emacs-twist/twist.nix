@@ -1,8 +1,10 @@
 {
   lib,
+  stdenv,
   runCommandLocal,
   makeWrapper,
   writeText,
+  writeShellScript,
   buildEnv,
   emacs,
   lndir,
@@ -69,6 +71,36 @@
     );
     executablePackages = map (pkg: "${pkg}/bin") executablePackages;
   });
+
+  macosAppLauncher = writeShellScript "emacs-launcher" ''
+    SCRIPT_DIR="$( cd "$( dirname "''${BASH_SOURCE[0]}" )" && pwd )"
+    APP_CONTENTS="$(dirname "$SCRIPT_DIR")"
+    APP_RESOURCES="$APP_CONTENTS/Resources"
+
+    # Use a login shell to source the Nix environment
+    # This ensures we get the same environment
+    exec -l "$SHELL" -c '
+      if [[ -d "'$APP_RESOURCES'/site-lisp" ]]; then
+        export EMACSLOADPATH="'$APP_RESOURCES'/site-lisp:"
+      fi
+
+      if [[ -d "'$APP_RESOURCES'/info" ]]; then
+        export INFOPATH="'$APP_RESOURCES'/info:${emacs}/share/info''${INFOPATH:+:$INFOPATH}"
+      fi
+
+      ${lib.optionalString nativeComp ''
+      if [[ -d "'$APP_RESOURCES'/native-lisp" ]]; then
+        export EMACSNATIVELOADPATH="'$APP_RESOURCES'/native-lisp:${packageEnv}/share/emacs/native-lisp:"
+      fi
+      ''}
+
+      if [[ -d "'$APP_RESOURCES'/bin" ]]; then
+        export PATH="'$APP_RESOURCES'/bin:$PATH"
+      fi
+
+      exec "'$SCRIPT_DIR'/_Emacs" "$@"
+    ' emacs-launcher "$@"
+  '';
 in
   runCommandLocal "emacs"
   {
@@ -187,4 +219,35 @@ in
         --set EMACSLOADPATH "$siteLisp:"
       fi
     done
+
+    ${lib.optionalString stdenv.hostPlatform.isDarwin ''
+      if [[ -d "${emacs}/Applications" ]]; then
+        mkdir -p $out/Applications
+        cp -R ${emacs}/Applications/Emacs.app $out/Applications/
+        chmod -R u+w $out/Applications/Emacs.app || true
+
+        mv $out/Applications/Emacs.app/Contents/MacOS/Emacs $out/Applications/Emacs.app/Contents/MacOS/_Emacs
+
+        mkdir -p $out/Applications/Emacs.app/Contents/Resources
+        ln -s $siteLisp $out/Applications/Emacs.app/Contents/Resources/site-lisp
+        ln -s $out/share/info $out/Applications/Emacs.app/Contents/Resources/info
+        ${lib.optionalString nativeComp ''
+          ln -s $nativeLisp $out/Applications/Emacs.app/Contents/Resources/native-lisp
+        ''}
+        ${lib.optionalString (length executablePackages > 0) ''
+          mkdir -p $out/Applications/Emacs.app/Contents/Resources/bin
+          for pkg in ${lib.escapeShellArg (lib.concatStringsSep " " executablePackages)}; do
+            if [[ -d "$pkg/bin" ]]; then
+              for exe in $pkg/bin/*; do
+                if [[ -x "$exe"  ]]; then
+                  ln -s "$exe" $out/Applications/Emacs.app/Contents/Resources/bin/
+                fi
+              done
+            fi
+          done
+        ''}
+
+        install -m 755 ${macosAppLauncher} $out/Applications/Emacs.app/Contents/MacOS/Emacs
+      fi
+    ''}
   ''
