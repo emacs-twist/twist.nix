@@ -7,6 +7,11 @@
       repo = "emacs-async";
       type = "github";
     };
+    bbdb = {
+      flake = false;
+      type = "tarball";
+      url = "https://raw.githubusercontent.com/d12frosted/elpa-mirror/master/gnu/bbdb-3.2.2.4.tar";
+    };
     compat = {
       flake = false;
       owner = "emacs-compat";
@@ -25,6 +30,11 @@
       repo = "dash.el";
       type = "github";
     };
+    dict-tree = {
+      flake = false;
+      type = "tarball";
+      url = "https://raw.githubusercontent.com/d12frosted/elpa-mirror/master/gnu/dict-tree-0.17.tar";
+    };
     doom-themes = {
       flake = false;
       owner = "doomemacs";
@@ -37,17 +47,26 @@
       repo = "drag-stuff.el";
       type = "github";
     };
-    git-commit = {
-      flake = false;
-      owner = "magit";
-      ref = "legacy-stub";
-      repo = "magit";
-      type = "github";
-    };
     google-translate = {
       flake = false;
       owner = "atykhonov";
       repo = "google-translate";
+      type = "github";
+    };
+    heap = {
+      flake = false;
+      type = "tarball";
+      url = "https://raw.githubusercontent.com/d12frosted/elpa-mirror/master/gnu/heap-0.5.tar";
+    };
+    ivy = {
+      flake = false;
+      type = "tarball";
+      url = "https://raw.githubusercontent.com/d12frosted/elpa-mirror/master/gnu/ivy-0.15.1.tar";
+    };
+    llama = {
+      flake = false;
+      owner = "tarsius";
+      repo = "llama";
       type = "github";
     };
     magit = {
@@ -74,17 +93,33 @@
       repo = "popup-el";
       type = "github";
     };
+    queue = {
+      flake = false;
+      type = "tarball";
+      url = "https://raw.githubusercontent.com/d12frosted/elpa-mirror/master/gnu/queue-0.2.tar";
+    };
     refactor = {
       flake = false;
       owner = "emacsattic";
       repo = "refactor";
       type = "github";
     };
+    tNFA = {
+      flake = false;
+      type = "file";
+      url = "https://raw.githubusercontent.com/d12frosted/elpa-mirror/master/gnu/tNFA-0.1.1.el";
+    };
     tramp = {
       flake = false;
-      ref = "externals/tramp";
-      type = "git";
-      url = "https://git.savannah.gnu.org/git/tramp.git";
+      owner = "emacs-straight";
+      ref = "master";
+      repo = "tramp";
+      type = "github";
+    };
+    trie = {
+      flake = false;
+      type = "tarball";
+      url = "https://raw.githubusercontent.com/d12frosted/elpa-mirror/master/gnu/trie-0.6.tar";
     };
     undo-tree = {
       flake = false;
