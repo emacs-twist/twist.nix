@@ -1,6 +1,6 @@
 {
   lib,
-  nixfmt-rfc-style,
+  nixfmt,
   jq,
   coreutils,
   runCommandLocal,
@@ -63,7 +63,7 @@ assert (flakeNix || archiveLock); let
   # proper Nix, but it is troublesome to run a nested Nix during a build phase.
   generateFlakeNix = ''
     sed -e 's/<LAMBDA>/{ ... }: { }/' $flakeNixPath > "$out/flake.nix"
-    ${nixfmt-rfc-style}/bin/nixfmt "$out/flake.nix"
+    ${nixfmt}/bin/nixfmt "$out/flake.nix"
   '';
 
   generateArchiveLock = ''
