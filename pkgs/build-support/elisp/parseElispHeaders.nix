@@ -1,7 +1,9 @@
 {lib}: string:
 with builtins; let
+  # Normalize CRLF/CR → LF
+  string' = replaceStrings ["\r\n" "\r"] ["\n" "\n"] string;
   # It should contain at least one line.
-  lines = filter isString (split "\n" string);
+  lines = filter isString (split "\n" string');
 
   # Imports
   trimRight = import ../utils/trimRight.nix;
