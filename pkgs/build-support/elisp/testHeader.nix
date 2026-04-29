@@ -58,6 +58,42 @@ in
       };
     };
 
+    testMultiLineCrlf = {
+      expr = parseElispHeaders (readFile ./testdata/header-multi-line-crlf.el);
+      expected = {
+        summary = "A basic configuration framework for org mode";
+        Version = "0.2.9";
+        Package-Requires = "((emacs \"25.1\") (dash \"2.18\"))";
+        Author = [
+          "Akira Komamura <akira.komamura@gmail.com>"
+          "Someone from somewhere else <someone@galaxy.space>"
+        ];
+        Maintainer = [
+          "My Son <myson@earth.net>"
+          "Your Grandpa <yourgrandpa@earth.net>"
+        ];
+        URL = "https://github.com/akirak/org-starter";
+      };
+    };
+
+    testMultiLineCr = {
+      expr = parseElispHeaders (readFile ./testdata/header-multi-line-cr.el);
+      expected = {
+        summary = "A basic configuration framework for org mode";
+        Version = "0.2.9";
+        Package-Requires = "((emacs \"25.1\") (dash \"2.18\"))";
+        Author = [
+          "Akira Komamura <akira.komamura@gmail.com>"
+          "Someone from somewhere else <someone@galaxy.space>"
+        ];
+        Maintainer = [
+          "My Son <myson@earth.net>"
+          "Your Grandpa <yourgrandpa@earth.net>"
+        ];
+        URL = "https://github.com/akirak/org-starter";
+      };
+    };
+
     testNoLexical = {
       expr = parseElispHeaders (readFile ./testdata/header-no-lexical.el);
       expected = {
