@@ -171,7 +171,7 @@ in
       wrapper
     ]
     ++ lib.optional cfg.icons.enable emacs-config.icons
-    ++ lib.optional (!pkgs.stdenv.isDarwin) (
+    ++ lib.optional (!pkgs.stdenv.hostPlatform.isDarwin) (
       pkgs.runCommandLocal "${cfg.name}-desktop-item"
         {
           nativeBuildInputs = [ pkgs.copyDesktopItems ];
