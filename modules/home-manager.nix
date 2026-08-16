@@ -1,18 +1,22 @@
-/*
-home-manager module that provides an installation of Emacs
-*/
+# home-manager module that provides an installation of Emacs
 {
   config,
   lib,
   pkgs,
   ...
-}: let
-  inherit (lib) mkOption mkEnableOption mkOptionType types;
+}:
+let
+  inherit (lib)
+    mkOption
+    mkEnableOption
+    mkOptionType
+    types
+    ;
   cfg = config.programs.emacs-twist;
 
   emacs-config = cfg.config;
 
-  initFile = pkgs.runCommandLocal "init.el" {} ''
+  initFile = pkgs.runCommandLocal "init.el" { } ''
     mkdir -p $out
     touch $out/init.el
     for file in ${builtins.concatStringsSep " " emacs-config.initFiles}
@@ -23,24 +27,23 @@ home-manager module that provides an installation of Emacs
   '';
 
   wrapper =
-    pkgs.runCommandLocal cfg.name {
-      propagatedBuildInputs = [
-        emacs-config
-      ];
-      nativeBuildInputs = [
-        pkgs.makeWrapper
-      ];
-    } ''
-      mkdir -p $out/bin
-
-      makeWrapper ${emacs-config}/bin/emacs $out/bin/${cfg.name} \
-        --add-flags --init-directory="${config.home.homeDirectory}/${cfg.directory}"
-
-      ${
-        lib.optionalString cfg.emacsclient.enable
-        "ln -t $out/bin -s ${emacs-config.emacs}/bin/emacsclient"
+    pkgs.runCommandLocal cfg.name
+      {
+        propagatedBuildInputs = [
+          emacs-config
+        ];
+        nativeBuildInputs = [
+          pkgs.makeWrapper
+        ];
       }
-    '';
+      ''
+        mkdir -p $out/bin
+
+        makeWrapper ${emacs-config}/bin/emacs $out/bin/${cfg.name} \
+          --add-flags --init-directory="${config.home.homeDirectory}/${cfg.directory}"
+
+        ${lib.optionalString cfg.emacsclient.enable "ln -t $out/bin -s ${emacs-config.emacs}/bin/emacsclient"}
+      '';
 
   desktopItem = pkgs.makeDesktopItem {
     inherit (cfg) name;
@@ -51,9 +54,13 @@ home-manager module that provides an installation of Emacs
     icon = "emacs";
     startupNotify = true;
     startupWMClass = "Emacs";
-    categories = ["TextEditor" "Development"];
+    categories = [
+      "TextEditor"
+      "Development"
+    ];
   };
-in {
+in
+{
   options = {
     programs.emacs-twist = {
       enable = mkEnableOption "Emacs Twist";
@@ -150,22 +157,30 @@ in {
         mimeTypes = mkOption {
           type = types.listOf types.str;
           description = "List of mime types associated with the wrapper";
-          default = ["text/plain" "inode/directory"];
+          default = [
+            "text/plain"
+            "inode/directory"
+          ];
         };
       };
     };
   };
 
   config = lib.mkIf cfg.enable {
-    home.packages =
-      [wrapper]
-      ++ lib.optional cfg.icons.enable emacs-config.icons
-      ++ lib.optional (!pkgs.stdenv.isDarwin) (pkgs.runCommandLocal "${cfg.name}-desktop-item" {
-          nativeBuildInputs = [pkgs.copyDesktopItems];
+    home.packages = [
+      wrapper
+    ]
+    ++ lib.optional cfg.icons.enable emacs-config.icons
+    ++ lib.optional (!pkgs.stdenv.isDarwin) (
+      pkgs.runCommandLocal "${cfg.name}-desktop-item"
+        {
+          nativeBuildInputs = [ pkgs.copyDesktopItems ];
           desktopItems = desktopItem;
-        } ''
+        }
+        ''
           runHook postInstall
-        '');
+        ''
+    );
 
     home.file = builtins.listToAttrs (
       (lib.optional cfg.createInitFile {
@@ -180,15 +195,12 @@ in {
           source = cfg.earlyInitFile;
         };
       })
-      ++ (lib.optional (
-          cfg.createManifestFile
-          && emacs-config.emacsWrapper.elispManifestPath != null
-        ) {
-          name = "${cfg.directory}/${cfg.manifestFileName}";
-          value = {
-            source = emacs-config.emacsWrapper.elispManifestPath;
-          };
-        })
+      ++ (lib.optional (cfg.createManifestFile && emacs-config.emacsWrapper.elispManifestPath != null) {
+        name = "${cfg.directory}/${cfg.manifestFileName}";
+        value = {
+          source = emacs-config.emacsWrapper.elispManifestPath;
+        };
+      })
     );
 
     services.emacs = lib.mkIf cfg.serviceIntegration.enable {
