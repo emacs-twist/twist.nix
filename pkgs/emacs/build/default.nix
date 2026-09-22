@@ -157,12 +157,20 @@ in
       fi
 
       rm -f "${ename}-autoloads.el"
-      emacs --batch -l autoload \
-          --eval "(setq backup-inhibited t)" \
-          --eval "(setq version-control 'never)" \
-          --eval "(setq generated-autoload-file \"$PWD/${ename}-autoloads.el\")" \
-          -f batch-update-autoloads .
-    '';
+    ''
+    + (if lib.versionAtLeast emacs.version "29"
+      then ''
+        emacs --batch -l loaddefs-gen \
+            --eval "(setq backup-inhibited t)" \
+            --eval "(setq version-control 'never)" \
+            --eval "(loaddefs-generate default-directory \"$PWD/${ename}-autoloads.el\")"
+      '' else ''
+        emacs --batch -l autoload \
+            --eval "(setq backup-inhibited t)" \
+            --eval "(setq version-control 'never)" \
+            --eval "(setq generated-autoload-file \"$PWD/${ename}-autoloads.el\")" \
+            -f batch-update-autoloads .
+      '');
 
     # Because eln depends on the file name hash of the source file, native
     # compilation must be done after the elisp files are installed. For details,
