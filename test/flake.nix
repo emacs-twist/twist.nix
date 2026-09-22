@@ -5,7 +5,7 @@
   };
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    nixpkgs.url = "https://channels.nixos.org/nixos-unstable/nixexprs.tar.zst";
     systems.url = "github:nix-systems/default";
     twist.url = "github:emacs-twist/twist.nix";
     home-manager.url = "github:nix-community/home-manager";
