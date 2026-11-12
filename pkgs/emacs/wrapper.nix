@@ -1,5 +1,6 @@
 {
   lib,
+  stdenv,
   runCommandLocal,
   makeWrapper,
   writeText,
@@ -69,6 +70,13 @@
     );
     executablePackages = map (pkg: "${pkg}/bin") executablePackages;
   });
+
+  wrapperArgs = lib.concatStringsSep " " (
+    lib.optional (length executablePackages > 0) "--prefix PATH : ${lib.escapeShellArg (lib.makeBinPath executablePackages)}"
+    ++ ["--prefix INFOPATH : ${emacs}/share/info:$out/share/info:${infoPath}"]
+    ++ lib.optional nativeComp "--prefix EMACSNATIVELOADPATH : $nativeLisp:$nativeLoadPath"
+    ++ [''--set EMACSLOADPATH "$siteLisp:"'']
+  );
 in
   runCommandLocal "emacs"
   {
@@ -178,13 +186,17 @@ in
     do
       if [[ $(basename $bin) = emacs-* ]]
       then
-      wrapProgram $bin \
-        ${lib.optionalString (length executablePackages > 0) "--prefix PATH : ${lib.escapeShellArg (lib.makeBinPath executablePackages)}"} \
-        --prefix INFOPATH : ${emacs}/share/info:$out/share/info:${infoPath} \
-        ${
-      lib.optionalString nativeComp "--prefix EMACSNATIVELOADPATH : $nativeLisp:$nativeLoadPath"
-    } \
-        --set EMACSLOADPATH "$siteLisp:"
+      wrapProgram $bin ${wrapperArgs}
       fi
     done
+
+    ${lib.optionalString stdenv.hostPlatform.isDarwin ''
+      app=Applications/Emacs.app
+      if [[ -d ${emacs}/$app ]]
+      then
+        mkdir -p $out/$app/Contents/MacOS
+        cp -r ${emacs}/$app/Contents/{Info.plist,PkgInfo,Resources} $out/$app/Contents
+        makeWrapper ${emacs}/$app/Contents/MacOS/Emacs $out/$app/Contents/MacOS/Emacs ${wrapperArgs}
+      fi
+    ''}
   ''
