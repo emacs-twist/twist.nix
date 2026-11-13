@@ -43,6 +43,17 @@ let
           --add-flags --init-directory="${config.home.homeDirectory}/${cfg.directory}"
 
         ${lib.optionalString cfg.emacsclient.enable "ln -t $out/bin -s ${emacs-config.emacs}/bin/emacsclient"}
+
+        ${lib.optionalString pkgs.stdenv.hostPlatform.isDarwin ''
+          app=Applications/Emacs.app
+          if [[ -d ${emacs-config}/$app ]]
+          then
+            mkdir -p $out/$app/Contents/MacOS
+            cp -r ${emacs-config}/$app/Contents/{Info.plist,PkgInfo,Resources} $out/$app/Contents
+            makeWrapper ${emacs-config}/$app/Contents/MacOS/Emacs $out/$app/Contents/MacOS/Emacs \
+              --add-flags --init-directory="${config.home.homeDirectory}/${cfg.directory}"
+          fi
+        ''}
       '';
 
   desktopItem = pkgs.makeDesktopItem {
